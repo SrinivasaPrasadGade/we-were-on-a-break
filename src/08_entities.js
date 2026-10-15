@@ -82,7 +82,14 @@ class Crate extends Ent {
     for (const f of this.level.friends) {
       if (skip(f) || !overlap(probe, f)) continue;
       const need = dx > 0 ? (probe.x + probe.w) - f.x : probe.x - (f.x + f.w);
-      if (Math.sign(need) === Math.sign(dx)) room.moveX(f, need);
+      if (Math.sign(need) !== Math.sign(dx)) continue;
+      const bx = f.x;
+      room.moveX(f, need);
+      // pinned against a wall? hop them up onto the crate instead of blocking the push
+      if (Math.abs((f.x - bx) - need) > 0.5 && !room.rectBlocked(f.x, this.y - f.h, f.w, f.h, f)) {
+        f.y = this.y - f.h; f.vy = 0; f.onGround = true; f.groundEnt = this;
+        f.sx = 0.8; f.sy = 1.2;
+      }
     }
     room.moveX(this, dx, { bodies: true, ignoreBody: skip });
     const moved = this.x - before;
@@ -939,15 +946,16 @@ class Runner extends Ent {
     this.kind = p.kind || 'sarge';
     this.path = (p.path || [[tx, ty]]).map(([a, b]) => ({ x: a * T + 8, y: (b + 1) * T }));
     this.i = 0; this.px = this.path[0].x; this.py = this.path[0].y; this.moving = false; this.face = p.face || -1;
-    this.trigger = (p.near || 4) * T; this.caught = false; this.hop = 0;
+    this.trigger = (p.near === undefined ? 4 : p.near) * T; this.caught = false; this.hop = 0;
   }
   update() {
     super.update();
     if (this.caught) return;
     const last = this.path.length - 1;
     if (!this.moving && this.i < last) {
-      const near = this.level.friends.some(f => f.present && !f.gone && Math.abs(f.cx - this.px) < this.trigger && Math.abs(f.y + f.h - this.py) < 4 * T);
+      const near = this.lured || (this.trigger > 0 && this.level.friends.some(f => f.present && !f.gone && Math.abs(f.cx - this.px) < this.trigger && Math.abs(f.y + f.h - this.py) < 4 * T));
       if (near && (!this.p.gate || this.level.check(this.p.gate))) {
+        this.lured = false;
         this.moving = true;
         AudioSys.sfx(this.kind === 'robot' ? 'robot' : 'squeak');
         if (this.p.taunts && Math.random() < 0.7) this.level.say(this.kind === 'robot' ? 'robot' : 'sarge', pick(this.p.taunts), this);
@@ -972,7 +980,13 @@ class Runner extends Ent {
       }
     }
   }
-  onSound() { if (this.p.lovesMusic) { this.dancing = 120; } }
+  onSound() {
+    if (this.p.lovesMusic && !this.caught) {
+      this.lured = true; this.setFlag && this.p.lureFlag && this.level.setFlag(this.p.lureFlag, true);
+      Particles.hearts(this.px, this.py - 14, 4);
+      if (this.p.lureSay) this.level.queueLines(this.p.lureSay, 0);
+    }
+  }
   draw(g, ox, oy) {
     if (this.gone || this.caught && this.p.hideWhenCaught) return;
     const x = this.px - ox, y = this.py - oy - this.hop;
@@ -1004,9 +1018,14 @@ class Hazard extends Ent {
         if ((this.t % 120) <= 70) { for (let k = 0; k < 4; k++) { g.fillStyle = 'rgba(255,255,255,' + (0.5 - k * 0.1) + ')'; g.fillRect(x + i * T + 4 + rnd(-2, 2), y + j * T + T - 4 - k * 4 - (this.t % 8), 8, 4); } }
         continue;
       }
-      const th = Object.assign({}, this.room.theme, { hazard: on ? this.kind : (this.kind === 'puddle' ? 'puddleoff' : this.kind) });
-      if (!on && this.kind === 'puddle') { g.fillStyle = '#3a6a9a'; g.fillRect(x + i * T, y + j * T + 13, T, 3); continue; }
-      if (!on && (this.kind === 'tesla' || this.kind === 'coals')) { g.fillStyle = '#5a6070'; g.fillRect(x + i * T + 5, y + j * T + 6, 6, 10); continue; }
+      const th = Object.assign({}, this.room.theme, { hazard: this.kind });
+      if (!on) {
+        if (this.kind === 'tesla') { g.fillStyle = '#5a6070'; g.fillRect(x + i * T + 5, y + j * T + 6, 6, 10); g.fillStyle = '#c0c8d0'; g.fillRect(x + i * T + 4, y + j * T + 4, 8, 3); }
+        else if (this.kind === 'coals') { g.fillStyle = '#3a2a2a'; g.fillRect(x + i * T, y + j * T + 13, T, 3); }
+        else if (this.kind === 'mousetrap') { g.fillStyle = '#c89a5a'; g.fillRect(x + i * T + 2, y + j * T + 13, 12, 3); }
+        else { g.fillStyle = 'rgba(120,170,220,0.45)'; g.fillRect(x + i * T, y + j * T + 14, T, 2); }
+        continue;
+      }
       drawHazardTile(g, th, x + i * T, y + j * T, this.t, this.tx + i);
     }
   }
@@ -1135,6 +1154,15 @@ class Deco extends Ent {
         drawText('MOVERS', x + 16 + (this.w - 16) / 2, y + 17, '#3a3a40', { g, align: 'center' });
         circleFill(x + 10, y + hh - 3, 5, '#2a2a2e', g); circleFill(x + 10, y + hh - 3, 2, '#8a8a92', g);
         circleFill(x + this.w - 12, y + hh - 3, 5, '#2a2a2e', g); circleFill(x + this.w - 12, y + hh - 3, 2, '#8a8a92', g);
+        break;
+      }
+      case 'greenhouse': {
+        g.fillStyle = 'rgba(200,240,230,0.13)'; g.fillRect(x, y, this.w, this.h);
+        g.fillStyle = 'rgba(230,255,250,0.35)';
+        for (let i = 0; i <= this.w; i += 32) g.fillRect(x + i, y, 2, this.h);
+        g.fillRect(x, y, this.w, 2);
+        for (let i = 8; i < this.w; i += 64) g.fillRect(x + i, y + 6, 10, 2);
+        for (let k = 0; k < 6; k++) { R(8 + k * 52, this.h - 10, 8, 10, '#3a8a3a'); R(6 + k * 52, this.h - 14, 12, 5, ['#ff7aa8', '#ffd23f', '#c88ad8'][k % 3]); }
         break;
       }
       case 'plane': R(0, 6, this.w, 6, '#f4f4f8'); R(this.w - 8, 0, 6, 8, '#3a6ac8'); R(this.w / 2 - 6, 10, 12, 4, '#d8d8e0'); for (let i = 6; i < this.w - 10; i += 5) R(i, 7, 2, 2, '#4a6a8a'); break;

@@ -16,7 +16,7 @@ def r1():
     g.put(26, 13, 'A')                 # moving box
     g.put(40, 2, 'B')                  # buzzer
     g.put(46, 10, 'X')                 # front door on the stoop
-    g.put(58, 2, '*')                  # golden mug on neighbor roof
+    g.put(58, 2, 'c')                  # bonus cup on neighbor roof
     g.put(1, 13, 'P')                  # intro trigger
     g.put(33, 10, 'R')                 # mila joins trigger (on stoop)
     g.cups([(4, 11), (7, 11), (10, 13), (12, 11), (16, 13), (20, 11), (24, 13), (29, 13),
@@ -36,11 +36,11 @@ def r2():
     g.put(23, 7, 'L')                  # lever behind the door
     g.put(2, 7, 'X')                   # exit to stairwell
     g.put(36, 4, '=')                  # secret ledge in the shaft
-    g.put(36, 3, '*')
+    g.put(36, 3, 'c')
     g.put(34, 13, 'E')                 # elevator platform (3 wide)
     g.put(33, 13, 'K')                 # broken elevator panel
     g.put(1, 13, '@')
-    g.put(5, 11, 'm')                  # mailboxes decor (2x2 at rows 12-13?)
+    g.put(5, 13, 'm')                  # mailboxes decor
     g.put(15, 13, 'B')                 # benny join trigger
     g.put(28, 13, 'T')                 # theo join trigger
     g.cups([(4, 13), (9, 13), (13, 13), (18, 13), (22, 13), (26, 13), (30, 13), (35, 10),
@@ -76,5 +76,4 @@ def r3():
 
 if __name__ == '__main__':
     for f in (r1, r2, r3):
-        print('=====', f.__name__)
-        g = f(); g.show(); print(g.js())
+        print('=====', f.__name__); g = f(); print(g.js())

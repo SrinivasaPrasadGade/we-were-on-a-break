@@ -55,6 +55,55 @@ STORY[0] = {
   credits: ['Piano Logistics: DEX (under protest)', 'Bylaw Enforcement: MR. FENWICK', 'Elevator Repair: THEO (1987, also today)', 'Mail Slot Occupant: BENNY'],
 };
 
+// S1E2 ---------------------------------------------------------------------------
+STORY[1] = {
+  previously: [
+    ['set', 'hall'],
+    ['at', 'roz', 330, { face: -1, expr: 'happy' }], ['at', 'dex', 230, { face: 1, anim: 'backpain', expr: 'pain' }],
+    ['say', 'roz', 'The OTHER piano arrives tomorrow!', { expr: 'happy' }],
+    ['say', 'dex', 'The other WHAT?!', { expr: 'shock' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'apt3a'],
+    ['at', 'theo', 250, { face: 1, expr: 'happy' }], ['at', 'dex', 92, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 160, { face: 1 }], ['at', 'benny', 196, { face: 1 }],
+    ['prop', 'sarge', 'iguana', 330, 210],
+    ['say', 'theo', 'Behold! The Iguana-Feeder 3000! Fresh lettuce every four hours!', { anim: 'cheer' }],
+    ['say', 'dex', 'What happens at hour five?'],
+    ['say', 'theo', 'Nobody knows. That\'s science!', { expr: 'grin' }],
+    ['fx', 'sparks', 240, 180], ['sfx', 'zap'], ['shake', 3],
+    ['prop', 'lettuce', 'lettuce', 236, 176], ['moveprop', 'lettuce', 60, 120, 5],
+    ['expr', 'all', 'surprised'],
+    ['laugh', 'big'],
+    ['wait', 30],
+    ['say', 'mila', 'Point for the lettuce.'],
+    ['laugh', 'chuckle'],
+    ['unprop', 'sarge'], ['sfx', 'squeak'],
+    ['wait', 30],
+    ['face', 'theo', -1],
+    ['say', 'theo', '...Has anyone seen Sarge?', { expr: 'scared' }],
+    ['laugh', 'ooh'],
+    ['say', 'benny', 'I\'ll check my apartment. Everything ends up in my apartment.', { expr: 'neutral' }],
+    ['say', 'mila', 'He\'s got a head start. I love a race.', { expr: 'smug', anim: 'flex' }],
+    ['laugh', 'chuckle'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'hall'],
+    ['at', 'theo', 120, { face: 1 }], ['at', 'dex', 160, { face: 1 }], ['at', 'mila', 196, { face: 1 }], ['at', 'priya', 90, { face: 1 }], ['at', 'benny', 228, { face: 1 }], ['at', 'juno', 60, { face: 1 }],
+    ['enter', 'holloway', 'R', 330, { wait: true, expr: 'angry' }],
+    ['prop', 'sargehead', 'iguanaL', 330, 194],
+    ['say', 'holloway', 'If I EVER find that lizard in my building...', { expr: 'angry' }],
+    ['say', 'holloway', 'Rule 9. No reptiles. I\'ll be watching.', { anim: 'point' }],
+    ['expr', 'all', 'surprised'],
+    ['wait', 40],
+    ['say', 'holloway', 'What? What are you all looking at?', { expr: 'neutral' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Iguana Wrangler: THEO (fired)', 'Hallway Choreography: MR. HOLLOWAY', 'Lettuce: Organic, airborne', 'Greenhouse Security: ROZ'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------
