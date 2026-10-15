@@ -3726,7 +3726,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -3853,6 +3853,13 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'botcrate': // Theo's invention, crated
+      R(0, 0, w, h, '#a87a4a'); R(1, 1, w - 2, h - 2, '#b88a5a');
+      R(0, 0, w, 2, '#8a5a34'); R(0, h - 2, w, 2, '#8a5a34'); R(0, 0, 2, h, '#8a5a34'); R(w - 2, 0, 2, h, '#8a5a34');
+      for (let i = 0; i < w; i += 2) R(i, i * (h / w), 2, 2, '#8a5a34');
+      R(4, 6, w - 8, 9, '#f4efe6'); drawText('TIDY', x + w / 2, y + 6, '#c83a3a', { g, align: 'center' });
+      R(5, h - 9, 10, 3, '#c83a3a'); R(w - 13, h - 9, 8, 3, '#c83a3a');
       break;
     case 'magicbox': // the Great Bennini's vanishing cabinet
       R(0, 2, w, h - 4, '#5a189a'); R(2, 4, w - 4, h - 8, '#7a38ba'); R(0, h - 2, w, 2, '#2a1a3a');
@@ -4612,6 +4619,11 @@ class Platform extends Ent {
       R(2, 2, 3, 2, this.active() ? '#7cf29a' : '#ff4a3a');
     } else if (this.kind === 'plank') {
       R(0, 0, w, 5, '#8a5a34'); R(0, 0, w, 1, '#b07a4a');
+    } else if (this.kind === 'cart') { // subway maintenance cart riding the rails
+      R(0, 0, w, 3, '#e8c020'); R(0, 3, w, 6, '#5a5a62'); R(2, 4, w - 4, 1, '#7a7a82');
+      R(3, -10, 2, 10, '#5a5a62'); R(w - 5, -10, 2, 10, '#5a5a62'); R(3, -10, w - 6, 2, '#e8c020');
+      circleFill(x + 6, y + 10, 3, '#2a2a2e', g); circleFill(x + w - 6, y + 10, 3, '#2a2a2e', g);
+      R(w / 2 - 2, -8, 4, 3, (this.t >> 4) % 2 ? '#ff4a3a' : '#7a1a1a');
     } else if (this.kind === 'cloud') {
       R(0, 0, w, 6, '#f4f8fc'); R(2, -2, w - 4, 2, '#ffffff');
     } else {
@@ -5023,6 +5035,13 @@ class Deco extends Ent {
         R(14, wk - 14, 3, 14, '#4a4a52'); R(w - 17, wk - 14, 3, 14, '#4a4a52');
         for (const lx of [16, Math.round(w / 3), Math.round(2 * w / 3), w - 19]) R(lx, wk + 6, 3, h - wk - 6, '#4a4a52');
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
+        break;
+      }
+      case 'rails': { // the track bed in a subway pit
+        R(0, 0, this.w, this.h, '#14121a');
+        for (let i = 2; i < this.w; i += 10) R(i, 12, 6, 3, '#4a3a2a');
+        R(0, 10, this.w, 2, '#9aa0a8'); R(0, 18, this.w, 2, '#9aa0a8');
+        R(0, 10, this.w, 1, '#d8dce0');
         break;
       }
       case 'hole': { // a suspicious iguana-sized hole in the wall
@@ -9616,6 +9635,148 @@ EPISODES.push({
   endLine: 'TA-DA!',
 });
 
+// =============================================================================
+// S2E3  Subway Shuffle
+// =============================================================================
+EPISODES.push({
+  season: 2, num: 3, title: 'Subway Shuffle', music: 'subway',
+  blurb: 'Theo\'s Tidy-Bot is in storage at the end of the line. The Expo is tomorrow.',
+  rooms: [
+    {
+      name: 'Larkspur St. Station', slug: 'INT. LARKSPUR ST. STATION - MORNING', theme: 'subway', shot: 'subway_day',
+      map: [
+        // 0000000000111111111122222222223333333333444444444455555555556666
+        // 0123456789012345678901234567890123456789012345678901234567890123
+        '################################################################', // 0
+        '################################################################', // 1
+        '...........................#....................................', // 2
+        '...........................#....................................', // 3
+        '...........................#....................................', // 4
+        '...........................#....................................', // 5
+        '...........................#....................................', // 6
+        '...........................#....................................', // 7
+        '...........................#....................................', // 8
+        '.....n.............n.......#...n...........cc.......n...........', // 9
+        '...........................#...............==...................', // 10
+        '..........c.............c..#.c........c.............c.....c.....', // 11
+        '................................................................', // 12
+        '..@.....A...N...c..c..cB.K.G....cq.C.k..P........c.....cj....X..', // 13
+        '###############{{{{{{{{#################........################', // 14
+        '########################################........################', // 15
+        '########################################........################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'agent', solve: 'talk', id: 'marge', moveTo: -3, vanish: true, face: -1, voice: 'npc', name: 'MARGE', expr: 'smug',
+          block: 'Tokens only.',
+          after: ['Have a nice day. Or don\'t. I\'m not your mother.'],
+          talk: {
+            q: 'Tokens only. We stopped SELLING tokens in 1998.',
+            opts: [
+              { t: 'Then how does anybody get in?', ok: false, r: 'They don\'t, sweetie. That\'s the beauty of it.' },
+              { t: 'We\'re late for a very important invention!', ok: false, r: 'Everybody\'s late. That\'s the subway.' },
+              { t: 'Marge! I know a guy who found your missing 1987 token collection.', ok: true, r: 'My commemoratives?! ...Go. GO. Tell him I\'ll pay in tokens.' },
+            ],
+          } },
+        G: { t: 'door', kind: 'turnstile', h: 2, link: 'turn9' },
+        K: { t: 'broken', kind: 'turnstile', id: 'turn9', say: [['theo', 'Turnstile\'s fixed! It just needed a little percussive maintenance.'], ['juno', 'He kicked it.'], ['theo', 'PERCUSSIVELY.']] },
+        P: { t: 'platform', kind: 'cart', w: 2, dy: 6, path: [[0, 0], [6, 0]], wait: 60, speed: 0.8 },
+        X: { t: 'exit' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'Tidy-Bot is in storage at the end of the line. And the Expo is TOMORROW.'], ['mila', 'End of the line? That\'s, like, an hour.'], ['dex', 'I\'ll carry it home.'], ['theo', 'It weighs four hundred pounds.'], ['dex', '...I\'ll carry it slowly.']], hintKeys: H_KEYS('PRIYA: talk to the token clerk (E).', 'PRIYA: talk to the token clerk (E).') },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'Turnstiles are jammed. Out of my way, I\'m a professional.']], hintKeys: H_KEYS('THEO: hold E at the turnstile control box.', 'THEO: hold E at the turnstile control box.') },
+        C: { t: 'trigger', w: 2, h: 3, lines: [['mila', 'Our train\'s on the far platform. Across the TRACKS.'], ['benny', 'There\'s a little maintenance cart going back and forth.'], ['priya', 'Hop on, hop off. Like a tourist.']], hintKeys: H_KEYS('Ride the maintenance cart across the tracks. Don\'t fall in!', 'Ride the maintenance cart across the tracks. Don\'t fall in!') },
+      },
+      extra: [
+        { t: 'deco', kind: 'rails', x: 40, y: 16, w: 8, h: 3, back: true },
+      ],
+    },
+    {
+      name: 'The Uptown Local', slug: 'INT. UPTOWN LOCAL - CAR 3 - MORNING', theme: 'train', shot: 'train_day',
+      map: [
+        // 000000000011111111112222222222333333333344444444445555555555
+        // 012345678901234567890123456789012345678901234567890123456789
+        '############################################################', // 0
+        '############################################################', // 1
+        '..........................................#.................', // 2
+        '.........................c.c.*.c.c........#.................', // 3
+        '.......................M==========M.......#.................', // 4
+        '.......................M..........M.......#.................', // 5
+        '.......................M..........M.......#.................', // 6
+        '......w.....w..........M..........M.......#.....w.....w.....', // 7
+        '.......................M..........M.......#.................', // 8
+        '.......................M....w.....M.......#.................', // 9
+        '.......................M..........M.......#.................', // 10
+        '..........c.........c..M..........M.c.......c....c.....c....', // 11
+        '.......................M..........M...........#######.......', // 12
+        '..@.....A...c.N.O.Q...cM..........M...B.c.U....c.c.c.....X..', // 13
+        '############################################################', // 14
+        '############################################################', // 15
+        '############################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'commuter', seed: 1, solve: 'music', id: 'c1', moveTo: 30, vanish: true, face: -1, voice: 'npc', name: 'COMMUTER', expr: 'angry',
+          block: 'This is MY pole.', won: '...Is that a sea shanty? I LOVE a sea shanty!' },
+        O: { t: 'npc', look: 'commuter', seed: 2, solve: 'music', id: 'c2', moveTo: 28, vanish: true, face: -1, voice: 'npc', name: 'COMMUTER', expr: 'angry',
+          block: 'Do NOT make eye contact.', won: 'Okay, this is a bop. I hate that this is a bop.' },
+        Q: { t: 'npc', look: 'commuter', seed: 3, solve: 'music', id: 'c3', moveTo: 26, vanish: true, face: -1, voice: 'npc', name: 'COMMUTER', expr: 'angry',
+          block: 'I\'ve been standing here since 1994.', won: 'Thirty years and NOBODY ever played me a song!' },
+        U: { t: 'shutter', h: 3, lift: 2 },
+        X: { t: 'exit' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Rush hour. Everyone\'s grumpy and nobody moves.'], ['juno', 'Nobody moves... YET.']], hintKeys: H_KEYS('JUNO: play (E) near the commuters. Music moves people!', 'JUNO: play (E) near the commuters. Music moves people!') },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['dex', 'The door to the next car is stuck. Classic me moment.'], ['mila', 'Hold it up, Dex. We\'ll go through.']], hintKeys: H_KEYS('DEX: lift the connecting door (E). Switch to someone else to walk through.', 'DEX: lift the connecting door. Switch to someone else to walk through.') },
+      },
+    },
+    {
+      name: 'End of the Line', slug: 'INT. GRIMSBY SELF-STORAGE - DAY', theme: 'storage', shot: 'storage_day', dark: true, lightLink: 'lift9',
+      map: [
+        // 00000000001111111111222222222233333333334444444444555555
+        // 01234567890123456789012345678901234567890123456789012345
+        '########################################################', // 0
+        '########################################################', // 1
+        '....................#..........#........................', // 2
+        '....................#..........#..................Y.....', // 3
+        '....Y...............#.....Y....#.....Y..................', // 4
+        '....................#..........#....................c...', // 5
+        '....................#..........#........................', // 6
+        '....................#..........#.............c.Z..c..X..', // 7
+        '....................#..........#...........#############', // 8
+        '...................cV..........#........c..#############', // 9
+        '.................===#..........#...........#############', // 10
+        '...............c.c.....c...c.....c.........#############', // 11
+        '...............##..........................#############', // 12
+        '..@...A...N.cx.##...G.L..C..xc.J..B.c.K.P..#############', // 13
+        '########################################################', // 14
+        '########################################################', // 15
+        '########################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'security', solve: 'talk', id: 'storageguy', moveTo: -6, vanish: true, face: -1, voice: 'npc', name: 'STORAGE GUY', expr: 'neutral',
+          block: 'Unit 7B? You got a key?',
+          talk: {
+            q: 'No key, no unit. Those are the rules. I didn\'t make them. Well. I did.',
+            opts: [
+              { t: 'Theo IS the key. Spiritually.', ok: false, r: 'That\'s not how keys work, pal.' },
+              { t: 'Your sign says "We store your dreams." Theo\'s dream is in there.', ok: true, r: '...You read the SIGN? Nobody reads the sign. Go. Live your dream.' },
+              { t: 'We can pay you in lettuce.', ok: false, r: 'Why does everybody keep offering me lettuce?' },
+            ],
+          } },
+        V: { t: 'grate', id: 'vent9' },
+        G: { t: 'door', kind: 'shutter', h: 3, link: 'unit9' },
+        J: { t: 'door', kind: 'shutter', h: 3, link: 'unit9' },
+        L: { t: 'lever', id: 'unit9', say: 'Both doors open! Ta-da! ...The Great Benny, master of storage.' },
+        C: { t: 'crate', kind: 'botcrate' },
+        K: { t: 'broken', kind: 'panel', id: 'lift9', say: [['theo', 'Power\'s back! Lights and the freight lift!'], ['priya', 'And this place is... a lot dustier than I thought.']] },
+        P: { t: 'platform', kind: 'lift', w: 3, dy: 6, path: [[0, 0], [0, -6]], link: 'lift9', wait: 100, speed: 0.8, cableTop: 2 },
+        Z: { t: 'plate', w: 2, heavy: true, mark: true, id: 'botup' },
+        X: { t: 'exit', link: 'botup', lockedMsg: 'GET THE TIDY-BOT ONTO THE DOCK!' },
+        Y: { t: 'light', kind: 'hang', r: 5 },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'Unit 7B. My entire invention archive.'], ['mila', 'Your entire archive is ONE crate?'], ['theo', 'It\'s a very full crate.']], hintKeys: H_KEYS('PRIYA: talk to the storage guy (E).', 'PRIYA: talk to the storage guy (E).') },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['dex', 'Freight lift to the loading dock. Crate goes on the lift, I go with it.'], ['theo', 'And the lift needs power. That\'s me.']], hintKeys: H_KEYS('BENNY opens the unit through the vent. DEX pushes the crate onto the lift. THEO powers it.', 'BENNY opens the unit through the vent. DEX pushes the crate onto the lift. THEO powers it.') },
+      },
+    },
+  ],
+  endLine: 'BOT RETRIEVED!',
+});
+
 
 
 // ===== 15_story.js =====
@@ -10082,6 +10243,62 @@ STORY[7] = {
     ['freeze'],
   ],
   credits: ['Magic: THE GREAT BENNINI (for real this time)', 'Trapdoor: THEO (tested on Dex)', 'Rabbit: PROFESSOR FLUFFINGTON (uncredited)', 'Drumroll: JUNO (four minutes long)'],
+};
+
+// S2E3 (episode 9) ----------------------------------------------------------------
+STORY[8] = {
+  previously: [
+    ['set', 'stage'],
+    ['at', 'benny', 440, { face: -1, expr: 'grin', anim: 'cheer' }], ['at', 'theo', 152, { face: 1, expr: 'surprised' }],
+    ['at', 'holloway', 360, { face: -1, expr: 'angry', anim: 'point' }],
+    ['say', 'theo', '...Who\'s in the trapdoor?'],
+    ['say', 'holloway', 'Rule 52. No unlicensed magic.', { expr: 'angry', anim: 'point' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'subway'],
+    ['at', 'dex', 110, { face: 1 }], ['at', 'mila', 160, { face: 1 }], ['at', 'theo', 230, { face: -1, expr: 'scared' }],
+    ['at', 'priya', 290, { face: -1, expr: 'smug' }], ['at', 'benny', 330, { face: -1 }], ['at', 'juno', 380, { face: -1 }],
+    ['say', 'theo', 'Tidy-Bot is in storage at the end of the line. The Expo is TOMORROW.', { expr: 'scared' }],
+    ['say', 'priya', 'Relax. We\'re on the express. End of the line in twenty minutes.', { expr: 'smug' }],
+    ['sfx', 'ding'],
+    ['say', 'announcer', 'Now arriving: Larkspur Street. Thank you for riding the LOCAL.'],
+    ['expr', 'all', 'surprised'],
+    ['wait', 20],
+    ['say', 'mila', 'The LOCAL? We\'ve been riding in a CIRCLE for an hour!', { expr: 'angry' }],
+    ['laugh', 'big'],
+    ['say', 'priya', 'I know a guy at the transit authority.'],
+    ['say', 'dex', 'Does he know which train is which?'],
+    ['say', 'priya', '...He knows a guy.'],
+    ['laugh', 'laugh'],
+    ['sing', 'juno', 'Round and round the subway goes, where it stops, nobody knows!'],
+    ['laugh', 'chuckle'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'cafe'],
+    ['at', 'dex', 140, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 168, { anim: 'sit', y: SIT_Y }], ['at', 'priya', 196, { anim: 'sit', y: SIT_Y }],
+    ['at', 'theo', 250, { face: 1, expr: 'happy' }], ['at', 'benny', 92, { face: 1 }], ['at', 'juno', 60, { face: 1 }], ['at', 'gus', 382, { face: -1 }],
+    ['at', 'robot', 282, { face: 1 }],
+    ['say', 'theo', 'Ladies and gentlemen: TIDY-BOT 2.0! It cleans ANYTHING!', { anim: 'cheer', expr: 'happy' }],
+    ['say', 'gus', 'Anything?', { expr: 'smug' }],
+    ['say', 'theo', 'Anything.'],
+    ['sfx', 'robot'],
+    ['walk', 'robot', 352, { wait: true }],
+    ['say', 'robot', 'MESS DETECTED. MUSTACHE: UNTIDY.'],
+    ['say', 'gus', 'Don\'t you DARE.', { expr: 'angry' }],
+    ['fx', 'sparks', 372, 196], ['shake', 3],
+    ['expr', 'gus', 'shock'],
+    ['laugh', 'big'],
+    ['say', 'theo', '...It\'s still in beta.', { expr: 'scared' }],
+    ['laugh', 'laugh'],
+    ['exit', 'robot', 'L'],
+    ['say', 'dex', 'Uh, Theo? It\'s leaving.'],
+    ['say', 'theo', 'It does that. It\'s fine. It always comes back.'],
+    ['laugh', 'ooh'],
+    ['freeze'],
+  ],
+  credits: ['Tokens: MARGE (since 1998)', 'Commuter Choir: JUNO & CAR 3', 'Freight: DEX (four hundred pounds)', 'Archive: THEO (one very full crate)'],
 };
 
 // ---------------------------------------------------------------------------

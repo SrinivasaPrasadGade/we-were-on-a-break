@@ -29,7 +29,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -156,6 +156,13 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'botcrate': // Theo's invention, crated
+      R(0, 0, w, h, '#a87a4a'); R(1, 1, w - 2, h - 2, '#b88a5a');
+      R(0, 0, w, 2, '#8a5a34'); R(0, h - 2, w, 2, '#8a5a34'); R(0, 0, 2, h, '#8a5a34'); R(w - 2, 0, 2, h, '#8a5a34');
+      for (let i = 0; i < w; i += 2) R(i, i * (h / w), 2, 2, '#8a5a34');
+      R(4, 6, w - 8, 9, '#f4efe6'); drawText('TIDY', x + w / 2, y + 6, '#c83a3a', { g, align: 'center' });
+      R(5, h - 9, 10, 3, '#c83a3a'); R(w - 13, h - 9, 8, 3, '#c83a3a');
       break;
     case 'magicbox': // the Great Bennini's vanishing cabinet
       R(0, 2, w, h - 4, '#5a189a'); R(2, 4, w - 4, h - 8, '#7a38ba'); R(0, h - 2, w, 2, '#2a1a3a');
@@ -915,6 +922,11 @@ class Platform extends Ent {
       R(2, 2, 3, 2, this.active() ? '#7cf29a' : '#ff4a3a');
     } else if (this.kind === 'plank') {
       R(0, 0, w, 5, '#8a5a34'); R(0, 0, w, 1, '#b07a4a');
+    } else if (this.kind === 'cart') { // subway maintenance cart riding the rails
+      R(0, 0, w, 3, '#e8c020'); R(0, 3, w, 6, '#5a5a62'); R(2, 4, w - 4, 1, '#7a7a82');
+      R(3, -10, 2, 10, '#5a5a62'); R(w - 5, -10, 2, 10, '#5a5a62'); R(3, -10, w - 6, 2, '#e8c020');
+      circleFill(x + 6, y + 10, 3, '#2a2a2e', g); circleFill(x + w - 6, y + 10, 3, '#2a2a2e', g);
+      R(w / 2 - 2, -8, 4, 3, (this.t >> 4) % 2 ? '#ff4a3a' : '#7a1a1a');
     } else if (this.kind === 'cloud') {
       R(0, 0, w, 6, '#f4f8fc'); R(2, -2, w - 4, 2, '#ffffff');
     } else {
@@ -1326,6 +1338,13 @@ class Deco extends Ent {
         R(14, wk - 14, 3, 14, '#4a4a52'); R(w - 17, wk - 14, 3, 14, '#4a4a52');
         for (const lx of [16, Math.round(w / 3), Math.round(2 * w / 3), w - 19]) R(lx, wk + 6, 3, h - wk - 6, '#4a4a52');
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
+        break;
+      }
+      case 'rails': { // the track bed in a subway pit
+        R(0, 0, this.w, this.h, '#14121a');
+        for (let i = 2; i < this.w; i += 10) R(i, 12, 6, 3, '#4a3a2a');
+        R(0, 10, this.w, 2, '#9aa0a8'); R(0, 18, this.w, 2, '#9aa0a8');
+        R(0, 10, this.w, 1, '#d8dce0');
         break;
       }
       case 'hole': { // a suspicious iguana-sized hole in the wall

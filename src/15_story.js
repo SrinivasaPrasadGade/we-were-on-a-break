@@ -463,6 +463,62 @@ STORY[7] = {
   credits: ['Magic: THE GREAT BENNINI (for real this time)', 'Trapdoor: THEO (tested on Dex)', 'Rabbit: PROFESSOR FLUFFINGTON (uncredited)', 'Drumroll: JUNO (four minutes long)'],
 };
 
+// S2E3 (episode 9) ----------------------------------------------------------------
+STORY[8] = {
+  previously: [
+    ['set', 'stage'],
+    ['at', 'benny', 440, { face: -1, expr: 'grin', anim: 'cheer' }], ['at', 'theo', 152, { face: 1, expr: 'surprised' }],
+    ['at', 'holloway', 360, { face: -1, expr: 'angry', anim: 'point' }],
+    ['say', 'theo', '...Who\'s in the trapdoor?'],
+    ['say', 'holloway', 'Rule 52. No unlicensed magic.', { expr: 'angry', anim: 'point' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'subway'],
+    ['at', 'dex', 110, { face: 1 }], ['at', 'mila', 160, { face: 1 }], ['at', 'theo', 230, { face: -1, expr: 'scared' }],
+    ['at', 'priya', 290, { face: -1, expr: 'smug' }], ['at', 'benny', 330, { face: -1 }], ['at', 'juno', 380, { face: -1 }],
+    ['say', 'theo', 'Tidy-Bot is in storage at the end of the line. The Expo is TOMORROW.', { expr: 'scared' }],
+    ['say', 'priya', 'Relax. We\'re on the express. End of the line in twenty minutes.', { expr: 'smug' }],
+    ['sfx', 'ding'],
+    ['say', 'announcer', 'Now arriving: Larkspur Street. Thank you for riding the LOCAL.'],
+    ['expr', 'all', 'surprised'],
+    ['wait', 20],
+    ['say', 'mila', 'The LOCAL? We\'ve been riding in a CIRCLE for an hour!', { expr: 'angry' }],
+    ['laugh', 'big'],
+    ['say', 'priya', 'I know a guy at the transit authority.'],
+    ['say', 'dex', 'Does he know which train is which?'],
+    ['say', 'priya', '...He knows a guy.'],
+    ['laugh', 'laugh'],
+    ['sing', 'juno', 'Round and round the subway goes, where it stops, nobody knows!'],
+    ['laugh', 'chuckle'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'cafe'],
+    ['at', 'dex', 140, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 168, { anim: 'sit', y: SIT_Y }], ['at', 'priya', 196, { anim: 'sit', y: SIT_Y }],
+    ['at', 'theo', 250, { face: 1, expr: 'happy' }], ['at', 'benny', 92, { face: 1 }], ['at', 'juno', 60, { face: 1 }], ['at', 'gus', 382, { face: -1 }],
+    ['at', 'robot', 282, { face: 1 }],
+    ['say', 'theo', 'Ladies and gentlemen: TIDY-BOT 2.0! It cleans ANYTHING!', { anim: 'cheer', expr: 'happy' }],
+    ['say', 'gus', 'Anything?', { expr: 'smug' }],
+    ['say', 'theo', 'Anything.'],
+    ['sfx', 'robot'],
+    ['walk', 'robot', 352, { wait: true }],
+    ['say', 'robot', 'MESS DETECTED. MUSTACHE: UNTIDY.'],
+    ['say', 'gus', 'Don\'t you DARE.', { expr: 'angry' }],
+    ['fx', 'sparks', 372, 196], ['shake', 3],
+    ['expr', 'gus', 'shock'],
+    ['laugh', 'big'],
+    ['say', 'theo', '...It\'s still in beta.', { expr: 'scared' }],
+    ['laugh', 'laugh'],
+    ['exit', 'robot', 'L'],
+    ['say', 'dex', 'Uh, Theo? It\'s leaving.'],
+    ['say', 'theo', 'It does that. It\'s fine. It always comes back.'],
+    ['laugh', 'ooh'],
+    ['freeze'],
+  ],
+  credits: ['Tokens: MARGE (since 1998)', 'Commuter Choir: JUNO & CAR 3', 'Freight: DEX (four hundred pounds)', 'Archive: THEO (one very full crate)'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------
