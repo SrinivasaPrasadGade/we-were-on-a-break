@@ -512,7 +512,7 @@ class LevelScene {
   }
   drawDark(ox, oy) {
     const r = this.room;
-    let level = 0.93;
+    let level = r.def.darkLevel || 0.9;
     if (r.def.lightLink && this.check(r.def.lightLink)) { this.litT = Math.min(1, (this.litT || 0) + 0.02); level *= (1 - this.litT * 0.85); }
     if (level < 0.05) return;
     const g = darkCtx;
@@ -526,7 +526,7 @@ class LevelScene {
       grd.addColorStop(0, 'rgba(0,0,0,' + (a || 1) + ')'); grd.addColorStop(1, 'rgba(0,0,0,0)');
       g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
     };
-    for (const f of this.friends) if (f.present && f.mishapT <= 22) hole(f.cx - ox, f.y + f.h / 2 - oy, f.ctrl >= 0 ? 58 : 34);
+    for (const f of this.friends) if (f.present && f.mishapT <= 22) hole(f.cx - ox, f.y + f.h / 2 - oy, f.ctrl >= 0 ? 68 : 36);
     for (const e of r.ents) {
       if (e instanceof Light && e.on()) hole(e.cx - ox, e.cy - oy, e.r);
       else if (e instanceof Broken && e.fixed && (e.kind === 'lights' || e.kind === 'generator' || e.kind === 'fusebox')) hole(e.cx - ox, e.cy - oy, e.p.r ? e.p.r * T : 110);

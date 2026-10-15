@@ -305,7 +305,7 @@ class SoundDoor extends Door {
   constructor(room, tx, ty, p) { super(room, tx, ty, Object.assign({ kind: 'sound' }, p)); this.heard = false; this.sound = true; }
   wantOpen() { return this.heard || this.level.check(this.link) && !!this.link; }
   onSound() { if (!this.heard) { this.heard = true; this.setFlag(true); AudioSys.sfx('fixed'); Particles.notes(this.cx, this.y, 6); this.level.toastAt(this.cx, this.y - 8, 'OPEN!', '#4cc9f0'); } }
-  interactInfo(f) { return f.who === 'juno' ? { ok: true, label: 'Play', prio: 3 } : { ok: false, need: 'juno', label: 'Needs music', prio: 1 }; }
+  interactInfo(f) { if (this.heard) return null; return f.who === 'juno' ? { ok: true, label: 'Play', prio: 3, play: true } : { ok: false, need: 'juno', label: 'Needs music', prio: 1 }; }
 }
 
 // ---- Dex shutter ---------------------------------------------------------------------
@@ -601,7 +601,7 @@ class NPC extends Ent {
     if (this.gone) return null;
     if (this.state !== 'block') return this.p.after ? { ok: true, label: 'Chat', prio: 1 } : null;
     if (this.solve === 'talk') return f.who === 'priya' ? { ok: true, label: 'Talk', prio: 5 } : { ok: false, need: 'priya', label: 'Grumpy', prio: 2 };
-    return f.who === 'juno' ? { ok: true, label: 'Play', prio: 5 } : { ok: false, need: 'juno', label: 'In the way', prio: 2 };
+    return f.who === 'juno' ? { ok: true, label: 'Play', prio: 5, play: true } : { ok: false, need: 'juno', label: 'In the way', prio: 2 };
   }
   use(f) {
     if (this.state !== 'block') { if (this.p.after) this.level.say(this.npcVoice(), pick([].concat(this.p.after)), this); return; }
@@ -1079,7 +1079,7 @@ class Sensor extends Ent {
     AudioSys.sfx('fixed'); Particles.notes(this.cx, this.y, 5);
     if (this.p.say) this.level.say(this.p.sayWho || 'juno', this.p.say);
   }
-  interactInfo(f) { return this.heard ? null : (f.who === 'juno' ? { ok: true, label: 'Play', prio: 3 } : { ok: false, need: 'juno', label: 'Sound-activated', prio: 1 }); }
+  interactInfo(f) { return this.heard ? null : (f.who === 'juno' ? { ok: true, label: 'Play', prio: 3, play: true } : { ok: false, need: 'juno', label: 'Sound-activated', prio: 1 }); }
   update() { super.update(); if (this.p.link && this.level.check(this.p.link) && !this.heard) { /* externally triggered */ } }
   draw(g, ox, oy) {
     const x = Math.round(this.x - ox), y = Math.round(this.y - oy);

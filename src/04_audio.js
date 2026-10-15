@@ -544,6 +544,14 @@ const AudioSys = {
         S.sfx('whistle'); break;
       case 'yay':
         [76, 79, 84].forEach((m, i) => S.inst('glock', m, t + i * 0.05, 0.2, 0.6, S.sfxBus)); break;
+      case 'claps': // two quick hand claps
+        S.inst('clap', 60, t, 0.1, 1, S.sfxBus); S.inst('clap', 60, t + 0.22, 0.1, 1, S.sfxBus); break;
+      case 'powerdown':
+        S.tone({ type: 'sawtooth', f0: 220, f1: 40, dur: 0.7, vol: 0.12, filter: 'lowpass', ff: 900 });
+        S.nz({ dur: 0.25, vol: 0.12, f0: 2000, f1: 200, type: 'bandpass', q: 1 }); break;
+      case 'powerup':
+        S.tone({ type: 'sawtooth', f0: 50, f1: 240, dur: 0.6, vol: 0.1, filter: 'lowpass', ff: 1200 });
+        [60, 67, 72].forEach((m, i) => S.inst('glock', m + 12, t + 0.35 + i * 0.07, 0.2, 0.5, S.sfxBus)); break;
       default: break;
     }
   },

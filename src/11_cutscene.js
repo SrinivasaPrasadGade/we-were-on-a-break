@@ -719,6 +719,17 @@ class CutsceneScene {
     ctx.restore();
     if (this.darkA > 0) {
       ctx.fillStyle = 'rgba(4,2,12,' + (this.darkA * 0.94) + ')'; ctx.fillRect(0, 0, W, H);
+      // cartoon eyes blinking in the dark
+      if (this.darkA > 0.6) for (const a of list) {
+        const info = ACTOR_INFO[a.who];
+        if ((info && info.animal) || a.alpha === 0) continue;
+        if (((this.t + Math.round(a.x) * 7) % 160) < 7) continue;
+        const hh = FRIENDS.includes(a.who) ? FRIEND_STATS[a.who].h : 28;
+        const p = this.toScreen(a.x + (a.face || 1) * 1, a.y - hh + (a.who === 'benny' ? 7 : 9) - (a.sit ? -6 : 0));
+        const s = Math.max(1, Math.round(this.zoom.cs));
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(Math.round(p.x - 3 * s), Math.round(p.y), s, 2 * s); ctx.fillRect(Math.round(p.x + 1 * s), Math.round(p.y), s, 2 * s);
+      }
     }
     // bubble (screen space, after zoom transform: compute screen pos)
     if (this.bubble) {
@@ -814,17 +825,19 @@ function drawEstablishing(kind, t) {
   const R = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
   const parts = kind.split('_');
   const base = parts[0], time = parts[1] || 'day';
-  const sky = { day: ['#6ab8ec', '#cdeefa'], night: ['#0f1030', '#3a2a5a'], dusk: ['#3a2a6a', '#f39a6a'], snow: ['#9fb0c4', '#e4ecf4'], sunset: ['#ff8e5a', '#ffe0a0'] }[time] || ['#6ab8ec', '#cdeefa'];
+  const sky = { day: ['#6ab8ec', '#cdeefa'], night: ['#0f1030', '#3a2a5a'], blackout: ['#07071a', '#1e1a34'], dusk: ['#3a2a6a', '#f39a6a'], snow: ['#9fb0c4', '#e4ecf4'], sunset: ['#ff8e5a', '#ffe0a0'] }[time] || ['#6ab8ec', '#cdeefa'];
   const grad = ctx.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0, sky[0]); grad.addColorStop(1, sky[1]);
   ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-  const night = time === 'night' || time === 'dusk';
-  if (time === 'night') { for (let i = 0; i < 50; i++) R(hash2(i, 1, 9) * W, hash2(i, 2, 9) * 120, 1, 1, '#ffffff'); circleFill(400, 40, 12, '#f4f0d8'); }
+  const blackout = time === 'blackout';
+  const night = time === 'night' || time === 'dusk' || blackout;
+  if (time === 'night' || blackout) { for (let i = 0; i < (blackout ? 140 : 50); i++) R(hash2(i, 1, 9) * W, hash2(i, 2, 9) * (blackout ? 170 : 120), 1, 1, i % 7 ? '#ffffff' : '#ffe8a0'); circleFill(400, 40, 12, '#f4f0d8'); }
   const pan = t * 0.25;
   // background skyline
   const far = skylineStrip(THEMES.street, 'skyline', night ? '#2a2550' : time === 'snow' ? '#b8c4d2' : '#9ab8cc', 140, 11, night, night);
   ctx.drawImage(far, -((pan * 0.3) % 960), H - 190);
-  const lit = (x, y) => night && hash2(x | 0, y | 0, 7) < 0.6;
+  const lit = (x, y) => night && !blackout && hash2(x | 0, y | 0, 7) < 0.6;
+  const candle = (x, y) => blackout && hash2(x | 0, y | 0, 5) < 0.18;
   const facade = (x, y, w, h, col, rows, cols, opts) => {
     opts = opts || {};
     R(x, y, w, h, col);
@@ -834,7 +847,8 @@ function drawEstablishing(kind, t) {
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
       const wx = x + 12 + c * cw, wy = y + 12 + r * rh;
       R(wx - 2, wy - 2, 22, 26, '#e8e0d0');
-      R(wx, wy, 18, 22, lit(wx, wy) ? '#ffd88a' : (night ? '#2a3050' : '#8ab8d8'));
+      R(wx, wy, 18, 22, lit(wx, wy) ? '#ffd88a' : (night ? (blackout ? '#121428' : '#2a3050') : '#8ab8d8'));
+      if (candle(wx, wy)) { const fl = (t >> 2) % 3; R(wx + 3, wy + 10, 12, 12, fl ? '#5a3a1a' : '#6a4420'); R(wx + 4 + fl, wy + 14, 2, 4, '#ffd27a'); }
       R(wx + 8, wy, 2, 22, '#e8e0d0');
       if (opts.fire && c % 2 === 0) { R(wx - 6, wy + 22, 30, 2, '#2a2a30'); for (let k = 0; k < 30; k += 4) R(wx - 6 + k, wy + 16, 1, 6, '#2a2a30'); }
     }

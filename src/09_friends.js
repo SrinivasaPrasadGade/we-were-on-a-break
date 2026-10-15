@@ -293,7 +293,7 @@ class Friend {
     const L = this.level;
     if (this.who === 'mila' && !this.onGround && !this.climbing && !this.djumpUsed && this.coyote <= 0) { this.doubleJump(); return; }
     const best = L.bestInteractable(this);
-    if (best && best.info.ok) { best.ent.use(this); return; }
+    if (best && best.info.ok) { if (best.info.play) { this.startPlay(); return; } best.ent.use(this); return; }
     if (this.who === 'juno') { this.startPlay(); return; }
     if (this.who === 'mila') { const ct = this.climbTileAt(); if (ct) { this.startClimb(ct); return; } }
     if (best && !best.info.ok) {
