@@ -1,0 +1,26 @@
+<title>The Gang's All Here</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A co-op sitcom puzzle-platformer. Six friends, one café couch, thirteen episodes of everyday disasters.">
+<style>
+  /* One-screen game: a dark stage that letterboxes a 480x270 pixel-art canvas. Single deliberate look. */
+  :root { --bg: #140d1a; --ink: #f6ead8; --accent: #ffcf5a; color-scheme: dark; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); overflow: hidden; box-sizing: border-box;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+    overscroll-behavior: none;
+    font: 14px system-ui, sans-serif;
+  }
+  #stage { position: relative; width: 100%; height: 100%; }
+  #screen {
+    position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent; outline: none; cursor: default;
+  }
+  #screen:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  noscript { display: block; padding: 2rem; text-align: center; }
+</style>
+<div id="stage"><canvas id="screen" tabindex="0" aria-label="The Gang's All Here, a sitcom puzzle-platformer. Click or press a key to start."></canvas></div>
+<noscript>The Gang's All Here needs JavaScript to run.</noscript>

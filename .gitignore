@@ -1,0 +1,4 @@
+test/shots/
+test/verify/
+test/_*.html
+node_modules/
