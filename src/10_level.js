@@ -237,7 +237,13 @@ class LevelScene {
     if (next >= this.ep.rooms.length) { this.complete(); return; }
     AudioSys.sfx('door');
     this.lockInput = true;
-    this.trans = { t: 0, next, shot: this.ep.rooms[next].shot || null };
+    this.trans = { t: 0, next, shot: this.ep.rooms[next].shot || null, ad: this.adBreakBefore(next) };
+  }
+  // the network cuts to a commercial before the last act (once per episode)
+  adBreakBefore(next) {
+    if (this.hub || this.opts.noAds || this.adShown || Save.data.settings.ads === false) return null;
+    if (next !== this.ep.rooms.length - 1 || typeof ADS === 'undefined') return null;
+    return ADS[this.epIndex] || null;
   }
   complete() {
     if (this.completing) return;
@@ -408,8 +414,20 @@ class LevelScene {
     const tr = this.trans;
     tr.t++;
     if (tr.t === 18) {
+      if (tr.ad) {
+        this.loadRoom(tr.next);
+        const ad = tr.ad;
+        tr.ad = null; tr.afterAd = true; this.adShown = true;
+        Game.setScene(new AdBreakScene(ad, { done: () => Game.setScene(this) }));
+        return;
+      }
       if (tr.shot) Music.oneShot(pick(['bumper1', 'bumper2', 'bumper3', 'bumper4']), 0.9);
       this.loadRoom(tr.next);
+    }
+    if (tr.afterAd) {
+      tr.afterAd = false;
+      if (!this.opts.noMusic) Music.play(this.room.def.music || this.ep.music || 'funk');
+      if (tr.shot) Music.oneShot(pick(['bumper1', 'bumper2', 'bumper3', 'bumper4']), 0.9);
     }
     const dur = tr.shot ? 120 : 36;
     if (tr.t >= dur) { this.trans = null; this.lockInput = false; }

@@ -550,6 +550,17 @@ const SONGS = {
       { comp: 'pad2', inst: 'organ', vol: 0.2, center: 64 },
     ],
   },
+  adbed: { // a cheerful local-commercial bed, kept low under the pitch
+    bpm: 128, vol: 0.7,
+    chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'Dm7', 'G7'],
+    parts: [
+      { inst: 'glock', vol: 0.32, mel: ['E6 . G6 . C7 . G6 .', 'A6 . E6 . C6 . E6 .', 'F6 . A6 . C7 . A6 .', 'G6 . . . D6 . . .', 'E6 . G6 . C7 . E7 .', 'D7 . C7 . A6 . E6 .', 'F6 . A6 . D7 . C7 .', 'B6 . G6 . D6 . F6 .'] },
+      { comp: 'push', inst: 'ep', vol: 0.32, center: 60 },
+      { bass: 'boom', inst: 'bass', vol: 0.5, center: 40 },
+      { drums: 'clapper', vol: 0.38 },
+      { comp: 'stab', inst: 'brass', vol: 0.24, center: 64, mask: 'x.......' },
+    ],
+  },
 
   // ----- stings, bumpers, fanfares -----
   sting_title: {

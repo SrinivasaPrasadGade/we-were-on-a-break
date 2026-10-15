@@ -68,7 +68,7 @@ class Wanderer extends Ent {
   interactInfo() { return { ok: true, label: this.kind === 'robot' ? 'Pat the Tidy-Bot' : 'Say hi to Sarge', prio: 2 }; }
   use(f) {
     const L = this.room.level;
-    if (this.kind === 'robot') { L.say('robot', pick(['BEEP. YOUR SHOES ARE DUSTY. VACUUMING.', 'TIDY-BOT LOVES YOU. TIDY-BOT LOVES DUST MORE.', 'WARNING: COUCH CRUMB LEVELS CRITICAL.']), this); AudioSys.sfx('robot'); }
+    if (this.kind === 'robot') { L.say('robot', pick(TIDYBOT_LINES), this); AudioSys.sfx('robot'); }
     else { L.say('sarge', pick(SARGE_LINES), this); AudioSys.sfx('squeak'); }
   }
   draw(g, ox, oy) {
@@ -140,7 +140,7 @@ class HubScene {
       case 'couch': {
         f.x = clamp(f.x, 222, 320); f.sitting = true; f.vx = 0;
         f.say(pick(COUCH_LINES[f.who] || ['Ahh. The couch.']));
-        if (Math.random() < 0.5) setTimeout(() => { L.say('gus', pick(['That couch is for paying customers.', 'You know that couch has a dent shaped like you six?', 'I should charge rent for that couch.', 'One day I\'m putting a meter on that thing.']), this.gusEnt()); AudioSys.audience('chuckle', 0.5); }, 1600);
+        if (Math.random() < 0.5) setTimeout(() => { L.say('gus', pick(['That couch is for paying customers.', 'You know that couch has a dent shaped like you six?', 'I should charge rent for that couch.', 'One day I\'m putting a meter on that thing.', 'That couch has better health insurance than I do.']), this.gusEnt()); AudioSys.audience('chuckle', 0.5); }, 1600);
         break;
       }
       case 'jukebox': {

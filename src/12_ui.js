@@ -120,6 +120,7 @@ function settingsItems(onBack) {
     { label: 'Music volume', type: 'slider', get: () => S.music, change: d => { S.music = clamp(S.music + d, 0, 10); apply(); } },
     { label: 'Sound volume', type: 'slider', get: () => S.sfx, change: d => { S.sfx = clamp(S.sfx + d, 0, 10); apply(); AudioSys.sfx('cup'); } },
     { label: 'Laugh track', type: 'choice', value: () => (S.laugh ? 'ON' : 'OFF'), change: () => { S.laugh = !S.laugh; apply(); if (S.laugh) AudioSys.audience('chuckle', 0.6); } },
+    { label: 'Ad breaks', type: 'choice', value: () => (S.ads === false ? 'OFF' : 'ON'), change: () => { S.ads = S.ads === false; apply(); } },
     { label: 'Screen shake', type: 'choice', value: () => (S.shake ? 'ON' : 'OFF'), change: () => { S.shake = !S.shake; apply(); } },
     { label: 'Touch buttons', type: 'choice', value: () => S.touch.toUpperCase(), change: d => { const o = ['auto', 'on', 'off']; S.touch = o[(o.indexOf(S.touch) + (d || 1) + 3) % 3]; Input.touchUI = S.touch === 'on' || (S.touch === 'auto' && Input.lastDevice === 'touch'); apply(); } },
     { label: 'Players', type: 'choice', value: () => (S.players === 2 ? '2 (CO-OP)' : '1'), change: () => { S.players = S.players === 2 ? 1 : 2; Input.twoPlayer = S.players === 2; apply(); } },

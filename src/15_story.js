@@ -489,6 +489,9 @@ STORY[8] = {
     ['say', 'dex', 'Does he know which train is which?'],
     ['say', 'priya', '...He knows a guy.'],
     ['laugh', 'laugh'],
+    ['sfx', 'ding'],
+    ['say', 'announcer', 'Reminder: fares are going up to pay for a study on why nobody rides the subway.'],
+    ['laugh', 'chuckle'],
     ['sing', 'juno', 'Round and round the subway goes, where it stops, nobody knows!'],
     ['laugh', 'chuckle'],
     ['freeze'],
@@ -539,6 +542,11 @@ STORY[9] = {
     ['say', 'inventor', 'I know.', { expr: 'smug' }],
     ['laugh', 'laugh'],
     ['say', 'inventor', 'Behold the future: the Kessler-Matic 9000. It does EVERYTHING.'],
+    ['say', 'theo', 'Everything like what?'],
+    ['say', 'inventor', 'It disrupts.', { expr: 'smug' }],
+    ['say', 'theo', 'Disrupts WHAT?'],
+    ['say', 'inventor', 'We\'ll figure that out after the investors leave.', { expr: 'smug' }],
+    ['laugh', 'laugh'],
     ['sfx', 'robot'],
     ['say', 'robot', 'MESS DETECTED. HAIR: NOT REAL.'],
     ['walk', 'robot', 340, { wait: true }],
@@ -695,6 +703,10 @@ STORY[12] = {
     ['at', 'dex', 100, { face: 1 }], ['at', 'mila', 130, { face: 1 }], ['at', 'theo', 160, { face: 1 }], ['at', 'priya', 200, { face: 1 }], ['at', 'juno', 60, { face: 1 }], ['at', 'benny', 230, { face: 1 }],
     ['enter', 'vance', 'R', 300, { wait: true, expr: 'smug' }],
     ['say', 'vance', 'Miss Priya. I don\'t do favors.', { expr: 'smug' }],
+    ['say', 'vance', 'Besides, the Grind Lofts will honor this café\'s history. We\'re keeping the couch.', { expr: 'happy' }],
+    ['say', 'gus', 'You are?', { expr: 'surprised' }],
+    ['say', 'vance', 'In the lobby. Behind glass. With a plaque. "Authentic Couch Experience."', { expr: 'smug' }],
+    ['laugh', 'big'],
     ['say', 'priya', 'Then let\'s make a deal. If Friday\'s grand reopening brings in one hundred customers...', { anim: 'point' }],
     ['say', 'priya', '...you sell the Daily Grind back to Gus. Same price.'],
     ['say', 'vance', 'And if it doesn\'t?'],
@@ -755,8 +767,14 @@ STORY[12] = {
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------
-const SARGE_LINES = ['Sarge stares into your soul.', 'Sarge flicks his tongue. Respectfully.', 'Sarge has seen things.', 'Sarge salutes. Probably.', 'Sarge is plotting his next escape.'];
-const WINDOW_LINES = ['Still raining. This city has one weather.', 'Somebody\'s umbrella just flew past. Again.', 'Nice view. Of rain.', 'I can see my apartment from here. It\'s across the street.'];
+const SARGE_LINES = ['Sarge stares into your soul.', 'Sarge flicks his tongue. Respectfully.', 'Sarge has seen things.', 'Sarge salutes. Probably.', 'Sarge is plotting his next escape.',
+  'Sarge has more followers than Benny.', 'Sarge refuses to sign the new lease.'];
+const WINDOW_LINES = ['Still raining. This city has one weather.', 'Somebody\'s umbrella just flew past. Again.', 'Nice view. Of rain.', 'I can see my apartment from here. It\'s across the street.',
+  'New place across the street: a café inside a bank inside a gym. It\'s called "Bean Counted."',
+  'Billboard says "Vance Lofts: Live the Dream." The dream is four grand a month.',
+  'A guy out there sells umbrellas for twenty bucks. It wasn\'t raining until he showed up.'];
+const TIDYBOT_LINES = ['BEEP. YOUR SHOES ARE DUSTY. VACUUMING.', 'TIDY-BOT LOVES YOU. TIDY-BOT LOVES DUST MORE.', 'WARNING: COUCH CRUMB LEVELS CRITICAL.',
+  'TIDY-BOT HAS UPDATED ITS TERMS OF SERVICE. YOU AGREED BY STANDING THERE.', 'UPGRADE TO TIDY-BOT PREMIUM TO UNLOCK: CORNERS.', 'PLEASE RATE YOUR CLEANING EXPERIENCE. ONE TO FIVE BEEPS.'];
 const COUCH_LINES = {
   dex: ['Ahh. Back support.', 'This couch gets me. Emotionally.'],
   mila: ['Called this spot. Point for Mila.', 'Best seat. I won it fair and square.'],
@@ -780,7 +798,16 @@ const GUS_LINES = [
   ['...You came to the airport. For me. Don\'t make it weird.', 'I\'m still here. Somebody\'s iguana grounded a plane.', 'The new owner comes Friday. Unless... no. Forget it.'],
   ['Grand reopening. Packed every day since. I blame you six.', 'The couch is yours. Forever. Don\'t make me say it twice.', 'Best customers I ever had. Worst, too. Same six.'],
 ];
-function gusLines() { return GUS_LINES[progressStage()]; }
+// Gus on the state of the coffee business, any time
+const GUS_SATIRE = [
+  'Guy asked for a "deconstructed latte." I handed him a cow and some beans.',
+  'The place across the street sells "artisanal toast." It\'s toast. It\'s nine dollars.',
+  'They want me on a "loyalty app." Kid, I know your name. THAT\'S the loyalty app.',
+  'Wi-Fi password is "buyamuffin." One word. Lowercase. No exceptions.',
+  'That guy\'s been "working remotely" at the corner table since March. One water a day.',
+  'Holloway calls the rent hike "a community investment." The community is his boat.',
+];
+function gusLines() { const s = GUS_LINES[progressStage()]; return s.concat(pick(GUS_SATIRE), pick(GUS_SATIRE)); }
 
 // Banter: [stage][who] -> exchanges. 'me' = the friend you're playing, 'them' = who you talk to.
 const BANTER = {
@@ -845,13 +872,51 @@ const BANTER = {
     [['them', '♪ The gang\'s all here, the couch is near, Gus is staying, give a cheer! ♪']],
   ],
 };
+// Life outside the café, as the gang sees it. 'laugh' rows cue the studio audience.
+const SATIRE = {
+  dex: [
+    [['them', 'My gym got bought out. Now it\'s a "wellness journey."'], ['me', 'What changed?'], ['them', 'Same treadmills. Twice the price. And a smoothie bar that judges me.'], ['laugh', 'chuckle']],
+    [['them', 'The school board renamed gym class "Kinetic Learning Outcomes."'], ['them', 'We still play dodgeball. Now it\'s called "conflict resolution."'], ['laugh', 'laugh']],
+    [['them', 'I bought the extended warranty on my extended warranty.'], ['me', 'Why?!'], ['them', 'The salesman cried. Then I cried. It was a whole thing.'], ['laugh', 'laugh']],
+  ],
+  mila: [
+    [['them', 'My boss says couriers are "independent mobility partners" now.'], ['me', 'Is that a raise?'], ['them', 'It means I buy my own tires. And my own sense of partnership.'], ['laugh', 'chuckle']],
+    [['them', 'New courier app. It tracks my speed and says I\'m "underperforming."'], ['them', 'It\'s a phone. In a bag. On MY bike. It has never pedaled once.'], ['laugh', 'chuckle']],
+    [['them', 'I ran a charity 5K. Entry fee: eighty bucks.'], ['me', 'How much went to charity?'], ['them', 'The charity got a t-shirt. A small.'], ['laugh', 'laugh']],
+  ],
+  theo: [
+    [['them', 'My toaster needs a software update before it\'ll make toast.'], ['me', 'Did you update it?'], ['them', 'It wants my email, my birthday, and my mother\'s maiden name. For TOAST.'], ['laugh', 'laugh']],
+    [['them', 'I built a machine that tells you what\'s wrong with your life.'], ['me', 'What did it say?'], ['them', '"Subscription required." I didn\'t program that. It LEARNED it.'], ['laugh', 'chuckle']],
+    [['them', 'Does anybody else hear laughing? Like, after everything we say?'], ['me', 'That\'s just the neighbors.'], ['them', 'We live on the top floor.'], ['laugh', 'big']],
+  ],
+  priya: [
+    [['them', 'Real estate translation: "cozy" means small. "Charming" means old.'], ['them', '"Up-and-coming" means there\'s a raccoon. He has a lease.'], ['laugh', 'laugh']],
+    [['them', 'I listed a broom closet as a "boutique micro-residence."'], ['me', 'And?'], ['them', 'Eleven offers. Two bidding wars. One guy wants to rent the broom.'], ['laugh', 'laugh']],
+    [['them', 'A client asked if the apartment has "good energy."'], ['them', 'It has a radiator from 1931. That\'s ALL the energy.'], ['laugh', 'chuckle']],
+  ],
+  benny: [
+    [['them', 'My landlord says rent is going up "due to market conditions."'], ['me', 'What conditions?'], ['them', 'He bought a boat. The boat is the condition.'], ['laugh', 'laugh']],
+    [['them', 'I\'m a content creator now. Card tricks. Nine followers.'], ['me', 'That\'s a start!'], ['them', 'Two are Juno. One is Sarge. Six are my mom on different computers.'], ['laugh', 'chuckle']],
+    [['them', 'Behold! I made my student loans disappear!'], ['me', 'Really?!'], ['them', 'No. I just stopped opening the envelopes. Same effect. Until Tuesday.'], ['laugh', 'chuckle']],
+  ],
+  juno: [
+    [['them', 'A company wants my song for a commercial. For "great exposure."'], ['me', 'Do they pay?'], ['them', 'In exposure. I tried paying rent in exposure. The landlord just stared.'], ['laugh', 'chuckle']],
+    [['them', 'Every new song is "a bold reinvention of the sound you already love."'], ['them', 'That\'s just the old song. Louder.'], ['laugh', 'chuckle']],
+    [['them', '♪ Hey there, landlord, raise my rent, I\'ll pay you in applause ♪'], ['me', 'Did that work?'], ['them', 'He clapped. Then he raised the rent.'], ['laugh', 'laugh']],
+  ],
+};
+
 function pickBanter(me, them, idx) {
   const st = progressStage();
   const pool = (BANTER[them] && BANTER[them][st]) || [[['them', 'Hey.']]];
   const key = them + st;
   const i = (idx[key] = ((idx[key] || 0) + 1));
-  // each stage has one main exchange; alternate with a generic quip
-  if (i % 2 === 0) {
+  // rotate: this stage's story exchange, a bit of commentary on the world, a quick quip
+  if (i % 3 === 2 && SATIRE[them]) {
+    const k = (idx['sat:' + them] = ((idx['sat:' + them] || 0) + 1));
+    return SATIRE[them][(k - 1) % SATIRE[them].length];
+  }
+  if (i % 3 === 0) {
     const q = (QUIPS[them] && QUIPS[them].length) ? pick(QUIPS[them]) : '♪ La la la ♪';
     return [['them', q]];
   }
@@ -870,6 +935,7 @@ function miniCreditLines(i) {
   L.push({ text: '', h: 10 });
   for (const c of (st.credits || [])) { const [a, b] = c.split(': '); L.push({ text: a, col: '#c8b8d8' }); L.push({ text: b || '', col: '#ffffff', h: 18 }); }
   L.push({ text: 'Couch provided by GUS (reluctantly)', col: '#c8b8d8', h: 18 });
+  if (typeof ADS !== 'undefined' && ADS[i]) L.push({ text: 'Brought to you by ' + ADS[i].brand, col: '#c8b8d8', h: 18 });
   L.push({ text: 'Filmed in front of a live studio audience', col: '#8a7a9a' });
   L.push({ text: '(synthesized, but sincere)', col: '#8a7a9a' });
   return L;
@@ -889,6 +955,11 @@ function endCreditLines() {
   add('Gwendolyn the Wedding Planner (four yogas a day)', '#f6ead8'); add('Professor Fluffington (rabbit, union)', '#f6ead8'); add('Marge (tokens since 1998)', '#f6ead8');
   add('Tidy-Bot 2.0 (first prize, no longer in custody)', '#f6ead8'); add('Dr. Kessler (hair: returned)', '#f6ead8'); add('Fort Awesome (password: hot chocolate)', '#f6ead8');
   add('Mr. Vance (left with a muffin)', '#f6ead8', 1, 26);
+  add('OUR SPONSORS', '#ffd23f', 1, 18);
+  add('Move-It Movers - Madame Zara - Spritz-O Ultra', '#f6ead8'); add('Larkspur Power & Light - Diet Water - Sparkle Barn', '#f6ead8');
+  add('Nosy-Pro 2000 - Crunch-O-Tron - Fenwick & Fenwick', '#f6ead8'); add('Slice-A-Tron 3000 - Channel 6 News - SkyPenny', '#f6ead8');
+  add('and Vance Developments (under protest)', '#f6ead8');
+  add('Brad appears courtesy of trucks, diamonds and slicers.', '#c8b8d8'); add('No sponsors were harmed. Several were satirized.', '#c8b8d8', 1, 26);
   add('THE STUDIO AUDIENCE', '#ffd23f', 1, 18);
   add('Every laugh, ooh, aww and round of applause', '#f6ead8'); add('was synthesized live by your browser.', '#f6ead8'); add('We like to think they meant it.', '#f6ead8', 1, 26);
   add('NO IGUANAS WERE HARMED', '#ffd23f', 1, 16); add('(Sarge harmed several plants and one airplane schedule)', '#f6ead8', 1, 26);

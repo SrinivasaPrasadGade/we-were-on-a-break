@@ -662,4 +662,6 @@ const VOICES = {
   npc: { f: 200, var: 0.25, type: 'triangle', dur: 0.05, vol: 0.08 },
   sarge: { f: 900, var: 0.2, type: 'sine', dur: 0.04, vol: 0.06, slide: 1.3 },
   robot: { f: 600, var: 0.4, type: 'square', dur: 0.04, vol: 0.04, slide: 1 },
+  announcer: { f: 98, var: 0.06, type: 'sawtooth', dur: 0.06, vol: 0.065, ff: 620, slide: 0.97 },
+  pitch: { f: 170, var: 0.3, type: 'square', dur: 0.045, vol: 0.05, ff: 1100, slide: 1.04 },
 };

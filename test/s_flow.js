@@ -29,8 +29,21 @@ module.exports = async ({ page, shot, logs }) => {
     }, [ep, r]);
     console.log('room', r, res);
     await S(5); await shot(`flow_2${r}_room_exit`);
-    // wait for transition / next room
-    for (let i = 0; i < 40; i++) { const ok = await page.evaluate(r => { const s = window.__gang.Game.scene; return s.constructor.name !== 'LevelScene' || (s.roomIndex === r + 1 && !s.trans); }, r); if (ok) break; await S(10); }
+    // wait for transition / next room; sit through (part of) a commercial break if one comes
+    for (let i = 0; i < 80; i++) {
+      const name = await sceneName();
+      if (name === 'AdBreakScene') {
+        await S(60); await shot(`flow_2${r}_ad_card`);
+        await S(160); await shot(`flow_2${r}_ad`);
+        await page.evaluate(() => { const G = window.__gang; G.Input.pressedKeys.add('Escape'); G.Game.update(); });
+        for (let k = 0; k < 20 && (await sceneName()) === 'AdBreakScene'; k++) await S(10);
+        console.log('ad break shown before room', r + 1);
+        continue;
+      }
+      const ok = await page.evaluate(r => { const s = window.__gang.Game.scene; return s.constructor.name === 'LevelScene' && s.roomIndex === r + 1 && !s.trans; }, r);
+      if (ok || (r === nRooms - 1 && name !== 'LevelScene')) break;
+      await S(10);
+    }
     await S(30);
   }
   for (let k = 0; k < 6; k++) { await S(120); await shot(`flow_3${k}_` + await sceneName()); }

@@ -16,7 +16,7 @@ const Save = {
   defaults() {
     return {
       v: 1, done: {}, stars: {}, bestCups: {}, mugs: {}, outfits: {}, seenOpening: false, lastEp: 0, totalTakes: 0,
-      settings: { music: 7, sfx: 8, laugh: true, shake: !reducedMotion, touch: 'auto', follow: false, players: 1 },
+      settings: { music: 7, sfx: 8, laugh: true, ads: true, shake: !reducedMotion, touch: 'auto', follow: false, players: 1 },
     };
   },
   load(snapshot) {
