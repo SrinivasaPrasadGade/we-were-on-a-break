@@ -101,6 +101,10 @@ class Friend {
       this.physicsIdle(); return;
     }
     if (this.state === 'talkpose') { this.physicsIdle(); this.anim = 'talk'; return; }
+    if (this.state === 'hide') {
+      if (!this.hiding || dir !== 0 || Pr.jump || Pr.act || Pr.up) { this.unhide(); Pr.act = false; Pr.jump = false; Pr.up = false; }
+      else { this.physicsIdle(); this.anim = 'idle'; return; }
+    }
     if (L.lockInput) { dir = 0; }
 
     // ---- E: ability / interact ----
@@ -293,7 +297,11 @@ class Friend {
     const L = this.level;
     if (this.who === 'mila' && !this.onGround && !this.climbing && !this.djumpUsed && this.coyote <= 0) { this.doubleJump(); return; }
     const best = L.bestInteractable(this);
-    if (best && best.info.ok) { if (best.info.play) { this.startPlay(); return; } best.ent.use(this); return; }
+    if (best && best.info.ok) {
+      // Juno: low-priority things (doors to hide in, chats) never get in the way of a song somebody nearby wants to hear
+      if (best.info.play || (this.who === 'juno' && (best.info.prio || 0) <= 2 && this.musicWanted())) { this.startPlay(); return; }
+      best.ent.use(this); return;
+    }
     if (this.who === 'juno') { this.startPlay(); return; }
     if (this.who === 'mila') { const ct = this.climbTileAt(); if (ct) { this.startClimb(ct); return; } }
     if (best && !best.info.ok) {
@@ -304,6 +312,19 @@ class Friend {
       return;
     }
     this.quip();
+  }
+  musicWanted() {
+    const R = 7 * T;
+    for (const e of this.level.room.ents) {
+      if (!e.onSound) continue;
+      const d = Math.hypot(e.cx - this.cx, e.cy - (this.y + this.h / 2));
+      if (d > R + Math.max(e.w, e.h) / 2) continue;
+      if (e instanceof Watcher && e.danceT <= 0) return true;
+      if (e instanceof NPC && e.solve === 'music' && e.state === 'block') return true;
+      if (e instanceof Runner && e.p.lovesMusic && !e.caught && !e.moving) return true;
+      if ((e instanceof Sensor || e instanceof SoundDoor) && !e.heard && (!e.ready || e.ready())) return true;
+    }
+    return false;
   }
   startPlay() {
     this.state = 'play'; this.playT = 72;
@@ -324,6 +345,17 @@ class Friend {
     if (this.state === 'hold') this.state = 'normal';
   }
   startGrab(c) { this.grabbing = c; this.face = c.cx > this.cx ? 1 : -1; }
+  startHide(h) {
+    this.hiding = h; h.occupant = this; this.state = 'hide'; this.vx = 0;
+    this.x = h.cx - this.w / 2;
+    AudioSys.sfx('creak');
+    if (Math.random() < 0.5 && this.quipCool <= 0) { this.say(pick(HIDE_LINES[this.who] || ['Shh.'])); this.quipCool = 200; }
+  }
+  unhide() {
+    if (this.hiding) { this.hiding.occupant = null; this.hiding.peekT = 0; }
+    this.hiding = null; if (this.state === 'hide') this.state = 'normal';
+    AudioSys.sfx('creak');
+  }
   celebrate(n) { this.celebT = n; }
 
   quip() {
@@ -369,6 +401,7 @@ class Friend {
     const L = this.level;
     if (L.completing) return;
     this.release(); this.climbing = false; this.grabbing = null;
+    if (this.hiding) { this.hiding.occupant = null; this.hiding = null; }
     if (this.fixing) { this.fixing.fixer = null; this.fixing = null; }
     this.state = 'mishap'; this.mishapKind = kind; this.mishapT = kind === 'fall' ? 60 : 78;
     this.vx = 0; this.vy = (kind === 'fall') ? 0 : -2.5;
@@ -499,6 +532,7 @@ class Friend {
 
   draw(g, ox, oy) {
     if (!this.present) return;
+    if (this.state === 'hide' && this.hiding) return;
     const L = this.level;
     let anim = this.anim, expr = 'neutral';
     if (this.mishapT > 0) {
@@ -540,4 +574,12 @@ const MISHAP_LINES = {
   priya: { ow: ['These shoes cost more than this building!'], zap: ['My hair! My HAIR!'], splash: ['I am calling my guy!'], caught: ['Do you know who I know?'], fall: ['Not my best angle!'], bonk: ['Rude!'] },
   benny: { ow: ['That trap was NOT part of the act!'], zap: ['Ta-da...?'], splash: ['The amazing soggy magician!'], fall: ['I meant to do that!'], bonk: ['...Ta-da.'] },
   juno: { ow: ['♪ Owww-ow-ow! ♪'], zap: ['♪ Electric! ♪'], splash: ['♪ Splish splash, I\'m... wet. ♪'], caught: ['♪ Busted! ♪'], fall: ['♪ Down I go! ♪'], bonk: ['♪ Bonk! ♪'] },
+};
+const HIDE_LINES = {
+  dex: ['I\'m a door now. A very muscular door.', 'Nobody look at my elbows.'],
+  mila: ['Hiding: also a sport. I\'m winning.', 'Holloway: 0, Mila: 1.'],
+  theo: ['Nobody here but us coats.', 'I am one with the fern.'],
+  priya: ['I know a guy who hides in doorways. It\'s me.', 'Very chic. Very hidden.'],
+  benny: ['He can\'t see me anyway. I just like doors.', 'The Great Benny... vanishes!'],
+  juno: ['♪ Shh-shh-shh ♪', 'This is my quiet song.'],
 };

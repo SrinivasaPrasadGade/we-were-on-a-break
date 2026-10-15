@@ -498,6 +498,59 @@ const SONGS = {
     ],
   },
 
+  snoop: { // spy jazz for sneaking past landlords
+    bpm: 126, swing: 0.6,
+    chords: ['Cm7', 'Cm7', 'Fm7', 'Fm7', 'Cm7', 'Cm7', 'Ab7', 'G7', 'Cm7', 'Cm7', 'Fm7', 'Bb7', 'Ebmaj7', 'Ab7', 'Dm7b5 G7', 'Cm7'],
+    parts: [
+      { inst: 'gtr', vol: 0.62, mel: ['G4 . C5 . Eb5 . D5 C5', 'Bb4 . G4 . - - - -', 'Ab4 . C5 . F5 . Eb5 C5', 'Eb5 . . . - - - -', 'G5 . G5 F5 Eb5 . D5 .', 'C5 . Bb4 . G4 . - -', 'Ab4 . C5 . Eb5 . Gb5 .', 'F5 . . . D5 . B4 .',
+        'C5 . . Eb5 - G5 . .', 'F#5 G5 . . Eb5 . C5 .', 'Ab5 . F5 . C5 . Ab4 .', 'D5 . F5 . Ab5 . F5 .', 'G5 . . . Bb5 . G5 .', 'Gb5 . Eb5 . C5 . Ab4 .', 'F5 . D5 . B4 . G4 .', 'C5 . . . - - - -'] },
+      { inst: 'vib', vol: 0.3, oct: 1, from: 8, mel: [null, null, null, null, null, null, null, null, 'C5 . . Eb5 - G5 . .', 'F#5 G5 . . Eb5 . C5 .', 'Ab5 . F5 . C5 . Ab4 .', 'D5 . F5 . Ab5 . F5 .', 'G5 . . . Bb5 . G5 .', 'Gb5 . Eb5 . C5 . Ab4 .', 'F5 . D5 . B4 . G4 .', 'C5 . . . - - - -'] },
+      { comp: 'comp', inst: 'ep', vol: 0.42, center: 60, len: 1.2 },
+      { walk: true, inst: 'bass', vol: 0.62, center: 38 },
+      { drums: 'swing', vol: 0.55 },
+    ],
+  },
+
+  magic: { // vaudeville bounce for the Great Bennini
+    bpm: 150,
+    chords: ['F', 'C7', 'C7', 'F', 'F', 'Bb', 'C7', 'F', 'F7', 'Bb', 'Bbm', 'F', 'D7', 'G7', 'C7', 'F'],
+    parts: [
+      { inst: 'organ', vol: 0.5, mel: ['C5 . A4 . C5 . F5 .', 'E5 . D5 . C5 . Bb4 .', 'G4 . Bb4 . E5 . G5 .', 'F5 . . . - - C5 C#5', 'D5 . C5 . A4 . F4 .', 'Bb4 . D5 . F5 . Bb5 .', 'A5 . G5 . E5 . C5 .', 'F5 . . . - - - -',
+        'Eb5 . . . C5 . A4 .', 'D5 . F5 . Bb5 . . .', 'Db5 . F5 . Bb5 . Ab5 .', 'A5 . F5 . C5 . A4 .', 'F#5 . A5 . C6 . A5 .', 'B5 . G5 . D5 . F5 .', 'E5 . G5 . Bb5 . E5 .', 'F5 . . . F4 . - -'] },
+      { inst: 'glock', vol: 0.35, oct: 1, mask: '....xxxx....xxxx', mel: ['C5 . A4 . C5 . F5 .', 'E5 . D5 . C5 . Bb4 .', 'G4 . Bb4 . E5 . G5 .', 'F5 . . . - - C5 C#5', 'D5 . C5 . A4 . F4 .', 'Bb4 . D5 . F5 . Bb5 .', 'A5 . G5 . E5 . C5 .', 'F5 . . . - - - -',
+        'Eb5 . . . C5 . A4 .', 'D5 . F5 . Bb5 . . .', 'Db5 . F5 . Bb5 . Ab5 .', 'A5 . F5 . C5 . A4 .', 'F#5 . A5 . C6 . A5 .', 'B5 . G5 . D5 . F5 .', 'E5 . G5 . Bb5 . E5 .', 'F5 . . . F4 . - -'] },
+      { comp: 'offbeat', inst: 'organ', vol: 0.32, center: 60 },
+      { bass: 'boom', inst: 'bass', vol: 0.75, center: 38 },
+      { drums: 'ska', vol: 0.5 },
+    ],
+  },
+
+  subway: { // breakbeat funk under the city
+    bpm: 112, swing16: 0.3,
+    chords: ['Dm9', 'Dm9', 'G9', 'G9', 'Dm9', 'Dm9', 'Bbmaj7', 'A7', 'Dm9', 'Dm9', 'G9', 'G9', 'Bbmaj7', 'C9', 'A7', 'A7'],
+    parts: [
+      { inst: 'keytar', vol: 0.48, mel: ['D5 . F5 . A5 . G5 F5', 'E5 . D5 . - - A4 C5', 'D5 . E5 . F5 . A5 .', 'G5 . . . - - - -', 'A5 . C6 . A5 . G5 F5', 'E5 F5 E5 D5 . . - -', 'D5 . F5 . A5 . C6 .', 'C#6 . . . A5 . - -',
+        'F5 . . . E5 . D5 .', 'C5 . D5 . - - - -', 'B4 . D5 . F5 . A5 .', 'G5 . F5 . E5 . D5 .', 'D5 . F5 . A5 . D6 .', 'E6 . D6 . C6 . Bb5 .', 'A5 . . . C#6 . E6 .', 'D6 . . . - - - -'] },
+      { comp: 'push', inst: 'clav', vol: 0.5, center: 60 },
+      { bass: 'funk', inst: 'slap', vol: 0.75 },
+      { drums: 'funk', vol: 0.65, fill: 8 },
+      { comp: 'stab', inst: 'brass', vol: 0.38, center: 64, mask: '...x...x' },
+    ],
+  },
+
+  expo: { // shiny synth-pop for the invention expo
+    bpm: 124,
+    chords: ['A', 'E', 'F#m', 'D', 'A', 'E', 'D', 'E', 'F#m', 'D', 'A', 'E', 'F#m', 'D', 'Bm7', 'E'],
+    parts: [
+      { inst: 'square', vol: 0.4, mel: ['E5 . A5 . C#6 . B5 .', 'G#5 . . . E5 . . .', 'F#5 . A5 . C#6 . E6 .', 'D6 . . . A5 . . .', 'C#6 . B5 . A5 . E5 .', 'B5 . G#5 . E5 . B4 .', 'D5 . F#5 . A5 . D6 .', 'E6 . . . - - - -',
+        'C#6 . . . A5 . F#5 .', 'D6 . . . F#5 . A5 .', 'E6 . C#6 . A5 . E5 .', 'G#5 . B5 . E6 . . .', 'F#6 . E6 . C#6 . A5 .', 'D6 . C#6 . A5 . F#5 .', 'D6 . . . F#5 . B5 .', 'G#5 . . . B5 . E6 .'] },
+      { comp: 'arp16', inst: 'saw', vol: 0.18, center: 60 },
+      { bass: 'disco', inst: 'bass', vol: 0.62, center: 40 },
+      { drums: 'disco', vol: 0.55, fill: 8 },
+      { comp: 'pad2', inst: 'organ', vol: 0.2, center: 64 },
+    ],
+  },
+
   // ----- stings, bumpers, fanfares -----
   sting_title: {
     bpm: 136, loop: false, vol: 1,

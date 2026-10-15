@@ -29,7 +29,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -156,6 +156,13 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'terrarium': // Sarge's glass house on a little wheeled stand
+      R(0, h - 3, w, 3, '#5a3a22'); R(2, h - 1, 2, 1, '#2a2a2a'); R(w - 4, h - 1, 2, 1, '#2a2a2a');
+      g.fillStyle = 'rgba(180,230,220,0.5)'; g.fillRect(x + 1, y + 1, w - 2, h - 4);
+      R(1, 1, w - 2, 1, '#e8fff8'); R(1, 1, 1, h - 4, '#c8e8e0'); R(w - 2, 1, 1, h - 4, '#c8e8e0');
+      R(3, h - 6, w - 6, 2, '#8a6a3a'); R(5, h - 9, 3, 3, '#3a8a3a');
+      if (!(t % 200 < 100)) { R(w - 12, h - 8, 8, 3, '#6ac84a'); R(w - 5, h - 9, 2, 2, '#6ac84a'); }
       break;
     case 'cakecart': // five-tier wedding cake on a rolling cart
       R(0, h - 6, w, 3, '#9aa0a8'); R(2, h - 3, 3, 3, '#3a3a40'); R(w - 5, h - 3, 3, 3, '#3a3a40');
@@ -367,11 +374,17 @@ class Shutter extends Ent {
 
 // ---- Lever (anyone) ------------------------------------------------------------------
 class Lever extends Ent {
-  constructor(room, tx, ty, p) { super(room, tx, ty, p, 1, 1); this.on = !!p.on; this.kind = p.kind || 'lever'; if (this.on) this.setFlagLater = true; }
+  constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, 1); this.on = !!p.on; this.kind = p.kind || 'lever'; if (this.on) this.setFlagLater = true; }
   update() { super.update(); if (this.setFlagLater) { this.setFlag(true); this.setFlagLater = false; } }
-  interactInfo() { return (this.on && !this.p.toggle) ? null : { ok: true, label: this.kind === 'button' ? 'Press' : 'Pull', prio: 3 }; }
+  ready() { return !this.p.cond || this.level.check(this.p.cond); }
+  interactInfo() {
+    if (this.on && !this.p.toggle) return null;
+    if (!this.ready()) return this.p.notReady ? { ok: false, need: this.p.notReadyNeed || null, label: this.p.notReady, prio: 1 } : null;
+    return { ok: true, label: this.p.label || (this.kind === 'button' ? 'Press' : 'Pull'), prio: 3 };
+  }
   use(f) {
     if (this.on && !this.p.toggle) return;
+    if (!this.ready()) return;
     this.on = this.p.toggle ? !this.on : true;
     this.setFlag(this.on);
     AudioSys.sfx('lever');
@@ -381,6 +394,14 @@ class Lever extends Ent {
   draw(g, ox, oy) {
     const x = Math.round(this.x - ox), y = Math.round(this.y - oy);
     const R = (a, b, w, h, c) => { g.fillStyle = c; g.fillRect(x + a, y + b, w, h); };
+    if (this.kind === 'book') { // the rulebook on Holloway's desk (appears once the safe is open)
+      R(0, 9, this.w, 7, '#6a4428'); R(1, 10, this.w - 2, 1, '#8a6040');
+      if (!this.ready()) return;
+      R(this.w / 2 - 6, 4, 12, 5, this.on ? '#f4efe6' : '#7a1f2b'); R(this.w / 2 - 6, 4, 12, 1, '#c8a040');
+      if (this.on) { R(this.w / 2, 4, 1, 5, '#9a8a7a'); R(this.w / 2 + 2, 6, 3, 1, '#3a3a6a'); }
+      if (!this.on && this.ready() && this.level.showHints) drawText('!', x + this.w / 2, y - 6, '#ffd23f', { g, align: 'center', outline: '#1b1020' });
+      return;
+    }
     if (this.kind === 'button') {
       R(3, 4, 10, 10, '#4a4e56'); R(4, 5, 8, 8, '#2a2e36'); circleFill(x + 8, y + 9, 3, this.on ? '#7cf29a' : '#e8504a', g);
     } else if (this.kind === 'valve') {
@@ -494,6 +515,10 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
       for (let i = 0; i < 6; i++) { const ph = 10 + (i % 3) * 4 + (i === 2 || i === 3 ? 6 : 0); R(3 + i * 4, 0 + (22 - ph), 3, ph, fixed ? '#e8c860' : '#a8945a'); R(3 + i * 4, 22 - ph, 3, 1, '#fff2c0'); }
       R(0, 18, w, h - 18, '#5a3020'); R(2, 20, w - 4, 3, '#f4efe6'); for (let i = 3; i < w - 3; i += 3) R(i, 20, 1, 2, '#2a1a10');
       if (!fixed) { R(w - 8, 12, 4, 1, '#3a3a3a'); R(w - 6, 13, 1, 4, '#3a3a3a'); }
+      break;
+    case 'safe':
+      R(1, 2, w - 2, h - 2, '#4a4e56'); R(2, 3, w - 4, h - 4, '#5a606a'); circleFill(x + w / 2, y + h / 2 + 1, 4, fixed ? '#7cf29a' : '#2a2e36', g);
+      R(w / 2 - 1, h / 2 - 3, 2, 3, '#c8c8c8'); if (fixed) { R(w - 3, 3, 2, h - 4, '#2a2e36'); }
       break;
     case 'junction':
       R(2, 1, 12, 14, '#5a606a'); R(3, 2, 10, 12, '#3a3e46'); R(5, 4, 6, 2, fixed ? '#7cf29a' : (blink ? '#ffd23f' : '#5a4a1a'));
@@ -715,7 +740,7 @@ class Watcher extends Ent {
     const vis = this.face > 0 ? { x: eyeX, y: this.y - 6, w: reach, h: this.h + 6 } : { x: eyeX - reach, y: this.y - 6, w: reach, h: this.h + 6 };
     this.vis = vis;
     for (const f of this.level.friends) {
-      if (!f.present || f.gone || f.mishapT > 0 || f.who === 'benny') continue;
+      if (!f.present || f.gone || f.mishapT > 0 || f.who === 'benny' || (f.state === 'hide' && f.hiding)) continue;
       if (overlap(vis, f)) {
         this.alertT = 50;
         this.level.say(this.p.voice || 'holloway', pick(this.lines), this);
@@ -744,6 +769,52 @@ class Watcher extends Ent {
     if (this.alertT > 0) drawText('!', Math.round(this.cx - ox), Math.round(this.y - oy) - 14, '#ff4a3a', { scale: 2, align: 'center', outline: '#1b1020' });
     if (this.danceT > 0) drawText('♪', Math.round(this.cx - ox) + 8, Math.round(this.y - oy) - 10 - (this.t >> 3) % 3, '#4cc9f0', { outline: '#1b1020' });
     if (this.level.showHints && this.danceT <= 0) drawNeedBadge(g, 'juno', Math.round(this.cx - ox) - 2, Math.round(this.y - oy) - 10, this.t);
+  }
+}
+
+// ---- Hideout (anyone: duck into a doorway / behind a fern; watchers can't see you) ----
+class Hideout extends Ent {
+  constructor(room, tx, ty, p) {
+    const k = p.kind || 'door';
+    super(room, tx, ty, p, p.w || (k === 'door' ? 2 : 1), p.h || (k === 'door' ? 3 : 2));
+    this.kind = k; this.occupant = null; this.peekT = 0;
+  }
+  interactInfo(f) {
+    if (this.occupant && this.occupant !== f) return null;
+    return { ok: true, label: f.hiding === this ? 'Come out' : 'Hide', prio: 2 };
+  }
+  use(f) { if (f.hiding === this) f.unhide(); else if (!this.occupant) f.startHide(this); }
+  useBox() { return { x: this.x - 2, y: this.y, w: this.w + 4, h: this.h }; }
+  update() { super.update(); if (this.occupant && this.occupant.hiding !== this) this.occupant = null; if (this.occupant) this.peekT++; }
+  draw(g, ox, oy) {
+    const x = Math.round(this.x - ox), y = Math.round(this.y - oy), w = this.w, h = this.h;
+    const R = (a, b, ww, hh, c) => { g.fillStyle = c; g.fillRect(x + a, y + b, ww, hh); };
+    const occ = this.occupant;
+    const eyes = (ex, ey) => {
+      if (!occ || ((this.peekT >> 4) % 9) === 0) return;
+      const look = Math.sin(this.peekT / 25) > 0 ? 1 : 0;
+      g.fillStyle = '#ffffff'; g.fillRect(x + ex + look, y + ey, 2, 2); g.fillRect(x + ex + 4 + look, y + ey, 2, 2);
+      g.fillStyle = '#1b1020'; g.fillRect(x + ex + look + 1, y + ey + 1, 1, 1); g.fillRect(x + ex + 5 + look, y + ey + 1, 1, 1);
+    };
+    if (this.kind === 'plant') {
+      R(3, h - 9, w - 6, 9, '#8a4a2a'); R(2, h - 10, w - 4, 2, '#a85a3a');
+      for (let i = 0; i < 9; i++) { const a = -1.2 + i * 0.3; g.fillStyle = i % 2 ? '#3a8a3a' : '#2e7a34'; g.fillRect(Math.round(x + w / 2 + Math.cos(a - 1.57) * 7) - 2, Math.round(y + h - 12 - Math.abs(Math.sin(a)) * 14 - (8 - Math.abs(i - 4) * 2)), 5, 9); }
+      eyes(w / 2 - 4, h - 22);
+    } else if (this.kind === 'coatrack') {
+      R(w / 2 - 1, 2, 2, h - 4, '#5a3a22'); R(w / 2 - 5, h - 2, 10, 2, '#5a3a22');
+      R(0, 6, w, 12, '#6a5a8a'); R(1, 8, w - 2, 10, '#7a6a9a'); R(2, 18, w - 4, 6, '#4a5a7a');
+      eyes(w / 2 - 4, 12);
+    } else {
+      // apartment door: closed, or ajar with a pair of eyes in the gap
+      R(-2, -2, w + 4, 2, '#3a2418'); R(-2, -2, 2, h + 2, '#3a2418'); R(w, -2, 2, h + 2, '#3a2418');
+      if (occ) { R(0, 0, w, h, '#120c10'); R(w - 9, 0, 9, h, '#7a4a30'); R(w - 8, 2, 7, h / 2 - 3, '#8a5a3a'); eyes(w - 18, Math.round(h * 0.22)); }
+      else { R(0, 0, w, h, '#7a4a30'); R(2, 3, w - 4, h / 2 - 4, '#8a5a3a'); R(2, h / 2 + 1, w - 4, h / 2 - 4, '#8a5a3a'); R(w - 6, h / 2, 2, 3, '#e0c060'); }
+      if (this.p.label) { R(w / 2 - 6, 4, 12, 6, '#e8d8a8'); drawText(this.p.label, x + w / 2, y + 3, '#3a2418', { g, align: 'center' }); }
+    }
+    if (!occ && this.level.showHints && this.level.room.ents.some(e => e instanceof Watcher)) {
+      const f = this.level.active();
+      if (f && Math.abs(f.cx - this.cx) < 40 && Math.abs(f.y + f.h - (this.y + this.h)) < 8 && f.who !== 'benny') drawText('HIDE', x + w / 2, y - 9, '#ffd23f', { g, align: 'center', outline: '#1b1020' });
+    }
   }
 }
 
@@ -1238,6 +1309,12 @@ class Deco extends Ent {
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
         break;
       }
+      case 'hole': { // a suspicious iguana-sized hole in the wall
+        R(2, 4, this.w - 4, this.h - 6, '#2a1a14'); R(4, 2, this.w - 8, 2, '#2a1a14'); R(0, 8, 2, this.h - 12, '#2a1a14');
+        R(4, this.h - 3, 3, 2, '#d8c8a8'); R(this.w - 6, this.h - 4, 2, 2, '#d8c8a8');
+        if ((t % 300) > 220) { R(this.w / 2 - 3, this.h / 2, 6, 4, '#6ac84a'); R(this.w / 2 - 2, this.h / 2 + 1, 1, 1, '#1b1020'); }
+        break;
+      }
       case 'chandelier': { // sits on a '=' platform row; chain to the ceiling
         const w = this.w;
         R(Math.floor(w / 2) - 1, -this.p.chain || -40, 2, this.p.chain || 40, '#8a7a4a');
@@ -1255,7 +1332,7 @@ class Deco extends Ent {
 // map type name -> class
 const ENT_TYPES = {
   crate: Crate, door: Door, sounddoor: SoundDoor, shutter: Shutter, lever: Lever, broken: Broken, plate: Plate,
-  npc: NPC, watcher: Watcher, grate: Grate, platform: Platform, blocks: Blocks, cup: Cup, mug: Mug,
+  npc: NPC, watcher: Watcher, grate: Grate, hideout: Hideout, platform: Platform, blocks: Blocks, cup: Cup, mug: Mug,
   checkpoint: Checkpoint, exit: Exit, runner: Runner, hazard: Hazard, spring: Spring, light: Light,
   sensor: Sensor, talker: Talker, sign: Sign, trigger: Trigger, deco: Deco,
 };

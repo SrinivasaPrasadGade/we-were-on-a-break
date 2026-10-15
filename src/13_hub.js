@@ -30,7 +30,7 @@ const HUB_SPOTS = [
   { kind: 'wardrobe', x: 790, w: 40, label: 'Lost & Found: outfits' },
   { kind: 'jukebox', x: 862, w: 30, label: 'Jukebox', decor: 'jukebox' },
 ];
-const JUKEBOX_SONGS = [['hub', 'Rainy Day Refill'], ['title', 'The Gang\'s All Here (Theme)'], ['funk', 'Moving Day Funk'], ['sneaky', 'Lizard on the Loose'], ['panic', 'Kitchen Panic'], ['lightsout', 'Lights Out'], ['sunny', 'Sunny Side Up'], ['wedding', 'Wedding Swing'], ['rush', 'Rush Hour'], ['snow', 'First Snow'], ['finale', 'Grand Reopening']];
+const JUKEBOX_SONGS = [['hub', 'Rainy Day Refill'], ['title', 'The Gang\'s All Here (Theme)'], ['funk', 'Moving Day Funk'], ['sneaky', 'Lizard on the Loose'], ['panic', 'Kitchen Panic'], ['lightsout', 'Lights Out'], ['sunny', 'Sunny Side Up'], ['wedding', 'Wedding Swing'], ['snoop', 'Rule Nine Shuffle'], ['magic', 'The Great Bennini'], ['subway', 'Uptown Local'], ['expo', 'Tidy-Bot Boogie'], ['snow', 'First Snow'], ['rush', 'Rush Hour'], ['finale', 'Grand Reopening']];
 
 class HubSpot extends Ent {
   constructor(room, s) {

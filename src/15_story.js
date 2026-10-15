@@ -354,6 +354,59 @@ STORY[5] = {
   credits: ['Wedding Band: JUNO & THE COUCH (one night only)', 'Triangle: THEO (classically trained since Tuesday)', 'Ring Bearer: SARGE (briefly)', 'Bouquet Catch: DEX (pollen-related)'],
 };
 
+// S2E1 (episode 7) ----------------------------------------------------------------
+STORY[6] = {
+  previously: [
+    ['set', 'ballroom'],
+    ['at', 'gus', 100, { face: 1, expr: 'sad' }], ['at', 'priya', 194, { face: -1 }], ['at', 'dex', 230, { face: -1, expr: 'cry' }],
+    ['say', 'gus', 'Big changes, huh? ...Real big changes.', { expr: 'sad' }],
+    ['say', 'priya', 'Was it just me, or was Gus being weird?'],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'apt3a'],
+    ['at', 'dex', 90, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 120, { anim: 'sit', y: SIT_Y }], ['at', 'benny', 150, { anim: 'sit', y: SIT_Y }],
+    ['at', 'priya', 196, { face: 1 }], ['at', 'theo', 268, { face: -1, expr: 'happy' }], ['at', 'juno', 350, { face: -1 }],
+    ['prop', 'sarge', 'iguana', 318, 176],
+    ['say', 'theo', 'Sarge has never been happier. Look at him. Living his best life.', { expr: 'happy' }],
+    ['sfx', 'door'], ['prop', 'note', 'letter', 20, 214], ['moveprop', 'note', 64, 214, 2],
+    ['wait', 30],
+    ['say', 'dex', 'A note. "SURPRISE INSPECTION. TODAY. Rule 9 still applies. Love, B. Holloway."'],
+    ['say', 'dex', '"Love" is crossed out. Then it says "Sincerely."'],
+    ['laugh', 'chuckle'],
+    ['say', 'theo', 'Rule 9. No reptiles. If he finds Sarge, I\'m EVICTED!', { expr: 'scared' }],
+    ['say', 'benny', 'I could make Sarge disappear.', { expr: 'grin' }],
+    ['say', 'theo', 'PERMANENTLY?!', { expr: 'shock' }],
+    ['say', 'benny', '...I haven\'t worked out the "reappear" part yet.'],
+    ['laugh', 'big'],
+    ['say', 'priya', 'Relax. He just got married. Married men are SOFT.', { expr: 'smug' }],
+    ['sfx', 'door'], ['shake', 4],
+    ['say', 'holloway', 'INSPECTION! Married life has NOT softened me!'],
+    ['expr', 'all', 'scared'],
+    ['say', 'dex', 'EVERYBODY HIDE!', { expr: 'shock', anim: 'point' }],
+    ['vanish', 'benny'],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'hall'],
+    ['at', 'theo', 120, { face: 1 }], ['at', 'dex', 160, { face: 1 }], ['at', 'mila', 196, { face: 1 }], ['at', 'priya', 90, { face: 1 }], ['at', 'benny', 228, { face: 1 }], ['at', 'juno', 60, { face: 1 }],
+    ['at', 'holloway', 300, { face: -1, anim: 'phone' }], ['at', 'roz', 344, { face: -1, expr: 'smug' }],
+    ['say', 'holloway', 'Rule 9½: "Iguanas named Sarge are permitted." Signed... B. Holloway.', { anim: 'phone' }],
+    ['say', 'holloway', 'I don\'t remember writing this.', { expr: 'surprised', anim: 'idle' }],
+    ['say', 'roz', 'You wrote it on our honeymoon, darling. You were VERY relaxed.', { expr: 'smug' }],
+    ['wait', 30],
+    ['say', 'holloway', '...That does sound like me.', { expr: 'happy' }],
+    ['laugh', 'big'],
+    ['prop', 'sargehead', 'iguanaL', 300, 194],
+    ['wait', 40],
+    ['say', 'holloway', 'Hello, Sarge.', { expr: 'neutral' }],
+    ['laugh', 'aww'],
+    ['freeze'],
+  ],
+  credits: ['Door Hiding: EVERYONE (badly)', 'Rule 9½: B. HOLLOWAY (allegedly)', 'Evidence Removal: THEO, DEX & MILA', 'The Fern: ITSELF'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------

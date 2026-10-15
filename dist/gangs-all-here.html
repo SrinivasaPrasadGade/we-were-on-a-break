@@ -1905,6 +1905,59 @@ const SONGS = {
     ],
   },
 
+  snoop: { // spy jazz for sneaking past landlords
+    bpm: 126, swing: 0.6,
+    chords: ['Cm7', 'Cm7', 'Fm7', 'Fm7', 'Cm7', 'Cm7', 'Ab7', 'G7', 'Cm7', 'Cm7', 'Fm7', 'Bb7', 'Ebmaj7', 'Ab7', 'Dm7b5 G7', 'Cm7'],
+    parts: [
+      { inst: 'gtr', vol: 0.62, mel: ['G4 . C5 . Eb5 . D5 C5', 'Bb4 . G4 . - - - -', 'Ab4 . C5 . F5 . Eb5 C5', 'Eb5 . . . - - - -', 'G5 . G5 F5 Eb5 . D5 .', 'C5 . Bb4 . G4 . - -', 'Ab4 . C5 . Eb5 . Gb5 .', 'F5 . . . D5 . B4 .',
+        'C5 . . Eb5 - G5 . .', 'F#5 G5 . . Eb5 . C5 .', 'Ab5 . F5 . C5 . Ab4 .', 'D5 . F5 . Ab5 . F5 .', 'G5 . . . Bb5 . G5 .', 'Gb5 . Eb5 . C5 . Ab4 .', 'F5 . D5 . B4 . G4 .', 'C5 . . . - - - -'] },
+      { inst: 'vib', vol: 0.3, oct: 1, from: 8, mel: [null, null, null, null, null, null, null, null, 'C5 . . Eb5 - G5 . .', 'F#5 G5 . . Eb5 . C5 .', 'Ab5 . F5 . C5 . Ab4 .', 'D5 . F5 . Ab5 . F5 .', 'G5 . . . Bb5 . G5 .', 'Gb5 . Eb5 . C5 . Ab4 .', 'F5 . D5 . B4 . G4 .', 'C5 . . . - - - -'] },
+      { comp: 'comp', inst: 'ep', vol: 0.42, center: 60, len: 1.2 },
+      { walk: true, inst: 'bass', vol: 0.62, center: 38 },
+      { drums: 'swing', vol: 0.55 },
+    ],
+  },
+
+  magic: { // vaudeville bounce for the Great Bennini
+    bpm: 150,
+    chords: ['F', 'C7', 'C7', 'F', 'F', 'Bb', 'C7', 'F', 'F7', 'Bb', 'Bbm', 'F', 'D7', 'G7', 'C7', 'F'],
+    parts: [
+      { inst: 'organ', vol: 0.5, mel: ['C5 . A4 . C5 . F5 .', 'E5 . D5 . C5 . Bb4 .', 'G4 . Bb4 . E5 . G5 .', 'F5 . . . - - C5 C#5', 'D5 . C5 . A4 . F4 .', 'Bb4 . D5 . F5 . Bb5 .', 'A5 . G5 . E5 . C5 .', 'F5 . . . - - - -',
+        'Eb5 . . . C5 . A4 .', 'D5 . F5 . Bb5 . . .', 'Db5 . F5 . Bb5 . Ab5 .', 'A5 . F5 . C5 . A4 .', 'F#5 . A5 . C6 . A5 .', 'B5 . G5 . D5 . F5 .', 'E5 . G5 . Bb5 . E5 .', 'F5 . . . F4 . - -'] },
+      { inst: 'glock', vol: 0.35, oct: 1, mask: '....xxxx....xxxx', mel: ['C5 . A4 . C5 . F5 .', 'E5 . D5 . C5 . Bb4 .', 'G4 . Bb4 . E5 . G5 .', 'F5 . . . - - C5 C#5', 'D5 . C5 . A4 . F4 .', 'Bb4 . D5 . F5 . Bb5 .', 'A5 . G5 . E5 . C5 .', 'F5 . . . - - - -',
+        'Eb5 . . . C5 . A4 .', 'D5 . F5 . Bb5 . . .', 'Db5 . F5 . Bb5 . Ab5 .', 'A5 . F5 . C5 . A4 .', 'F#5 . A5 . C6 . A5 .', 'B5 . G5 . D5 . F5 .', 'E5 . G5 . Bb5 . E5 .', 'F5 . . . F4 . - -'] },
+      { comp: 'offbeat', inst: 'organ', vol: 0.32, center: 60 },
+      { bass: 'boom', inst: 'bass', vol: 0.75, center: 38 },
+      { drums: 'ska', vol: 0.5 },
+    ],
+  },
+
+  subway: { // breakbeat funk under the city
+    bpm: 112, swing16: 0.3,
+    chords: ['Dm9', 'Dm9', 'G9', 'G9', 'Dm9', 'Dm9', 'Bbmaj7', 'A7', 'Dm9', 'Dm9', 'G9', 'G9', 'Bbmaj7', 'C9', 'A7', 'A7'],
+    parts: [
+      { inst: 'keytar', vol: 0.48, mel: ['D5 . F5 . A5 . G5 F5', 'E5 . D5 . - - A4 C5', 'D5 . E5 . F5 . A5 .', 'G5 . . . - - - -', 'A5 . C6 . A5 . G5 F5', 'E5 F5 E5 D5 . . - -', 'D5 . F5 . A5 . C6 .', 'C#6 . . . A5 . - -',
+        'F5 . . . E5 . D5 .', 'C5 . D5 . - - - -', 'B4 . D5 . F5 . A5 .', 'G5 . F5 . E5 . D5 .', 'D5 . F5 . A5 . D6 .', 'E6 . D6 . C6 . Bb5 .', 'A5 . . . C#6 . E6 .', 'D6 . . . - - - -'] },
+      { comp: 'push', inst: 'clav', vol: 0.5, center: 60 },
+      { bass: 'funk', inst: 'slap', vol: 0.75 },
+      { drums: 'funk', vol: 0.65, fill: 8 },
+      { comp: 'stab', inst: 'brass', vol: 0.38, center: 64, mask: '...x...x' },
+    ],
+  },
+
+  expo: { // shiny synth-pop for the invention expo
+    bpm: 124,
+    chords: ['A', 'E', 'F#m', 'D', 'A', 'E', 'D', 'E', 'F#m', 'D', 'A', 'E', 'F#m', 'D', 'Bm7', 'E'],
+    parts: [
+      { inst: 'square', vol: 0.4, mel: ['E5 . A5 . C#6 . B5 .', 'G#5 . . . E5 . . .', 'F#5 . A5 . C#6 . E6 .', 'D6 . . . A5 . . .', 'C#6 . B5 . A5 . E5 .', 'B5 . G#5 . E5 . B4 .', 'D5 . F#5 . A5 . D6 .', 'E6 . . . - - - -',
+        'C#6 . . . A5 . F#5 .', 'D6 . . . F#5 . A5 .', 'E6 . C#6 . A5 . E5 .', 'G#5 . B5 . E6 . . .', 'F#6 . E6 . C#6 . A5 .', 'D6 . C#6 . A5 . F#5 .', 'D6 . . . F#5 . B5 .', 'G#5 . . . B5 . E6 .'] },
+      { comp: 'arp16', inst: 'saw', vol: 0.18, center: 60 },
+      { bass: 'disco', inst: 'bass', vol: 0.62, center: 40 },
+      { drums: 'disco', vol: 0.55, fill: 8 },
+      { comp: 'pad2', inst: 'organ', vol: 0.2, center: 64 },
+    ],
+  },
+
   // ----- stings, bumpers, fanfares -----
   sting_title: {
     bpm: 136, loop: false, vol: 1,
@@ -3673,7 +3726,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -3800,6 +3853,13 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'terrarium': // Sarge's glass house on a little wheeled stand
+      R(0, h - 3, w, 3, '#5a3a22'); R(2, h - 1, 2, 1, '#2a2a2a'); R(w - 4, h - 1, 2, 1, '#2a2a2a');
+      g.fillStyle = 'rgba(180,230,220,0.5)'; g.fillRect(x + 1, y + 1, w - 2, h - 4);
+      R(1, 1, w - 2, 1, '#e8fff8'); R(1, 1, 1, h - 4, '#c8e8e0'); R(w - 2, 1, 1, h - 4, '#c8e8e0');
+      R(3, h - 6, w - 6, 2, '#8a6a3a'); R(5, h - 9, 3, 3, '#3a8a3a');
+      if (!(t % 200 < 100)) { R(w - 12, h - 8, 8, 3, '#6ac84a'); R(w - 5, h - 9, 2, 2, '#6ac84a'); }
       break;
     case 'cakecart': // five-tier wedding cake on a rolling cart
       R(0, h - 6, w, 3, '#9aa0a8'); R(2, h - 3, 3, 3, '#3a3a40'); R(w - 5, h - 3, 3, 3, '#3a3a40');
@@ -4011,11 +4071,17 @@ class Shutter extends Ent {
 
 // ---- Lever (anyone) ------------------------------------------------------------------
 class Lever extends Ent {
-  constructor(room, tx, ty, p) { super(room, tx, ty, p, 1, 1); this.on = !!p.on; this.kind = p.kind || 'lever'; if (this.on) this.setFlagLater = true; }
+  constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, 1); this.on = !!p.on; this.kind = p.kind || 'lever'; if (this.on) this.setFlagLater = true; }
   update() { super.update(); if (this.setFlagLater) { this.setFlag(true); this.setFlagLater = false; } }
-  interactInfo() { return (this.on && !this.p.toggle) ? null : { ok: true, label: this.kind === 'button' ? 'Press' : 'Pull', prio: 3 }; }
+  ready() { return !this.p.cond || this.level.check(this.p.cond); }
+  interactInfo() {
+    if (this.on && !this.p.toggle) return null;
+    if (!this.ready()) return this.p.notReady ? { ok: false, need: this.p.notReadyNeed || null, label: this.p.notReady, prio: 1 } : null;
+    return { ok: true, label: this.p.label || (this.kind === 'button' ? 'Press' : 'Pull'), prio: 3 };
+  }
   use(f) {
     if (this.on && !this.p.toggle) return;
+    if (!this.ready()) return;
     this.on = this.p.toggle ? !this.on : true;
     this.setFlag(this.on);
     AudioSys.sfx('lever');
@@ -4025,6 +4091,14 @@ class Lever extends Ent {
   draw(g, ox, oy) {
     const x = Math.round(this.x - ox), y = Math.round(this.y - oy);
     const R = (a, b, w, h, c) => { g.fillStyle = c; g.fillRect(x + a, y + b, w, h); };
+    if (this.kind === 'book') { // the rulebook on Holloway's desk (appears once the safe is open)
+      R(0, 9, this.w, 7, '#6a4428'); R(1, 10, this.w - 2, 1, '#8a6040');
+      if (!this.ready()) return;
+      R(this.w / 2 - 6, 4, 12, 5, this.on ? '#f4efe6' : '#7a1f2b'); R(this.w / 2 - 6, 4, 12, 1, '#c8a040');
+      if (this.on) { R(this.w / 2, 4, 1, 5, '#9a8a7a'); R(this.w / 2 + 2, 6, 3, 1, '#3a3a6a'); }
+      if (!this.on && this.ready() && this.level.showHints) drawText('!', x + this.w / 2, y - 6, '#ffd23f', { g, align: 'center', outline: '#1b1020' });
+      return;
+    }
     if (this.kind === 'button') {
       R(3, 4, 10, 10, '#4a4e56'); R(4, 5, 8, 8, '#2a2e36'); circleFill(x + 8, y + 9, 3, this.on ? '#7cf29a' : '#e8504a', g);
     } else if (this.kind === 'valve') {
@@ -4138,6 +4212,10 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
       for (let i = 0; i < 6; i++) { const ph = 10 + (i % 3) * 4 + (i === 2 || i === 3 ? 6 : 0); R(3 + i * 4, 0 + (22 - ph), 3, ph, fixed ? '#e8c860' : '#a8945a'); R(3 + i * 4, 22 - ph, 3, 1, '#fff2c0'); }
       R(0, 18, w, h - 18, '#5a3020'); R(2, 20, w - 4, 3, '#f4efe6'); for (let i = 3; i < w - 3; i += 3) R(i, 20, 1, 2, '#2a1a10');
       if (!fixed) { R(w - 8, 12, 4, 1, '#3a3a3a'); R(w - 6, 13, 1, 4, '#3a3a3a'); }
+      break;
+    case 'safe':
+      R(1, 2, w - 2, h - 2, '#4a4e56'); R(2, 3, w - 4, h - 4, '#5a606a'); circleFill(x + w / 2, y + h / 2 + 1, 4, fixed ? '#7cf29a' : '#2a2e36', g);
+      R(w / 2 - 1, h / 2 - 3, 2, 3, '#c8c8c8'); if (fixed) { R(w - 3, 3, 2, h - 4, '#2a2e36'); }
       break;
     case 'junction':
       R(2, 1, 12, 14, '#5a606a'); R(3, 2, 10, 12, '#3a3e46'); R(5, 4, 6, 2, fixed ? '#7cf29a' : (blink ? '#ffd23f' : '#5a4a1a'));
@@ -4359,7 +4437,7 @@ class Watcher extends Ent {
     const vis = this.face > 0 ? { x: eyeX, y: this.y - 6, w: reach, h: this.h + 6 } : { x: eyeX - reach, y: this.y - 6, w: reach, h: this.h + 6 };
     this.vis = vis;
     for (const f of this.level.friends) {
-      if (!f.present || f.gone || f.mishapT > 0 || f.who === 'benny') continue;
+      if (!f.present || f.gone || f.mishapT > 0 || f.who === 'benny' || (f.state === 'hide' && f.hiding)) continue;
       if (overlap(vis, f)) {
         this.alertT = 50;
         this.level.say(this.p.voice || 'holloway', pick(this.lines), this);
@@ -4388,6 +4466,52 @@ class Watcher extends Ent {
     if (this.alertT > 0) drawText('!', Math.round(this.cx - ox), Math.round(this.y - oy) - 14, '#ff4a3a', { scale: 2, align: 'center', outline: '#1b1020' });
     if (this.danceT > 0) drawText('♪', Math.round(this.cx - ox) + 8, Math.round(this.y - oy) - 10 - (this.t >> 3) % 3, '#4cc9f0', { outline: '#1b1020' });
     if (this.level.showHints && this.danceT <= 0) drawNeedBadge(g, 'juno', Math.round(this.cx - ox) - 2, Math.round(this.y - oy) - 10, this.t);
+  }
+}
+
+// ---- Hideout (anyone: duck into a doorway / behind a fern; watchers can't see you) ----
+class Hideout extends Ent {
+  constructor(room, tx, ty, p) {
+    const k = p.kind || 'door';
+    super(room, tx, ty, p, p.w || (k === 'door' ? 2 : 1), p.h || (k === 'door' ? 3 : 2));
+    this.kind = k; this.occupant = null; this.peekT = 0;
+  }
+  interactInfo(f) {
+    if (this.occupant && this.occupant !== f) return null;
+    return { ok: true, label: f.hiding === this ? 'Come out' : 'Hide', prio: 2 };
+  }
+  use(f) { if (f.hiding === this) f.unhide(); else if (!this.occupant) f.startHide(this); }
+  useBox() { return { x: this.x - 2, y: this.y, w: this.w + 4, h: this.h }; }
+  update() { super.update(); if (this.occupant && this.occupant.hiding !== this) this.occupant = null; if (this.occupant) this.peekT++; }
+  draw(g, ox, oy) {
+    const x = Math.round(this.x - ox), y = Math.round(this.y - oy), w = this.w, h = this.h;
+    const R = (a, b, ww, hh, c) => { g.fillStyle = c; g.fillRect(x + a, y + b, ww, hh); };
+    const occ = this.occupant;
+    const eyes = (ex, ey) => {
+      if (!occ || ((this.peekT >> 4) % 9) === 0) return;
+      const look = Math.sin(this.peekT / 25) > 0 ? 1 : 0;
+      g.fillStyle = '#ffffff'; g.fillRect(x + ex + look, y + ey, 2, 2); g.fillRect(x + ex + 4 + look, y + ey, 2, 2);
+      g.fillStyle = '#1b1020'; g.fillRect(x + ex + look + 1, y + ey + 1, 1, 1); g.fillRect(x + ex + 5 + look, y + ey + 1, 1, 1);
+    };
+    if (this.kind === 'plant') {
+      R(3, h - 9, w - 6, 9, '#8a4a2a'); R(2, h - 10, w - 4, 2, '#a85a3a');
+      for (let i = 0; i < 9; i++) { const a = -1.2 + i * 0.3; g.fillStyle = i % 2 ? '#3a8a3a' : '#2e7a34'; g.fillRect(Math.round(x + w / 2 + Math.cos(a - 1.57) * 7) - 2, Math.round(y + h - 12 - Math.abs(Math.sin(a)) * 14 - (8 - Math.abs(i - 4) * 2)), 5, 9); }
+      eyes(w / 2 - 4, h - 22);
+    } else if (this.kind === 'coatrack') {
+      R(w / 2 - 1, 2, 2, h - 4, '#5a3a22'); R(w / 2 - 5, h - 2, 10, 2, '#5a3a22');
+      R(0, 6, w, 12, '#6a5a8a'); R(1, 8, w - 2, 10, '#7a6a9a'); R(2, 18, w - 4, 6, '#4a5a7a');
+      eyes(w / 2 - 4, 12);
+    } else {
+      // apartment door: closed, or ajar with a pair of eyes in the gap
+      R(-2, -2, w + 4, 2, '#3a2418'); R(-2, -2, 2, h + 2, '#3a2418'); R(w, -2, 2, h + 2, '#3a2418');
+      if (occ) { R(0, 0, w, h, '#120c10'); R(w - 9, 0, 9, h, '#7a4a30'); R(w - 8, 2, 7, h / 2 - 3, '#8a5a3a'); eyes(w - 18, Math.round(h * 0.22)); }
+      else { R(0, 0, w, h, '#7a4a30'); R(2, 3, w - 4, h / 2 - 4, '#8a5a3a'); R(2, h / 2 + 1, w - 4, h / 2 - 4, '#8a5a3a'); R(w - 6, h / 2, 2, 3, '#e0c060'); }
+      if (this.p.label) { R(w / 2 - 6, 4, 12, 6, '#e8d8a8'); drawText(this.p.label, x + w / 2, y + 3, '#3a2418', { g, align: 'center' }); }
+    }
+    if (!occ && this.level.showHints && this.level.room.ents.some(e => e instanceof Watcher)) {
+      const f = this.level.active();
+      if (f && Math.abs(f.cx - this.cx) < 40 && Math.abs(f.y + f.h - (this.y + this.h)) < 8 && f.who !== 'benny') drawText('HIDE', x + w / 2, y - 9, '#ffd23f', { g, align: 'center', outline: '#1b1020' });
+    }
   }
 }
 
@@ -4882,6 +5006,12 @@ class Deco extends Ent {
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
         break;
       }
+      case 'hole': { // a suspicious iguana-sized hole in the wall
+        R(2, 4, this.w - 4, this.h - 6, '#2a1a14'); R(4, 2, this.w - 8, 2, '#2a1a14'); R(0, 8, 2, this.h - 12, '#2a1a14');
+        R(4, this.h - 3, 3, 2, '#d8c8a8'); R(this.w - 6, this.h - 4, 2, 2, '#d8c8a8');
+        if ((t % 300) > 220) { R(this.w / 2 - 3, this.h / 2, 6, 4, '#6ac84a'); R(this.w / 2 - 2, this.h / 2 + 1, 1, 1, '#1b1020'); }
+        break;
+      }
       case 'chandelier': { // sits on a '=' platform row; chain to the ceiling
         const w = this.w;
         R(Math.floor(w / 2) - 1, -this.p.chain || -40, 2, this.p.chain || 40, '#8a7a4a');
@@ -4899,7 +5029,7 @@ class Deco extends Ent {
 // map type name -> class
 const ENT_TYPES = {
   crate: Crate, door: Door, sounddoor: SoundDoor, shutter: Shutter, lever: Lever, broken: Broken, plate: Plate,
-  npc: NPC, watcher: Watcher, grate: Grate, platform: Platform, blocks: Blocks, cup: Cup, mug: Mug,
+  npc: NPC, watcher: Watcher, grate: Grate, hideout: Hideout, platform: Platform, blocks: Blocks, cup: Cup, mug: Mug,
   checkpoint: Checkpoint, exit: Exit, runner: Runner, hazard: Hazard, spring: Spring, light: Light,
   sensor: Sensor, talker: Talker, sign: Sign, trigger: Trigger, deco: Deco,
 };
@@ -5052,6 +5182,10 @@ class Friend {
       this.physicsIdle(); return;
     }
     if (this.state === 'talkpose') { this.physicsIdle(); this.anim = 'talk'; return; }
+    if (this.state === 'hide') {
+      if (!this.hiding || dir !== 0 || Pr.jump || Pr.act || Pr.up) { this.unhide(); Pr.act = false; Pr.jump = false; Pr.up = false; }
+      else { this.physicsIdle(); this.anim = 'idle'; return; }
+    }
     if (L.lockInput) { dir = 0; }
 
     // ---- E: ability / interact ----
@@ -5244,7 +5378,11 @@ class Friend {
     const L = this.level;
     if (this.who === 'mila' && !this.onGround && !this.climbing && !this.djumpUsed && this.coyote <= 0) { this.doubleJump(); return; }
     const best = L.bestInteractable(this);
-    if (best && best.info.ok) { if (best.info.play) { this.startPlay(); return; } best.ent.use(this); return; }
+    if (best && best.info.ok) {
+      // Juno: low-priority things (doors to hide in, chats) never get in the way of a song somebody nearby wants to hear
+      if (best.info.play || (this.who === 'juno' && (best.info.prio || 0) <= 2 && this.musicWanted())) { this.startPlay(); return; }
+      best.ent.use(this); return;
+    }
     if (this.who === 'juno') { this.startPlay(); return; }
     if (this.who === 'mila') { const ct = this.climbTileAt(); if (ct) { this.startClimb(ct); return; } }
     if (best && !best.info.ok) {
@@ -5255,6 +5393,19 @@ class Friend {
       return;
     }
     this.quip();
+  }
+  musicWanted() {
+    const R = 7 * T;
+    for (const e of this.level.room.ents) {
+      if (!e.onSound) continue;
+      const d = Math.hypot(e.cx - this.cx, e.cy - (this.y + this.h / 2));
+      if (d > R + Math.max(e.w, e.h) / 2) continue;
+      if (e instanceof Watcher && e.danceT <= 0) return true;
+      if (e instanceof NPC && e.solve === 'music' && e.state === 'block') return true;
+      if (e instanceof Runner && e.p.lovesMusic && !e.caught && !e.moving) return true;
+      if ((e instanceof Sensor || e instanceof SoundDoor) && !e.heard && (!e.ready || e.ready())) return true;
+    }
+    return false;
   }
   startPlay() {
     this.state = 'play'; this.playT = 72;
@@ -5275,6 +5426,17 @@ class Friend {
     if (this.state === 'hold') this.state = 'normal';
   }
   startGrab(c) { this.grabbing = c; this.face = c.cx > this.cx ? 1 : -1; }
+  startHide(h) {
+    this.hiding = h; h.occupant = this; this.state = 'hide'; this.vx = 0;
+    this.x = h.cx - this.w / 2;
+    AudioSys.sfx('creak');
+    if (Math.random() < 0.5 && this.quipCool <= 0) { this.say(pick(HIDE_LINES[this.who] || ['Shh.'])); this.quipCool = 200; }
+  }
+  unhide() {
+    if (this.hiding) { this.hiding.occupant = null; this.hiding.peekT = 0; }
+    this.hiding = null; if (this.state === 'hide') this.state = 'normal';
+    AudioSys.sfx('creak');
+  }
   celebrate(n) { this.celebT = n; }
 
   quip() {
@@ -5320,6 +5482,7 @@ class Friend {
     const L = this.level;
     if (L.completing) return;
     this.release(); this.climbing = false; this.grabbing = null;
+    if (this.hiding) { this.hiding.occupant = null; this.hiding = null; }
     if (this.fixing) { this.fixing.fixer = null; this.fixing = null; }
     this.state = 'mishap'; this.mishapKind = kind; this.mishapT = kind === 'fall' ? 60 : 78;
     this.vx = 0; this.vy = (kind === 'fall') ? 0 : -2.5;
@@ -5450,6 +5613,7 @@ class Friend {
 
   draw(g, ox, oy) {
     if (!this.present) return;
+    if (this.state === 'hide' && this.hiding) return;
     const L = this.level;
     let anim = this.anim, expr = 'neutral';
     if (this.mishapT > 0) {
@@ -5491,6 +5655,14 @@ const MISHAP_LINES = {
   priya: { ow: ['These shoes cost more than this building!'], zap: ['My hair! My HAIR!'], splash: ['I am calling my guy!'], caught: ['Do you know who I know?'], fall: ['Not my best angle!'], bonk: ['Rude!'] },
   benny: { ow: ['That trap was NOT part of the act!'], zap: ['Ta-da...?'], splash: ['The amazing soggy magician!'], fall: ['I meant to do that!'], bonk: ['...Ta-da.'] },
   juno: { ow: ['♪ Owww-ow-ow! ♪'], zap: ['♪ Electric! ♪'], splash: ['♪ Splish splash, I\'m... wet. ♪'], caught: ['♪ Busted! ♪'], fall: ['♪ Down I go! ♪'], bonk: ['♪ Bonk! ♪'] },
+};
+const HIDE_LINES = {
+  dex: ['I\'m a door now. A very muscular door.', 'Nobody look at my elbows.'],
+  mila: ['Hiding: also a sport. I\'m winning.', 'Holloway: 0, Mila: 1.'],
+  theo: ['Nobody here but us coats.', 'I am one with the fern.'],
+  priya: ['I know a guy who hides in doorways. It\'s me.', 'Very chic. Very hidden.'],
+  benny: ['He can\'t see me anyway. I just like doors.', 'The Great Benny... vanishes!'],
+  juno: ['♪ Shh-shh-shh ♪', 'This is my quiet song.'],
 };
 
 
@@ -7926,7 +8098,7 @@ const HUB_SPOTS = [
   { kind: 'wardrobe', x: 790, w: 40, label: 'Lost & Found: outfits' },
   { kind: 'jukebox', x: 862, w: 30, label: 'Jukebox', decor: 'jukebox' },
 ];
-const JUKEBOX_SONGS = [['hub', 'Rainy Day Refill'], ['title', 'The Gang\'s All Here (Theme)'], ['funk', 'Moving Day Funk'], ['sneaky', 'Lizard on the Loose'], ['panic', 'Kitchen Panic'], ['lightsout', 'Lights Out'], ['sunny', 'Sunny Side Up'], ['wedding', 'Wedding Swing'], ['rush', 'Rush Hour'], ['snow', 'First Snow'], ['finale', 'Grand Reopening']];
+const JUKEBOX_SONGS = [['hub', 'Rainy Day Refill'], ['title', 'The Gang\'s All Here (Theme)'], ['funk', 'Moving Day Funk'], ['sneaky', 'Lizard on the Loose'], ['panic', 'Kitchen Panic'], ['lightsout', 'Lights Out'], ['sunny', 'Sunny Side Up'], ['wedding', 'Wedding Swing'], ['snoop', 'Rule Nine Shuffle'], ['magic', 'The Great Bennini'], ['subway', 'Uptown Local'], ['expo', 'Tidy-Bot Boogie'], ['snow', 'First Snow'], ['rush', 'Rush Hour'], ['finale', 'Grand Reopening']];
 
 class HubSpot extends Ent {
   constructor(room, s) {
@@ -9146,6 +9318,146 @@ EPISODES.push({
   endLine: 'JUST MARRIED!',
 });
 
+// =============================================================================
+// S2E1  The Landlord Strikes Back
+// =============================================================================
+EPISODES.push({
+  season: 2, num: 1, title: 'The Landlord Strikes Back', music: 'snoop',
+  blurb: 'Holloway is back from the honeymoon. Surprise inspection. Rule 9: no reptiles.',
+  rooms: [
+    {
+      name: '3rd Floor Hallway', slug: 'INT. 3RD FLOOR HALLWAY - MORNING', theme: 'hall', shot: 'building_day',
+      map: [
+        // 0000000000111111111122222222223333333333444444444455
+        // 0123456789012345678901234567890123456789012345678901
+        '####################################################', // 0
+        '####################################################', // 1
+        '.............................................#......', // 2
+        '.............................................#......', // 3
+        '.............................................#......', // 4
+        '.............................................#......', // 5
+        '.............................................#......', // 6
+        '.......................i.......i.......i.....#......', // 7
+        '..........l...................l..............#......', // 8
+        '.............................................#......', // 9
+        '.............................................#......', // 10
+        '...........c.....c......c.......c........c..c.....c.', // 11
+        '....................................................', // 12
+        '..@...A..C...Z.Bc..P..c...WQ..c....R..c.E..K.GfcX.c.', // 13
+        '####################################################', // 14
+        '####################################################', // 15
+        '####################################################', // 16
+      ],
+      ents: {
+        C: { t: 'crate', kind: 'terrarium' },
+        Z: { t: 'plate', w: 2, heavy: true, mark: true, id: 'terra7' },
+        W: { t: 'watcher', look: 'holloway', from: -8, to: 8, range: 6, speed: 0.6, dance: 420, voice: 'holloway',
+          lines: ['INSPECTION! Back to your apartment!', 'Rule 14! No loitering during inspections!', 'I see you, 3A! I ALWAYS see 3A!', 'Married life has NOT softened me!'],
+          danceLines: ['Is that... our wedding song?', 'Roz taught me this one!', 'My feet are married to the rhythm!'] },
+        P: { t: 'hideout', kind: 'door', label: '3C' },
+        Q: { t: 'hideout', kind: 'door', label: '3D' },
+        R: { t: 'hideout', kind: 'door', label: '3E' },
+        K: { t: 'broken', kind: 'panel', id: 'keypad7', say: [['theo', 'Keypad\'s fixed. The code was 1-2-3-4. Of course it was.']] },
+        G: { t: 'door', link: 'keypad7', h: 3, kind: 'door' },
+        X: { t: 'exit', link: 'terra7&keypad7', lockedMsg: 'HIDE SARGE IN 3B FIRST!' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'Holloway\'s inspecting every apartment. If he finds Sarge, I\'m evicted.'], ['juno', 'Hide him in 3B! Holloway never inspects 3B.'], ['dex', 'Why not?'], ['juno', 'He\'s scared of my keytar.']] },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['mila', 'Holloway\'s patrolling the whole hall.'], ['priya', 'Then we do it the old-fashioned way. Duck into doorways.']], hintKeys: H_KEYS('Stand in a doorway and press E to HIDE. Holloway can\'t see you there!', 'Stand in a doorway and press E to HIDE. Holloway can\'t see you there!') },
+        E: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'Stairwell keypad. Dead, naturally. Give me a minute.']], hintKeys: H_KEYS('DEX: terrarium onto the 3B mark. THEO: fix the stairwell keypad.', 'DEX: terrarium onto the 3B mark. THEO: fix the stairwell keypad.') },
+      },
+      extra: [
+        { t: 'hideout', kind: 'door', x: 12, y: 13, label: '3B', w: 2 },
+      ],
+    },
+    {
+      name: 'Apartment 3A', slug: 'INT. APARTMENT 3A - MORNING', theme: 'apt', shot: 'building_day',
+      map: [
+        // 0000000000111111111122222222223333333333444444444455
+        // 0123456789012345678901234567890123456789012345678901
+        '####################################################', // 0
+        '####################################################', // 1
+        '....................................................', // 2
+        '....................................................', // 3
+        '....................................................', // 4
+        '..................................cL................', // 5
+        '................i..........o.....M##................', // 6
+        '..........w......................M##........w.......', // 7
+        '.................................M##...*c...........', // 8
+        '.................................M##..===...........', // 9
+        '.................................M##................', // 10
+        '..........c.....c....c......c.c..M##........c.......', // 11
+        '............................===..M##................', // 12
+        '..@..a..A...c.K....F....Z.c..B...M##.c....t...c..X..', // 13
+        '####################################################', // 14
+        '####################################################', // 15
+        '####################################################', // 16
+      ],
+      ents: {
+        K: { t: 'broken', kind: 'robot', id: 'bot7', label: 'Switch off (hold)', say: [['theo', 'Tidy-Bot prototype: deactivated. It was vacuuming the ceiling.'], ['dex', 'How?!'], ['theo', 'I don\'t KNOW, Dex.']] },
+        F: { t: 'crate', kind: 'fridge' },
+        Z: { t: 'plate', heavy: true, mark: true, id: 'hole7' },
+        L: { t: 'lever', id: 'lamp7', kind: 'button', say: 'Heat lamp off! No reptile evidence here! Scoreboard: Mila 1.' },
+        X: { t: 'exit', link: 'bot7&hole7&lamp7', lockedMsg: 'HIDE THE EVIDENCE FIRST!' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Inspection checklist: one haywire robot, one iguana-shaped hole, one heat lamp.'], ['dex', 'That\'s not a checklist. That\'s our lives.']], hintKeys: H_KEYS('Hide the evidence: THEO the robot, DEX the fridge over the hole, MILA the heat lamp.', 'Hide the evidence: THEO the robot, DEX the fridge over the hole, MILA the heat lamp.') },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['mila', 'The heat lamp switch is on top of the bookshelf.'], ['mila', 'I\'ve been training for this my whole life. Literally. I climb bookshelves recreationally.']] },
+      },
+      extra: [
+        { t: 'deco', kind: 'hole', x: 24, y: 13, w: 1, h: 1, back: true },
+      ],
+    },
+    {
+      name: 'Holloway\'s Office', slug: 'INT. SUPERINTENDENT\'S OFFICE - DAY', theme: 'lobby', shot: 'building_day',
+      map: [
+        // 0000000000111111111122222222223333333333444444444455
+        // 0123456789012345678901234567890123456789012345678901
+        '####################################################', // 0
+        '####################################################', // 1
+        '....................#...............................', // 2
+        '....................#...............................', // 3
+        '....................#...............................', // 4
+        '....................#...............................', // 5
+        '....................#................o..............', // 6
+        '.....i........w.....#.....i......cKc................', // 7
+        '....................#............===................', // 8
+        '....................#..........c....................', // 9
+        '....................#.........##....................', // 10
+        '..........c.......c....c...c..##..........c....c..c.', // 11
+        '....................G......##.##....................', // 12
+        '..@.....A...N..c....V.L.Ec.##.##......c.F..W.R..B.f.', // 13
+        '####################################################', // 14
+        '####################################################', // 15
+        '####################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'roz', solve: 'talk', id: 'roz7', moveTo: -5, face: -1, voice: 'roz', name: 'ROZ', expr: 'smug',
+          block: 'Darlings! Bertram\'s office is off-limits. It\'s his "sanctuary." It has a FERN.',
+          after: ['I didn\'t see a thing, darlings.', 'Bertram talks to that fern. It\'s adorable.'],
+          talk: {
+            q: 'And what, pray tell, do you want in my husband\'s office?',
+            opts: [
+              { t: 'A cup of sugar. From his desk.', ok: false, r: 'Darling, he alphabetizes his sugar. No.' },
+              { t: 'Is that a new perfume?', ok: false, r: 'It\'s called "Bylaws." Bertram named it. I wear it ironically.' },
+              { t: 'It\'s Sarge. If Bertram finds him, Theo gets evicted!', ok: true, r: 'Evict my sweet Sarge? Over my dead begonias. Go!' },
+            ],
+          } },
+        G: { t: 'door', link: 'office7', h: 2, kind: 'door' },
+        V: { t: 'grate', id: 'vent7' },
+        L: { t: 'lever', id: 'office7', say: 'We\'re in! ...This office has a LOT of label makers.' },
+        K: { t: 'broken', kind: 'safe', id: 'safe7', label: 'Crack (hold)', say: [['theo', 'Safe\'s open! The combination was his wedding date.'], ['priya', 'Aww. And also: terrible security.']] },
+        F: { t: 'hideout', kind: 'plant' },
+        R: { t: 'hideout', kind: 'coatrack' },
+        W: { t: 'watcher', look: 'holloway', from: -5, to: 5, range: 6, speed: 0.55, dance: 420, voice: 'holloway',
+          lines: ['WHO is in my office?!', 'Rule 2! My office is MY office!', 'Not near the fern! Never near the fern!'],
+          danceLines: ['Not the samba! Anything but the samba!', 'Oh, my hips are filing a complaint.', 'Roz is going to LOVE this story.'] },
+        B: { t: 'lever', kind: 'book', w: 2, id: 'rule', cond: 'safe7', label: 'Add Rule 9½', say: 'Rule 9½: iguanas named Sarge are PERMITTED. Signed... "B. Holloway."' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'The plan: sneak in, open the safe, add ONE tiny rule to the rulebook.'], ['theo', 'Rule 9½. Iguanas named Sarge are permitted.'], ['mila', 'That\'s forgery.'], ['priya', 'It\'s CREATIVE ADMINISTRATION.']], hintKeys: H_KEYS('PRIYA: talk to Roz (E).', 'PRIYA: talk to Roz (E).') },
+        E: { t: 'trigger', w: 2, h: 3, any: true, lines: [['benny', 'Holloway\'s pacing in front of the desk!'], ['juno', 'Fern. Coat rack. Or one cha-cha. Your call.']], hintKeys: H_KEYS('THEO cracks the safe. Then sneak to the desk: hide (E), dance (JUNO) or send BENNY.', 'THEO cracks the safe. Then sneak to the desk: hide, dance (JUNO) or send BENNY.') },
+      },
+      goal: 'rule',
+    },
+  ],
+  endLine: 'INSPECTION SURVIVED!',
+});
+
 
 
 // ===== 15_story.js =====
@@ -9505,6 +9817,59 @@ STORY[5] = {
   credits: ['Wedding Band: JUNO & THE COUCH (one night only)', 'Triangle: THEO (classically trained since Tuesday)', 'Ring Bearer: SARGE (briefly)', 'Bouquet Catch: DEX (pollen-related)'],
 };
 
+// S2E1 (episode 7) ----------------------------------------------------------------
+STORY[6] = {
+  previously: [
+    ['set', 'ballroom'],
+    ['at', 'gus', 100, { face: 1, expr: 'sad' }], ['at', 'priya', 194, { face: -1 }], ['at', 'dex', 230, { face: -1, expr: 'cry' }],
+    ['say', 'gus', 'Big changes, huh? ...Real big changes.', { expr: 'sad' }],
+    ['say', 'priya', 'Was it just me, or was Gus being weird?'],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'apt3a'],
+    ['at', 'dex', 90, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 120, { anim: 'sit', y: SIT_Y }], ['at', 'benny', 150, { anim: 'sit', y: SIT_Y }],
+    ['at', 'priya', 196, { face: 1 }], ['at', 'theo', 268, { face: -1, expr: 'happy' }], ['at', 'juno', 350, { face: -1 }],
+    ['prop', 'sarge', 'iguana', 318, 176],
+    ['say', 'theo', 'Sarge has never been happier. Look at him. Living his best life.', { expr: 'happy' }],
+    ['sfx', 'door'], ['prop', 'note', 'letter', 20, 214], ['moveprop', 'note', 64, 214, 2],
+    ['wait', 30],
+    ['say', 'dex', 'A note. "SURPRISE INSPECTION. TODAY. Rule 9 still applies. Love, B. Holloway."'],
+    ['say', 'dex', '"Love" is crossed out. Then it says "Sincerely."'],
+    ['laugh', 'chuckle'],
+    ['say', 'theo', 'Rule 9. No reptiles. If he finds Sarge, I\'m EVICTED!', { expr: 'scared' }],
+    ['say', 'benny', 'I could make Sarge disappear.', { expr: 'grin' }],
+    ['say', 'theo', 'PERMANENTLY?!', { expr: 'shock' }],
+    ['say', 'benny', '...I haven\'t worked out the "reappear" part yet.'],
+    ['laugh', 'big'],
+    ['say', 'priya', 'Relax. He just got married. Married men are SOFT.', { expr: 'smug' }],
+    ['sfx', 'door'], ['shake', 4],
+    ['say', 'holloway', 'INSPECTION! Married life has NOT softened me!'],
+    ['expr', 'all', 'scared'],
+    ['say', 'dex', 'EVERYBODY HIDE!', { expr: 'shock', anim: 'point' }],
+    ['vanish', 'benny'],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'hall'],
+    ['at', 'theo', 120, { face: 1 }], ['at', 'dex', 160, { face: 1 }], ['at', 'mila', 196, { face: 1 }], ['at', 'priya', 90, { face: 1 }], ['at', 'benny', 228, { face: 1 }], ['at', 'juno', 60, { face: 1 }],
+    ['at', 'holloway', 300, { face: -1, anim: 'phone' }], ['at', 'roz', 344, { face: -1, expr: 'smug' }],
+    ['say', 'holloway', 'Rule 9½: "Iguanas named Sarge are permitted." Signed... B. Holloway.', { anim: 'phone' }],
+    ['say', 'holloway', 'I don\'t remember writing this.', { expr: 'surprised', anim: 'idle' }],
+    ['say', 'roz', 'You wrote it on our honeymoon, darling. You were VERY relaxed.', { expr: 'smug' }],
+    ['wait', 30],
+    ['say', 'holloway', '...That does sound like me.', { expr: 'happy' }],
+    ['laugh', 'big'],
+    ['prop', 'sargehead', 'iguanaL', 300, 194],
+    ['wait', 40],
+    ['say', 'holloway', 'Hello, Sarge.', { expr: 'neutral' }],
+    ['laugh', 'aww'],
+    ['freeze'],
+  ],
+  credits: ['Door Hiding: EVERYONE (badly)', 'Rule 9½: B. HOLLOWAY (allegedly)', 'Evidence Removal: THEO, DEX & MILA', 'The Fern: ITSELF'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------
@@ -9771,7 +10136,7 @@ try {
   if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
 } catch (e) { start({}); }
 // test hook
-window.__gang = { present, Game, Save, Input, LevelScene, EPISODES, FRIENDS, Music, AudioSys, playEpisode, goHub, HubScene, TitleScene, CutsceneScene };
+window.__gang = { present, Game, Save, Input, LevelScene, EPISODES, FRIENDS, Music, AudioSys, playEpisode, goHub, HubScene, TitleScene, CutsceneScene, compileSong, SONGS };
 
 
 })();
