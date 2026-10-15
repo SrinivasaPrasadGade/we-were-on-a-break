@@ -36,6 +36,7 @@ const Input = {
   touchUI: false,
   touchButtons: [],
   touchHeld: {},
+  touchLatch: {},
   pointers: new Map(),
   clicks: [],
   gpPrev: [{}, {}],
@@ -69,7 +70,7 @@ const Input = {
         let h = false;
         if (bind) for (const code of bind[a]) if (this.down.has(code)) { h = true; break; }
         if (gp && gp[a]) h = true;
-        if (p === 0 && this.touchHeld[a]) h = true;
+        if (p === 0 && (this.touchHeld[a] || this.touchLatch[a])) h = true;
         pad.pressed[a] = h && !pad.held[a];
         pad.released[a] = !h && pad.held[a];
         pad.held[a] = h;
@@ -89,6 +90,7 @@ const Input = {
       }
     }
     this.touchSelect = -1;
+    for (const k in this.touchLatch) this.touchLatch[k] = false;
 
     // Menu (merged) input
     const kp = c => this.pressedKeys.has(c);
@@ -176,6 +178,7 @@ function refreshTouchHeld() {
 }
 screenCanvas.addEventListener('pointerdown', e => {
   e.preventDefault();
+  screenCanvas.setAttribute('data-ptr', '');
   try { screenCanvas.focus({ preventScroll: true }); } catch (err) { /* ignore */ }
   if (typeof AudioSys !== 'undefined') AudioSys.unlock();
   const p = toBuf(e.clientX, e.clientY);
@@ -185,7 +188,7 @@ screenCanvas.addEventListener('pointerdown', e => {
   } else Input.lastDevice = Input.lastDevice === 'pad' ? 'pad' : 'keys';
   const btn = touchButtonAt(p.x, p.y);
   Input.pointers.set(e.pointerId, { btn: btn ? btn.id : null, x: p.x, y: p.y });
-  if (btn) refreshTouchHeld();
+  if (btn) { refreshTouchHeld(); Input.touchLatch[btn.id] = true; }
   else Input.clicks.push({ x: p.x, y: p.y });
   try { screenCanvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
 }, { passive: false });

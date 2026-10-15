@@ -12,4 +12,4 @@ try {
   if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
 } catch (e) { start({}); }
 // test hook
-window.__gang = { present, Game, Save, Input, LevelScene, EPISODES, FRIENDS, Music, AudioSys, playEpisode, goHub, HubScene, TitleScene, CutsceneScene, compileSong, SONGS };
+window.__gang = { present, Game, Save, Input, LevelScene, EPISODES, FRIENDS, Music, AudioSys, playEpisode, goHub, HubScene, TitleScene, CutsceneScene, CreditsScene, ResultsScene, compileSong, SONGS };

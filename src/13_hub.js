@@ -303,16 +303,16 @@ class EpisodeBoard {
         continue;
       }
       drawText((i % 6 + 1) + '.', r.x + 5, r.y + 5, un ? '#f4efe6' : '#5a6a62');
-      drawText(un ? ep.title : 'Locked', r.x + 17, r.y + 5, un ? (sel ? '#ffffff' : '#d8e8d0') : '#5a6a62');
+      drawText(un ? fitText(ep.title, r.w - 22) : 'Locked', r.x + 17, r.y + 5, un ? (sel ? '#ffffff' : '#d8e8d0') : '#5a6a62');
       this.drawStatus(i, r.x + 17, r.y + 17);
     }
     // detail strip
     const ep = EPISODES[this.sel];
     if (epUnlocked(this.sel)) {
-      const blurb = ep.blurb || '';
-      drawText(blurb, 340, 204, '#f4efe6', {});
-      drawText(Input.lastDevice === 'touch' ? 'Tap again to roll!' : 'E to roll camera   ESC to close', 340, 230, '#ffd23f', {});
-    } else drawText('Finish the previous episode first.', 340, 204, '#8aa898', {});
+      const lines = wrapText(ep.blurb || '', W - 356).slice(0, 4);
+      lines.forEach((l, k) => drawText(l, 340, 196 + k * 9, '#f4efe6', {}));
+      drawText(Input.lastDevice === 'touch' ? 'Tap again to roll!' : 'E: ROLL CAMERA!', 340, 236, '#ffd23f', {});
+    } else wrapText('Finish the previous episode first.', W - 356).forEach((l, k) => drawText(l, 340, 199 + k * 10, '#8aa898', {}));
   }
   drawStatus(i, x, y) {
     const S = Save.data;

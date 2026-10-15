@@ -187,3 +187,10 @@ function wrapText(s, maxW, scale) {
   }
   return out;
 }
+// shorten a string with "..." so it fits maxW pixels
+function fitText(s, maxW, scale) {
+  if (textWidth(s, scale) <= maxW) return s;
+  let t = s;
+  while (t.length > 1 && textWidth(t + '...', scale) > maxW) t = t.slice(0, -1);
+  return t.trimEnd() + '...';
+}

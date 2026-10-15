@@ -22,6 +22,7 @@ class LevelScene {
     this.shakeAmt = 0; this.shakeX = 0; this.shakeY = 0;
     this.trans = null; this.completing = false; this.lockInput = false; this.goalT = 0;
     this.showHints = true;
+    this.wantsTouch = true;
     this.slugT = 0;
     this.t = 0;
     if (!this.hub && !opts.noMusic) Music.play(this.ep.music || 'funk');
@@ -542,6 +543,8 @@ class LevelScene {
     ctx.drawImage(darkCanvas, 0, 0);
   }
   drawBubbles(ox, oy) {
+    const placed = [];
+    const hits = (r) => placed.find(q => r.x < q.x + q.w + 2 && r.x + r.w + 2 > q.x && r.y - 8 < q.y + q.h + 2 && r.y + r.h + 2 > q.y - 8);
     for (const b of this.bubbles) {
       const a = b.anchor;
       if (!a) continue;
@@ -552,7 +555,14 @@ class LevelScene {
       if (a.who === 'mila') hy -= 3;
       const name = FRIEND_INFO[b.who] ? FRIEND_INFO[b.who].name : (b.anchor && b.anchor.p && b.anchor.p.name) || NPC_NAMES[b.who] || '';
       const col = FRIEND_INFO[b.who] ? FRIEND_INFO[b.who].color : '#c8b8a8';
-      drawSpeechBubble(b.text.slice(0, Math.floor(b.shown)), b.text, hx, hy, name, col, b.t < 4 ? b.t / 4 : 1);
+      // stack bubbles that would overlap: try above the older one, then below it
+      const lay = layoutBubble(b.text, hx, hy, name);
+      for (let k = 0, q = hits(lay); q && k < 4; k++, q = hits(lay)) {
+        const up = q.y - lay.h - 12;
+        lay.y = up >= 26 ? up : Math.min(H - lay.h - 3, q.y + q.h + 12);
+      }
+      placed.push(lay);
+      drawSpeechBubble(b.text.slice(0, Math.floor(b.shown)), b.text, hx, hy, name, col, b.t < 4 ? b.t / 4 : 1, lay);
     }
   }
   drawHUD() {
@@ -676,19 +686,23 @@ const SWAP_LINES = {
 };
 const NPC_NAMES = { gus: 'GUS', holloway: 'MR. HOLLOWAY', roz: 'ROZ', sarge: 'SARGE', robot: 'TIDY-BOT', npc: '' };
 
-function drawSpeechBubble(shownText, fullText, hx, hy, name, col, alpha) {
+function layoutBubble(fullText, hx, hy, name) {
   const lines = wrapText(fullText, 150);
-  const shownLines = wrapText(fullText, 150);
   let w = 0;
   for (const l of lines) w = Math.max(w, textWidth(l));
   w += 10; const h = lines.length * 10 + 7 + (name ? 4 : 0);
   let x = Math.round(hx - w / 2), y = Math.round(hy - h - 6);
   x = clamp(x, 3, W - w - 3); y = clamp(y, 26, H - h - 3);
+  return { x, y, w, h, lines };
+}
+function drawSpeechBubble(shownText, fullText, hx, hy, name, col, alpha, lay) {
+  lay = lay || layoutBubble(fullText, hx, hy, name);
+  const { x, y, w, h } = lay, shownLines = lay.lines;
   ctx.globalAlpha = alpha === undefined ? 1 : alpha;
   panel(x, y, w, h, '#fbf6ec', OUTLINE);
-  // tail
+  // tail (only when the bubble sits right above its speaker)
   const tx = clamp(hx, x + 6, x + w - 8);
-  if (hy - 6 > y + h) {
+  if (hy - 6 > y + h && hy - (y + h) < 40) {
     ctx.fillStyle = OUTLINE; ctx.fillRect(tx - 3, y + h - 1, 7, 2); ctx.fillRect(tx - 2, y + h + 1, 5, 2); ctx.fillRect(tx - 1, y + h + 3, 3, 2);
     ctx.fillStyle = '#fbf6ec'; ctx.fillRect(tx - 2, y + h - 2, 5, 2); ctx.fillRect(tx - 1, y + h, 3, 2); ctx.fillRect(tx, y + h + 2, 1, 1);
   }

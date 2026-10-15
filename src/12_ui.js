@@ -86,14 +86,15 @@ class Menu {
   draw(cx, y, w) {
     w = w || 220;
     const rowH = 16;
-    const h = 26 + this.items.length * rowH + 6;
+    const head = this.title ? 24 : 10;
+    const h = head + 2 + this.items.length * rowH + 6;
     const x = Math.round(cx - w / 2);
     panel(x, y, w, h, '#22182c', '#ffd23f');
     panel(x + 3, y + 3, w - 6, h - 6, '#2a1e36', '#4a3a5a');
-    drawText(this.title, cx, y + 9, '#ffd23f', { align: 'center' });
+    if (this.title) drawText(this.title, cx, y + 9, '#ffd23f', { align: 'center' });
     this.layout = [];
     this.items.forEach((it, i) => {
-      const iy = y + 24 + i * rowH;
+      const iy = y + head + i * rowH;
       const sel = i === this.sel;
       this.layout[i] = { x: x + 6, y: iy - 3, w: w - 12, h: rowH - 1 };
       if (sel) { ctx.fillStyle = '#3e2c4e'; ctx.fillRect(x + 6, iy - 3, w - 12, rowH - 1); drawText('>', x + 10, iy, '#ffd23f'); }
@@ -290,7 +291,7 @@ class OpeningScene {
     const who = role.who, info = FRIEND_INFO[who];
     const frozen = k >= 2.5;
     const kk = frozen ? 2.5 : k;
-    drawMemphis(shade(info.color, -0.55), [info.color, '#ffd23f', '#f6ead8', shade(info.color, 0.4)], frozen ? 0 : this.t, bar * 13, 34);
+    drawMemphis(shade(info.color, -0.55), [info.color, '#ffd23f', '#f6ead8', shade(info.color, 0.4)], frozen ? 0 : this.t, bar * 13, 34, [250, 46, 230, 120]);
     // diagonal stripe
     ctx.fillStyle = shade(info.color, -0.3);
     for (let i = 0; i < 70; i++) ctx.fillRect(0, 150 + i - Math.round(i * 0.3), W, 1);
@@ -454,8 +455,8 @@ class TitleScene {
     const seats = [['dex', 140], ['priya', 166], ['juno', 192], ['theo', 218]];
     for (const [who, sx] of seats) blitPerson(ctx, friendSpecId(who, (Save.data.outfits || {})[who] || 0), friendSpecFn(who, (Save.data.outfits || {})[who] || 0), { anim: 'sit', t: this.t + sx, expr: 'happy', blink: ((this.t + sx * 7) % 200) < 6 }, sx, 214, {});
     blitPerson(ctx, friendSpecId('mila', (Save.data.outfits || {}).mila || 0), friendSpecFn('mila', (Save.data.outfits || {}).mila || 0), { anim: 'idle', t: this.t, quirk: 'mila' }, 100, 222, {});
-    blitPerson(ctx, friendSpecId('benny', (Save.data.outfits || {}).benny || 0), friendSpecFn('benny', (Save.data.outfits || {}).benny || 0), { anim: 'idle', t: this.t, quirk: 'benny' }, 270, 222, { flip: true });
-    blitPerson(ctx, 'npc:gus', npcSpecFn('gus'), { anim: 'idle', t: this.t, expr: 'neutral', blink: (this.t % 190) < 6 }, 380, 160, { flip: true });
+    blitPerson(ctx, friendSpecId('benny', (Save.data.outfits || {}).benny || 0), friendSpecFn('benny', (Save.data.outfits || {}).benny || 0), { anim: 'idle', t: this.t, quirk: 'benny' }, 246, 222, { flip: true });
+    blitPerson(ctx, 'npc:gus', npcSpecFn('gus'), { anim: 'idle', t: this.t, expr: 'neutral', blink: (this.t % 190) < 6 }, 58, 222, {});
     ctx.fillStyle = 'rgba(14,8,22,0.55)'; ctx.fillRect(0, 0, W, H);
     drawTitleLogo(W / 2, 12, 99, this.t);
     if (this.mode === 'main') this.menu.draw(362, 124, 200);
@@ -560,7 +561,7 @@ class CreditsScene {
       ctx.restore();
       frameRect(14, 40, 210, 190, '#ffd23f');
     } else {
-      drawMemphis('#1e1430', ['#ff4f9a', '#ffd23f', '#4cc9f0', '#7cf29a', '#ff8a5a'], this.t, 77, 34);
+      drawMemphis('#1e1430', ['#ff4f9a', '#ffd23f', '#4cc9f0', '#7cf29a', '#ff8a5a'], this.t, 77, 34, [W / 2 - 150, 0, 300, H]);
     }
     const x0 = this.kind === 'mini' ? 350 : W / 2;
     let y = H + 10 - this.t * this.speed;

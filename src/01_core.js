@@ -100,8 +100,11 @@ function resizeScreen() {
 }
 
 function present() {
+  // clear only the letterbox bars; the frame covers the rest
+  const cw = screenCanvas.width, ch = screenCanvas.height;
   sctx.fillStyle = '#0d0811';
-  sctx.fillRect(0, 0, screenCanvas.width, screenCanvas.height);
+  if (view.x > 0) { sctx.fillRect(0, 0, view.x, ch); sctx.fillRect(view.x + view.w, 0, cw - view.x - view.w, ch); }
+  if (view.y > 0) { sctx.fillRect(0, 0, cw, view.y); sctx.fillRect(0, view.y + view.h, cw, ch - view.y - view.h); }
   const s = view.scale;
   if (Math.abs(s - Math.round(s)) < 0.02 || s < 1) {
     sctx.imageSmoothingEnabled = s < 1;
@@ -110,7 +113,7 @@ function present() {
     upCtx.imageSmoothingEnabled = false;
     upCtx.drawImage(buf, 0, 0, upCanvas.width, upCanvas.height);
     sctx.imageSmoothingEnabled = true;
-    sctx.imageSmoothingQuality = 'high';
+    sctx.imageSmoothingQuality = 'low';
     sctx.drawImage(upCanvas, view.x, view.y, view.w, view.h);
   }
 }

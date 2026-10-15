@@ -19,10 +19,15 @@
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent; outline: none; cursor: default;
   }
-  #screen:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  #screen:focus-visible:not([data-ptr]) { outline: 2px solid var(--accent); outline-offset: -2px; }
   noscript { display: block; padding: 2rem; text-align: center; }
+  #rotate {
+    display: none; position: absolute; left: 0; right: 0; bottom: max(28px, env(safe-area-inset-bottom, 0px));
+    text-align: center; color: #9a8aaa; font: 13px ui-monospace, Menlo, Consolas, monospace; pointer-events: none;
+  }
+  @media (orientation: portrait) and (pointer: coarse) { #rotate { display: block; } }
 </style>
-<div id="stage"><canvas id="screen" tabindex="0" aria-label="The Gang's All Here, a sitcom puzzle-platformer. Click or press a key to start."></canvas></div>
+<div id="stage"><canvas id="screen" tabindex="0" aria-label="The Gang's All Here, a sitcom puzzle-platformer. Click or press a key to start."></canvas><div id="rotate" aria-hidden="true">&#8635; Turn your phone sideways for a bigger stage</div></div>
 <noscript>The Gang's All Here needs JavaScript to run.</noscript>
 <script>
 (function(){
@@ -130,8 +135,11 @@ function resizeScreen() {
 }
 
 function present() {
+  // clear only the letterbox bars; the frame covers the rest
+  const cw = screenCanvas.width, ch = screenCanvas.height;
   sctx.fillStyle = '#0d0811';
-  sctx.fillRect(0, 0, screenCanvas.width, screenCanvas.height);
+  if (view.x > 0) { sctx.fillRect(0, 0, view.x, ch); sctx.fillRect(view.x + view.w, 0, cw - view.x - view.w, ch); }
+  if (view.y > 0) { sctx.fillRect(0, 0, cw, view.y); sctx.fillRect(0, view.y + view.h, cw, ch - view.y - view.h); }
   const s = view.scale;
   if (Math.abs(s - Math.round(s)) < 0.02 || s < 1) {
     sctx.imageSmoothingEnabled = s < 1;
@@ -140,7 +148,7 @@ function present() {
     upCtx.imageSmoothingEnabled = false;
     upCtx.drawImage(buf, 0, 0, upCanvas.width, upCanvas.height);
     sctx.imageSmoothingEnabled = true;
-    sctx.imageSmoothingQuality = 'high';
+    sctx.imageSmoothingQuality = 'low';
     sctx.drawImage(upCanvas, view.x, view.y, view.w, view.h);
   }
 }
@@ -366,6 +374,13 @@ function wrapText(s, maxW, scale) {
   }
   return out;
 }
+// shorten a string with "..." so it fits maxW pixels
+function fitText(s, maxW, scale) {
+  if (textWidth(s, scale) <= maxW) return s;
+  let t = s;
+  while (t.length > 1 && textWidth(t + '...', scale) > maxW) t = t.slice(0, -1);
+  return t.trimEnd() + '...';
+}
 
 
 // ===== 03_input.js =====
@@ -407,6 +422,7 @@ const Input = {
   touchUI: false,
   touchButtons: [],
   touchHeld: {},
+  touchLatch: {},
   pointers: new Map(),
   clicks: [],
   gpPrev: [{}, {}],
@@ -440,7 +456,7 @@ const Input = {
         let h = false;
         if (bind) for (const code of bind[a]) if (this.down.has(code)) { h = true; break; }
         if (gp && gp[a]) h = true;
-        if (p === 0 && this.touchHeld[a]) h = true;
+        if (p === 0 && (this.touchHeld[a] || this.touchLatch[a])) h = true;
         pad.pressed[a] = h && !pad.held[a];
         pad.released[a] = !h && pad.held[a];
         pad.held[a] = h;
@@ -460,6 +476,7 @@ const Input = {
       }
     }
     this.touchSelect = -1;
+    for (const k in this.touchLatch) this.touchLatch[k] = false;
 
     // Menu (merged) input
     const kp = c => this.pressedKeys.has(c);
@@ -547,6 +564,7 @@ function refreshTouchHeld() {
 }
 screenCanvas.addEventListener('pointerdown', e => {
   e.preventDefault();
+  screenCanvas.setAttribute('data-ptr', '');
   try { screenCanvas.focus({ preventScroll: true }); } catch (err) { /* ignore */ }
   if (typeof AudioSys !== 'undefined') AudioSys.unlock();
   const p = toBuf(e.clientX, e.clientY);
@@ -556,7 +574,7 @@ screenCanvas.addEventListener('pointerdown', e => {
   } else Input.lastDevice = Input.lastDevice === 'pad' ? 'pad' : 'keys';
   const btn = touchButtonAt(p.x, p.y);
   Input.pointers.set(e.pointerId, { btn: btn ? btn.id : null, x: p.x, y: p.y });
-  if (btn) refreshTouchHeld();
+  if (btn) { refreshTouchHeld(); Input.touchLatch[btn.id] = true; }
   else Input.clicks.push({ x: p.x, y: p.y });
   try { screenCanvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
 }, { passive: false });
@@ -5795,6 +5813,7 @@ class LevelScene {
     this.shakeAmt = 0; this.shakeX = 0; this.shakeY = 0;
     this.trans = null; this.completing = false; this.lockInput = false; this.goalT = 0;
     this.showHints = true;
+    this.wantsTouch = true;
     this.slugT = 0;
     this.t = 0;
     if (!this.hub && !opts.noMusic) Music.play(this.ep.music || 'funk');
@@ -6315,6 +6334,8 @@ class LevelScene {
     ctx.drawImage(darkCanvas, 0, 0);
   }
   drawBubbles(ox, oy) {
+    const placed = [];
+    const hits = (r) => placed.find(q => r.x < q.x + q.w + 2 && r.x + r.w + 2 > q.x && r.y - 8 < q.y + q.h + 2 && r.y + r.h + 2 > q.y - 8);
     for (const b of this.bubbles) {
       const a = b.anchor;
       if (!a) continue;
@@ -6325,7 +6346,14 @@ class LevelScene {
       if (a.who === 'mila') hy -= 3;
       const name = FRIEND_INFO[b.who] ? FRIEND_INFO[b.who].name : (b.anchor && b.anchor.p && b.anchor.p.name) || NPC_NAMES[b.who] || '';
       const col = FRIEND_INFO[b.who] ? FRIEND_INFO[b.who].color : '#c8b8a8';
-      drawSpeechBubble(b.text.slice(0, Math.floor(b.shown)), b.text, hx, hy, name, col, b.t < 4 ? b.t / 4 : 1);
+      // stack bubbles that would overlap: try above the older one, then below it
+      const lay = layoutBubble(b.text, hx, hy, name);
+      for (let k = 0, q = hits(lay); q && k < 4; k++, q = hits(lay)) {
+        const up = q.y - lay.h - 12;
+        lay.y = up >= 26 ? up : Math.min(H - lay.h - 3, q.y + q.h + 12);
+      }
+      placed.push(lay);
+      drawSpeechBubble(b.text.slice(0, Math.floor(b.shown)), b.text, hx, hy, name, col, b.t < 4 ? b.t / 4 : 1, lay);
     }
   }
   drawHUD() {
@@ -6449,19 +6477,23 @@ const SWAP_LINES = {
 };
 const NPC_NAMES = { gus: 'GUS', holloway: 'MR. HOLLOWAY', roz: 'ROZ', sarge: 'SARGE', robot: 'TIDY-BOT', npc: '' };
 
-function drawSpeechBubble(shownText, fullText, hx, hy, name, col, alpha) {
+function layoutBubble(fullText, hx, hy, name) {
   const lines = wrapText(fullText, 150);
-  const shownLines = wrapText(fullText, 150);
   let w = 0;
   for (const l of lines) w = Math.max(w, textWidth(l));
   w += 10; const h = lines.length * 10 + 7 + (name ? 4 : 0);
   let x = Math.round(hx - w / 2), y = Math.round(hy - h - 6);
   x = clamp(x, 3, W - w - 3); y = clamp(y, 26, H - h - 3);
+  return { x, y, w, h, lines };
+}
+function drawSpeechBubble(shownText, fullText, hx, hy, name, col, alpha, lay) {
+  lay = lay || layoutBubble(fullText, hx, hy, name);
+  const { x, y, w, h } = lay, shownLines = lay.lines;
   ctx.globalAlpha = alpha === undefined ? 1 : alpha;
   panel(x, y, w, h, '#fbf6ec', OUTLINE);
-  // tail
+  // tail (only when the bubble sits right above its speaker)
   const tx = clamp(hx, x + 6, x + w - 8);
-  if (hy - 6 > y + h) {
+  if (hy - 6 > y + h && hy - (y + h) < 40) {
     ctx.fillStyle = OUTLINE; ctx.fillRect(tx - 3, y + h - 1, 7, 2); ctx.fillRect(tx - 2, y + h + 1, 5, 2); ctx.fillRect(tx - 1, y + h + 3, 3, 2);
     ctx.fillStyle = '#fbf6ec'; ctx.fillRect(tx - 2, y + h - 2, 5, 2); ctx.fillRect(tx - 1, y + h, 3, 2); ctx.fillRect(tx, y + h + 2, 1, 1);
   }
@@ -7650,14 +7682,15 @@ class Menu {
   draw(cx, y, w) {
     w = w || 220;
     const rowH = 16;
-    const h = 26 + this.items.length * rowH + 6;
+    const head = this.title ? 24 : 10;
+    const h = head + 2 + this.items.length * rowH + 6;
     const x = Math.round(cx - w / 2);
     panel(x, y, w, h, '#22182c', '#ffd23f');
     panel(x + 3, y + 3, w - 6, h - 6, '#2a1e36', '#4a3a5a');
-    drawText(this.title, cx, y + 9, '#ffd23f', { align: 'center' });
+    if (this.title) drawText(this.title, cx, y + 9, '#ffd23f', { align: 'center' });
     this.layout = [];
     this.items.forEach((it, i) => {
-      const iy = y + 24 + i * rowH;
+      const iy = y + head + i * rowH;
       const sel = i === this.sel;
       this.layout[i] = { x: x + 6, y: iy - 3, w: w - 12, h: rowH - 1 };
       if (sel) { ctx.fillStyle = '#3e2c4e'; ctx.fillRect(x + 6, iy - 3, w - 12, rowH - 1); drawText('>', x + 10, iy, '#ffd23f'); }
@@ -7854,7 +7887,7 @@ class OpeningScene {
     const who = role.who, info = FRIEND_INFO[who];
     const frozen = k >= 2.5;
     const kk = frozen ? 2.5 : k;
-    drawMemphis(shade(info.color, -0.55), [info.color, '#ffd23f', '#f6ead8', shade(info.color, 0.4)], frozen ? 0 : this.t, bar * 13, 34);
+    drawMemphis(shade(info.color, -0.55), [info.color, '#ffd23f', '#f6ead8', shade(info.color, 0.4)], frozen ? 0 : this.t, bar * 13, 34, [250, 46, 230, 120]);
     // diagonal stripe
     ctx.fillStyle = shade(info.color, -0.3);
     for (let i = 0; i < 70; i++) ctx.fillRect(0, 150 + i - Math.round(i * 0.3), W, 1);
@@ -8018,8 +8051,8 @@ class TitleScene {
     const seats = [['dex', 140], ['priya', 166], ['juno', 192], ['theo', 218]];
     for (const [who, sx] of seats) blitPerson(ctx, friendSpecId(who, (Save.data.outfits || {})[who] || 0), friendSpecFn(who, (Save.data.outfits || {})[who] || 0), { anim: 'sit', t: this.t + sx, expr: 'happy', blink: ((this.t + sx * 7) % 200) < 6 }, sx, 214, {});
     blitPerson(ctx, friendSpecId('mila', (Save.data.outfits || {}).mila || 0), friendSpecFn('mila', (Save.data.outfits || {}).mila || 0), { anim: 'idle', t: this.t, quirk: 'mila' }, 100, 222, {});
-    blitPerson(ctx, friendSpecId('benny', (Save.data.outfits || {}).benny || 0), friendSpecFn('benny', (Save.data.outfits || {}).benny || 0), { anim: 'idle', t: this.t, quirk: 'benny' }, 270, 222, { flip: true });
-    blitPerson(ctx, 'npc:gus', npcSpecFn('gus'), { anim: 'idle', t: this.t, expr: 'neutral', blink: (this.t % 190) < 6 }, 380, 160, { flip: true });
+    blitPerson(ctx, friendSpecId('benny', (Save.data.outfits || {}).benny || 0), friendSpecFn('benny', (Save.data.outfits || {}).benny || 0), { anim: 'idle', t: this.t, quirk: 'benny' }, 246, 222, { flip: true });
+    blitPerson(ctx, 'npc:gus', npcSpecFn('gus'), { anim: 'idle', t: this.t, expr: 'neutral', blink: (this.t % 190) < 6 }, 58, 222, {});
     ctx.fillStyle = 'rgba(14,8,22,0.55)'; ctx.fillRect(0, 0, W, H);
     drawTitleLogo(W / 2, 12, 99, this.t);
     if (this.mode === 'main') this.menu.draw(362, 124, 200);
@@ -8124,7 +8157,7 @@ class CreditsScene {
       ctx.restore();
       frameRect(14, 40, 210, 190, '#ffd23f');
     } else {
-      drawMemphis('#1e1430', ['#ff4f9a', '#ffd23f', '#4cc9f0', '#7cf29a', '#ff8a5a'], this.t, 77, 34);
+      drawMemphis('#1e1430', ['#ff4f9a', '#ffd23f', '#4cc9f0', '#7cf29a', '#ff8a5a'], this.t, 77, 34, [W / 2 - 150, 0, 300, H]);
     }
     const x0 = this.kind === 'mini' ? 350 : W / 2;
     let y = H + 10 - this.t * this.speed;
@@ -8478,16 +8511,16 @@ class EpisodeBoard {
         continue;
       }
       drawText((i % 6 + 1) + '.', r.x + 5, r.y + 5, un ? '#f4efe6' : '#5a6a62');
-      drawText(un ? ep.title : 'Locked', r.x + 17, r.y + 5, un ? (sel ? '#ffffff' : '#d8e8d0') : '#5a6a62');
+      drawText(un ? fitText(ep.title, r.w - 22) : 'Locked', r.x + 17, r.y + 5, un ? (sel ? '#ffffff' : '#d8e8d0') : '#5a6a62');
       this.drawStatus(i, r.x + 17, r.y + 17);
     }
     // detail strip
     const ep = EPISODES[this.sel];
     if (epUnlocked(this.sel)) {
-      const blurb = ep.blurb || '';
-      drawText(blurb, 340, 204, '#f4efe6', {});
-      drawText(Input.lastDevice === 'touch' ? 'Tap again to roll!' : 'E to roll camera   ESC to close', 340, 230, '#ffd23f', {});
-    } else drawText('Finish the previous episode first.', 340, 204, '#8aa898', {});
+      const lines = wrapText(ep.blurb || '', W - 356).slice(0, 4);
+      lines.forEach((l, k) => drawText(l, 340, 196 + k * 9, '#f4efe6', {}));
+      drawText(Input.lastDevice === 'touch' ? 'Tap again to roll!' : 'E: ROLL CAMERA!', 340, 236, '#ffd23f', {});
+    } else wrapText('Finish the previous episode first.', W - 356).forEach((l, k) => drawText(l, 340, 199 + k * 10, '#8aa898', {}));
   }
   drawStatus(i, x, y) {
     const S = Save.data;
@@ -11415,7 +11448,10 @@ function endCreditLines() {
   add('ALSO STARRING', '#ffd23f', 1, 18);
   add('GUS as the owner of the couch', '#8ac89a'); add('MR. HOLLOWAY as the landlord (Rule 1: no fun)', '#d8b84a'); add('ROZ as the new neighbor with two pianos', '#c88ad8'); add('SARGE as himself', '#6ac84a', 1, 26);
   add('GUEST STARS', '#ffd23f', 1, 18);
-  add('Mr. Fenwick (bathrobe, his own)', '#f6ead8'); add('The Health Inspector (A-minus)', '#f6ead8'); add('The Tidy-Bot 9000 (no longer in custody)', '#f6ead8'); add('Professor Fluffington (rabbit, union)', '#f6ead8'); add('Mr. Vance (left disappointed)', '#f6ead8', 1, 26);
+  add('Mr. Fenwick (bathrobe, his own)', '#f6ead8'); add('The Health Inspector (A-minus)', '#f6ead8'); add('Mrs. Petrakis (sunbathing, moon-bathing)', '#f6ead8');
+  add('Gwendolyn the Wedding Planner (four yogas a day)', '#f6ead8'); add('Professor Fluffington (rabbit, union)', '#f6ead8'); add('Marge (tokens since 1998)', '#f6ead8');
+  add('Tidy-Bot 2.0 (first prize, no longer in custody)', '#f6ead8'); add('Dr. Kessler (hair: returned)', '#f6ead8'); add('Fort Awesome (password: hot chocolate)', '#f6ead8');
+  add('Mr. Vance (left with a muffin)', '#f6ead8', 1, 26);
   add('THE STUDIO AUDIENCE', '#ffd23f', 1, 18);
   add('Every laugh, ooh, aww and round of applause', '#f6ead8'); add('was synthesized live by your browser.', '#f6ead8'); add('We like to think they meant it.', '#f6ead8', 1, 26);
   add('NO IGUANAS WERE HARMED', '#ffd23f', 1, 16); add('(Sarge harmed several plants and one airplane schedule)', '#f6ead8', 1, 26);
@@ -11548,7 +11584,7 @@ try {
   if (hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
 } catch (e) { start({}); }
 // test hook
-window.__gang = { present, Game, Save, Input, LevelScene, EPISODES, FRIENDS, Music, AudioSys, playEpisode, goHub, HubScene, TitleScene, CutsceneScene, compileSong, SONGS };
+window.__gang = { present, Game, Save, Input, LevelScene, EPISODES, FRIENDS, Music, AudioSys, playEpisode, goHub, HubScene, TitleScene, CutsceneScene, CreditsScene, ResultsScene, compileSong, SONGS };
 
 
 })();

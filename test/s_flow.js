@@ -1,7 +1,7 @@
 const path = require('path');
 module.exports = async ({ page, shot, logs }) => {
   await page.addScriptTag({ path: path.join(__dirname, 'bot.js') });
-  await page.addScriptTag({ path: path.join(__dirname, 'sol_ep1.js') });
+  for (const f of require('fs').readdirSync(__dirname).filter(f => /^sol_ep\d+\.js$/.test(f))) await page.addScriptTag({ path: path.join(__dirname, f) });
   const ep = parseInt(process.env.EP || '0', 10);
   const S = (n) => page.evaluate(n => { const G = window.__gang; for (let i = 0; i < n; i++) G.Game.update(); G.Game.draw(); G.present(); }, n);
   const sceneName = () => page.evaluate(() => window.__gang.Game.scene && window.__gang.Game.scene.constructor.name);

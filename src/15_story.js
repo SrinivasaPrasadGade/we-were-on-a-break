@@ -885,7 +885,10 @@ function endCreditLines() {
   add('ALSO STARRING', '#ffd23f', 1, 18);
   add('GUS as the owner of the couch', '#8ac89a'); add('MR. HOLLOWAY as the landlord (Rule 1: no fun)', '#d8b84a'); add('ROZ as the new neighbor with two pianos', '#c88ad8'); add('SARGE as himself', '#6ac84a', 1, 26);
   add('GUEST STARS', '#ffd23f', 1, 18);
-  add('Mr. Fenwick (bathrobe, his own)', '#f6ead8'); add('The Health Inspector (A-minus)', '#f6ead8'); add('The Tidy-Bot 9000 (no longer in custody)', '#f6ead8'); add('Professor Fluffington (rabbit, union)', '#f6ead8'); add('Mr. Vance (left disappointed)', '#f6ead8', 1, 26);
+  add('Mr. Fenwick (bathrobe, his own)', '#f6ead8'); add('The Health Inspector (A-minus)', '#f6ead8'); add('Mrs. Petrakis (sunbathing, moon-bathing)', '#f6ead8');
+  add('Gwendolyn the Wedding Planner (four yogas a day)', '#f6ead8'); add('Professor Fluffington (rabbit, union)', '#f6ead8'); add('Marge (tokens since 1998)', '#f6ead8');
+  add('Tidy-Bot 2.0 (first prize, no longer in custody)', '#f6ead8'); add('Dr. Kessler (hair: returned)', '#f6ead8'); add('Fort Awesome (password: hot chocolate)', '#f6ead8');
+  add('Mr. Vance (left with a muffin)', '#f6ead8', 1, 26);
   add('THE STUDIO AUDIENCE', '#ffd23f', 1, 18);
   add('Every laugh, ooh, aww and round of applause', '#f6ead8'); add('was synthesized live by your browser.', '#f6ead8'); add('We like to think they meant it.', '#f6ead8', 1, 26);
   add('NO IGUANAS WERE HARMED', '#ffd23f', 1, 16); add('(Sarge harmed several plants and one airplane schedule)', '#f6ead8', 1, 26);
