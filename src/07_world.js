@@ -673,7 +673,7 @@ class Room {
         for (let tx = tx0; tx <= tx1; tx++) {
           const c = this.code(tx, ty);
           if (isSolidCode(c)) { if (top >= prevBottom - 0.01 && top < land) { land = top; landTile = c; } }
-          else if (!opts.drop && !b.climbing && (c === TL.ONEWAY || (c === TL.LADDER && this.ladderTop(tx, ty)) || (c === TL.CLIMB && b.who === 'mila' && this.climbTop(tx, ty)))) {
+          else if (!opts.drop && (c === TL.ONEWAY || (!b.climbing && ((c === TL.LADDER && this.ladderTop(tx, ty)) || (c === TL.CLIMB && b.who === 'mila' && this.climbTop(tx, ty)))))) {
             if (prevBottom <= top + 0.01 && top < land) { land = top; landTile = c; }
           }
         }

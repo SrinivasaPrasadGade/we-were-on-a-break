@@ -1,18 +1,17 @@
 const path = require('path');
 module.exports = async ({ page }) => {
   await page.addScriptTag({ path: path.join(__dirname, 'bot.js') });
+  await page.addScriptTag({ path: path.join(__dirname, 'sol_ep5.js') });
   const r = await page.evaluate(() => {
     const G = window.__gang, B = window.__bot;
     G.Game.manual = true;
-    const L = new G.LevelScene(2, { room: 2, noMusic: true });
+    const L = new G.LevelScene(4, { room: 0, noMusic: true });
     G.Game.setScene(L);
     B.step(30);
-    B.as('priya');
-    B.walkTo(4 * 16 + 8); B.walkTo(11 * 16 + 4, { tol: 3 });
-    const f = B.f();
-    const insp = L.room.ents.find(e => e.constructor.name === 'NPC');
-    const best = L.bestInteractable(f);
-    return { f: [f.x, f.y, f.w, f.h], insp: insp && [insp.x, insp.y, insp.w, insp.h, insp.state, insp.gone], ub: insp && insp.useBox(), best: best && [best.ent.constructor.name, best.info], ents: L.room.ents.map(e => e.constructor.name).join(',') };
+    const out = [];
+    B.onStep = () => { const f = B.f(); if (f.who === 'mila' && B.frames % 20 === 0 && B.frames > 900) out.push([B.frames, f.cx.toFixed(1), f.y.toFixed(1), (f.y + f.h).toFixed(1), f.vy.toFixed(2), f.onGround, f.climbing].join(' ')); };
+    try { window.__sol[4][0](B); } catch (e) { out.push('ERR ' + e.message); }
+    return out.slice(0, 80);
   });
-  console.log(JSON.stringify(r, null, 1));
+  console.log(r.join('\n'));
 };

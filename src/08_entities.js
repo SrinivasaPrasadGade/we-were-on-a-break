@@ -75,6 +75,14 @@ class Crate extends Ent {
   // move horizontally, carrying riders; blocked by walls, solids and people
   tryMove(dx) {
     const room = this.room;
+    if (this.p.lockedUntil && !this.level.check(this.p.lockedUntil)) {
+      if (this.lockT === undefined || this.t - this.lockT > 150) {
+        this.lockT = this.t; this.wobble = 10;
+        if (this.p.lockMsg) this.level.hint(this.p.lockNeed || null, this.p.lockMsg, 220);
+        if (this.p.lockSay) this.level.queueLines(this.p.lockSay, 0);
+      }
+      return 0;
+    }
     const before = this.x;
     const skip = f => f.groundEnt === this || f.pushingCrate === this || f.grabbing === this || f.mishapT > 0 || !f.present;
     // shove anybody standing in the way (they stop only against walls)
@@ -383,8 +391,10 @@ class Broken extends Ent {
     super(room, tx, ty, p, p.w || 1, p.h || 1);
     this.kind = p.kind || 'panel'; this.fixed = false; this.progress = 0; this.fixer = null;
   }
+  ready() { return !this.p.cond || this.level.check(this.p.cond); }
   update() {
     super.update();
+    if (!this.ready()) return;
     if (!this.fixed) {
       if (this.fixer && this.fixer.fixing === this) {
         this.progress += 1 / 55;
@@ -405,11 +415,12 @@ class Broken extends Ent {
     this.level.onFixed(this, f);
   }
   interactInfo(f) {
-    if (this.fixed) return null;
-    return f.who === 'theo' ? { ok: true, label: 'Fix (hold)', prio: 4, hold: true } : { ok: false, need: 'theo', label: 'Broken', prio: 1 };
+    if (this.fixed || !this.ready()) return null;
+    return f.who === 'theo' ? { ok: true, label: this.p.label || 'Fix (hold)', prio: 4, hold: true } : { ok: false, need: 'theo', label: 'Broken', prio: 1 };
   }
-  use(f) { if (!this.fixed && f.who === 'theo') { this.fixer = f; f.startFix(this); } }
+  use(f) { if (!this.fixed && f.who === 'theo' && this.ready()) { this.fixer = f; f.startFix(this); } }
   draw(g, ox, oy) {
+    if (!this.ready()) return;
     const x = Math.round(this.x - ox), y = Math.round(this.y - oy);
     drawBrokenArt(g, this.kind, x, y, this.w, this.h, this.fixed, this.t);
     if (!this.fixed && this.progress > 0) {
@@ -465,6 +476,14 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
       break;
     case 'lights':
       R(2, 4, w - 4, 8, '#3a3a3a'); R(4, 6, w - 8, 4, fixed ? '#ffe89a' : '#5a5a4a');
+      break;
+    case 'flame': // flames sitting on top of a grill (crate) once lit; a sad wisp of smoke before
+      if (fixed) for (let i = 2; i < w - 2; i += 3) { const hh = 4 + ((t >> 2) + i * 3) % 5; R(i, h - hh, 2, hh, (i + (t >> 3)) % 2 ? '#ff6a2a' : '#ffd23f'); R(i, h - hh - 1, 1, 1, '#fff2a0'); }
+      else { g.fillStyle = 'rgba(200,200,210,0.5)'; g.fillRect(x + w / 2 - 1 + Math.round(Math.sin(t / 9) * 2), y + h - 6 - (t % 24) / 4, 3, 3); }
+      break;
+    case 'junction':
+      R(2, 1, 12, 14, '#5a606a'); R(3, 2, 10, 12, '#3a3e46'); R(5, 4, 6, 2, fixed ? '#7cf29a' : (blink ? '#ffd23f' : '#5a4a1a'));
+      R(5, 8, 2, 4, '#c83a3a'); R(9, 8, 2, 4, '#3a6ac8'); if (!fixed) { R(12, 12, 3, 1, '#ffd23f'); R(14, 13, 1, 3, '#ffd23f'); }
       break;
     case 'robot':
       drawRobot(g, x + w / 2, y + h, false, fixed ? t : 0, {});
@@ -694,7 +713,7 @@ class Watcher extends Ent {
   }
   onSound() {
     if (this.danceT <= 0) { this.level.say(this.p.voice || 'holloway', pick(this.p.danceLines || ['...is that a bossa nova?', 'Oh, I LOVE this one.', 'My feet! They have a mind of their own!']), this); }
-    this.danceT = 360; this.alertT = 0;
+    this.danceT = this.p.dance || 360; this.alertT = 0;
   }
   draw(g, ox, oy) {
     // vision cone
@@ -966,7 +985,7 @@ class Runner extends Ent {
     if (this.caught) return;
     const last = this.path.length - 1;
     if (!this.moving && this.i < last) {
-      const near = this.lured || (this.trigger > 0 && this.level.friends.some(f => f.present && !f.gone && Math.abs(f.cx - this.px) < this.trigger && Math.abs(f.y + f.h - this.py) < 4 * T));
+      const near = this.lured || (this.p.dash && this.i > 0) || (this.trigger > 0 && this.level.friends.some(f => f.present && !f.gone && Math.abs(f.cx - this.px) < this.trigger && Math.abs(f.y + f.h - this.py) < 4 * T));
       if (near && (!this.p.gate || this.level.check(this.p.gate))) {
         this.lured = false;
         this.moving = true;
@@ -1060,10 +1079,22 @@ class Spring extends Ent {
 
 // ---- Lights for dark rooms -------------------------------------------------------------
 class Light extends Ent {
-  constructor(room, tx, ty, p) { super(room, tx, ty, p, 1, 1); this.r = (p.r || 5) * T; this.kind = p.kind || 'lamp'; }
+  constructor(room, tx, ty, p) { super(room, tx, ty, p, p.kind === 'string' ? (p.w || 4) : 1, 1); this.r = (p.r || 5) * T; this.kind = p.kind || 'lamp'; }
   on() { return !this.link || this.level.check(this.link); }
   draw(g, ox, oy) {
     const x = Math.round(this.x - ox), y = Math.round(this.y - oy), on = this.on();
+    if (this.kind === 'string') {
+      const n = Math.floor(this.w / 8), sag = this.p.sag || 10;
+      const cols = ['#ff5a7a', '#ffd23f', '#5ae0a0', '#4cc9f0', '#c88ad8'];
+      for (let i = 0; i <= this.w; i += 2) { const k = i / this.w; g.fillStyle = '#2a2a2e'; g.fillRect(x + i, y + Math.round(Math.sin(k * Math.PI) * sag), 2, 1); }
+      for (let i = 0; i < n; i++) {
+        const k = (i + 0.5) / n, bx = x + Math.round(k * this.w), by = y + Math.round(Math.sin(k * Math.PI) * sag) + 1;
+        const c = on ? cols[(i + (this.t >> 4)) % cols.length] : '#5a5a60';
+        if (on && ((i + (this.t >> 3)) % 7)) { g.fillStyle = 'rgba(255,230,160,0.25)'; g.fillRect(bx - 2, by - 1, 6, 6); }
+        g.fillStyle = c; g.fillRect(bx, by, 2, 3);
+      }
+      return;
+    }
     if (this.kind === 'hang') { g.fillStyle = '#2a2a2a'; g.fillRect(x + 7, y - 6, 1, 8); g.fillStyle = '#3a3a3a'; g.fillRect(x + 3, y + 2, 10, 4); g.fillStyle = on ? '#ffe89a' : '#4a4a40'; g.fillRect(x + 4, y + 6, 8, 2); }
     else if (this.kind === 'clapper') { g.fillStyle = '#c8a040'; g.fillRect(x + 6, y + 6, 4, 10); g.fillStyle = on ? '#ffe89a' : '#5a5a4a'; g.fillRect(x + 3, y, 10, 7); }
     else { g.fillStyle = '#c8a040'; g.fillRect(x + 6, y + 6, 4, 6); g.fillStyle = on ? '#ffe89a' : '#5a5a4a'; g.fillRect(x + 5, y + 2, 6, 5); }
@@ -1176,6 +1207,18 @@ class Deco extends Ent {
         g.fillRect(x, y, this.w, 2);
         for (let i = 8; i < this.w; i += 64) g.fillRect(x + i, y + 6, 10, 2);
         for (let k = 0; k < 6; k++) { R(8 + k * 52, this.h - 10, 8, 10, '#3a8a3a'); R(6 + k * 52, this.h - 14, 12, 5, ['#ff7aa8', '#ffd23f', '#c88ad8'][k % 3]); }
+        break;
+      }
+      case 'tower': { // rooftop water tower: tank above the catwalk row (p.walk = rows from the top), legs below
+        const wk = (this.p.walk || 6) * T, w = this.w, h = this.h;
+        R(10, 10, w - 20, wk - 24, '#8a5a3a');
+        for (let yy = 16; yy < wk - 14; yy += 14) R(9, yy, w - 18, 2, '#5a5a62');
+        for (let xx = 18; xx < w - 18; xx += 6) R(xx, 12, 1, wk - 28, '#7a4a2e');
+        g.fillStyle = '#5a3a26'; g.beginPath(); g.moveTo(x + 6, y + 12); g.lineTo(x + w / 2, y - 6); g.lineTo(x + w - 6, y + 12); g.closePath(); g.fill();
+        drawText('BELLWEATHER', x + w / 2, y + 30, '#f4e8c8', { g, align: 'center' });
+        R(14, wk - 14, 3, 14, '#4a4a52'); R(w - 17, wk - 14, 3, 14, '#4a4a52');
+        for (const lx of [16, Math.round(w / 3), Math.round(2 * w / 3), w - 19]) R(lx, wk + 6, 3, h - wk - 6, '#4a4a52');
+        for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
         break;
       }
       case 'plane': R(0, 6, this.w, 6, '#f4f4f8'); R(this.w - 8, 0, 6, 8, '#3a6ac8'); R(this.w / 2 - 6, 10, 12, 4, '#d8d8e0'); for (let i = 6; i < this.w - 10; i += 5) R(i, 7, 2, 2, '#4a6a8a'); break;

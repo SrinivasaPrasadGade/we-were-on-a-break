@@ -143,6 +143,20 @@
       B.up(code); B.step(4);
       return B.f();
     },
+    // hold W: jump, grab a ladder overhead and climb to its top
+    jumpClimb(max) {
+      B.down('KeyW');
+      let started = false;
+      for (let i = 0; i < (max || 400); i++) {
+        B.step(1);
+        const f = B.f();
+        if (f.climbing) started = true;
+        if (started && !f.climbing && f.onGround) break;
+        if (!started && i > 60 && f.onGround) { B.up('KeyW'); B.fail('jumpClimb: never grabbed the ladder'); }
+      }
+      B.up('KeyW'); B.step(4);
+      return B.f();
+    },
     use() { B.tap('KeyE', 1); B.step(2); },
     holdUse(n) { B.down('KeyE'); B.step(n || 70); B.up('KeyE'); B.step(2); },
     enter() { B.tap('KeyW', 1); B.step(4); },
