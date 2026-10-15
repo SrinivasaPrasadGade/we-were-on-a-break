@@ -111,6 +111,25 @@
       }
       B.fail('could not board the platform');
     },
+    // push (or pull) a crate until its left edge reaches px
+    pushTo(crate, px, max) {
+      for (let i = 0; i < (max || 1500); i++) {
+        const f = B.f();
+        const d = px - crate.x;
+        if (Math.abs(d) < 1.2) { B.releaseAll(); B.step(3); return; }
+        B.up('KeyA'); B.up('KeyD'); B.up('KeyE');
+        if (d > 0) {
+          if (f.cx > crate.cx) B.fail('pusher on the wrong side');
+          B.down('KeyD');
+        } else {
+          // pull: grab and walk left
+          B.down('KeyE'); if (i > 1) B.down('KeyA');
+        }
+        B.step(1);
+      }
+      B.releaseAll();
+      B.fail('pushTo timeout, crate at ' + crate.x);
+    },
     // climb ladder/pipe up (dir=-1) or down (dir=1) until feet row reaches row or climbing stops
     climb(dir, untilFeetY, max) {
       const code = dir < 0 ? 'KeyW' : 'KeyS';

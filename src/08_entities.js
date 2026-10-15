@@ -594,7 +594,7 @@ class NPC extends Ent {
     this.solid = this.state === 'block';
   }
   npcVoice() { return this.p.voice || 'npc'; }
-  useBox() { return { x: this.x - 18, y: this.y - 4, w: this.w + 36, h: this.h + 8 }; }
+  useBox() { return { x: this.x - 24, y: this.y - 4, w: this.w + 48, h: this.h + 8 }; }
   // used by collision: replace box with full-height wall while blocking
   get collider() { return this.state === 'block' ? this.solidBox : null; }
   interactInfo(f) {
@@ -622,6 +622,19 @@ class NPC extends Ent {
   }
   draw(g, ox, oy) {
     if (this.gone) return;
+    if (this.look === 'pigeons') {
+      const fly = this.state !== 'block';
+      g.globalAlpha = this.fading ? this.fading : 1;
+      for (let i = 0; i < 5; i++) {
+        const px = this.cx - ox - 10 + i * 6 + (fly ? Math.sin(this.t / 5 + i) * 3 : 0);
+        const py = this.y + this.h - oy - (i % 2) * 9 - (fly ? (this.t % 60) * 0.3 + i * 2 : 0) - (i > 2 ? 14 : 0);
+        drawPigeon(g, px, py, (i + (this.t >> 5)) % 2 === 0, this.t + i * 7, fly);
+      }
+      g.globalAlpha = 1;
+      if (this.state === 'block' && this.level.showHints) drawNeedBadge(g, 'juno', Math.round(this.cx - ox) - 2, Math.round(this.y - oy) - 16, this.t);
+      if (this.state === 'block' && this.t % 120 === 0 && this.level.near(this, 200)) AudioSys.sfx('coo');
+      return;
+    }
     const pose = { anim: this.anim, t: this.t, expr: this.expr, blink: (this.t % 180) < 6, talk: this.level.isTalking(this) };
     blitPerson(g, 'npc:' + this.look + (this.seed !== undefined ? '~' + this.seed : ''), npcSpecFn(this.look, this.seed), pose, Math.round(this.cx - ox), Math.round(this.y + this.h - oy), { flip: this.face < 0, alpha: this.fading ? this.fading : 1 });
     if (this.state === 'block' && this.level.showHints) drawNeedBadge(g, this.solve === 'talk' ? 'priya' : 'juno', Math.round(this.cx - ox) - 2, Math.round(this.y - oy) - 10, this.t);
@@ -1006,7 +1019,7 @@ class Hazard extends Ent {
     if (!this.active()) return;
     const box = { x: this.x + 2, y: this.y + this.h - 8, w: this.w - 4, h: 8 };
     if (this.kind === 'steam' || this.kind === 'tesla' || this.kind === 'sprinkler') { box.y = this.y; box.h = this.h; }
-    if (this.kind === 'steam' && (this.t % 120) > 70) return;
+    if (this.kind === 'steam' && !this.p.always && (this.t % 120) > 70) return;
     for (const f of this.level.friends) if (f.present && !f.gone && f.mishapT <= 0 && overlap(box, f)) f.mishap(hazardReaction(this.kind));
   }
   draw(g, ox, oy) {
@@ -1015,7 +1028,7 @@ class Hazard extends Ent {
     for (let i = 0; i < this.w / T; i++) for (let j = 0; j < this.h / T; j++) {
       if (this.kind === 'steam') {
         if (!on) continue;
-        if ((this.t % 120) <= 70) { for (let k = 0; k < 4; k++) { g.fillStyle = 'rgba(255,255,255,' + (0.5 - k * 0.1) + ')'; g.fillRect(x + i * T + 4 + rnd(-2, 2), y + j * T + T - 4 - k * 4 - (this.t % 8), 8, 4); } }
+        if (this.p.always || (this.t % 120) <= 70) { for (let k = 0; k < 4; k++) { g.fillStyle = 'rgba(255,255,255,' + (0.55 - k * 0.1) + ')'; g.fillRect(x + i * T + 3 + Math.round(Math.sin((this.t + k * 9 + i * 5) / 6) * 2), y + j * T + T - 4 - k * 4 - (this.t % 8), 10, 4); } }
         continue;
       }
       const th = Object.assign({}, this.room.theme, { hazard: this.kind });

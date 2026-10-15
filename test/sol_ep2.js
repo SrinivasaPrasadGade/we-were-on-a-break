@@ -93,7 +93,7 @@ window.__sol[1] = [
     B.jumpTo(39 * 16 + 8); B.walkTo(41 * 16 + 8);
     B.jumpTo(45 * 16 + 8); B.walkTo(49 * 16 + 4, { tol: 4 });
     B.jumpTo(51 * 16 + 8); B.walkTo(53 * 16 + 8);
-    B.walkTo(50 * 16 + 8, { tol: 5 }); B.walkTo(50 * 16 + 8, { tol: 3 });
+    B.walkTo(48 * 16 + 8, { tol: 5 }); B.walkTo(50 * 16 + 8, { tol: 3 });
     B.as('juno');
     B.walkTo(25 * 16 + 8);
     B.jumpTo(27 * 16 + 8); B.walkTo(30 * 16 + 8);

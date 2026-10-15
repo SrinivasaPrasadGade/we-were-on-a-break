@@ -104,6 +104,58 @@ STORY[1] = {
   credits: ['Iguana Wrangler: THEO (fired)', 'Hallway Choreography: MR. HOLLOWAY', 'Lettuce: Organic, airborne', 'Greenhouse Security: ROZ'],
 };
 
+// S1E3 ---------------------------------------------------------------------------
+STORY[2] = {
+  previously: [
+    ['set', 'hall'],
+    ['at', 'holloway', 300, { face: -1, expr: 'angry' }],
+    ['prop', 'sargehead', 'iguanaL', 300, 194],
+    ['at', 'theo', 200, { face: 1, expr: 'surprised' }],
+    ['say', 'holloway', 'What? What are you all looking at?'],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'cafe'],
+    ['at', 'dex', 140, { anim: 'sit', y: SIT_Y }], ['at', 'priya', 168, { anim: 'sit', y: SIT_Y }], ['at', 'theo', 230, { face: 1 }],
+    ['at', 'juno', 196, { anim: 'sit', y: SIT_Y }], ['at', 'gus', 382, { face: -1, expr: 'scared' }],
+    ['say', 'gus', 'The health inspector is coming. In ONE HOUR.', { expr: 'scared' }],
+    ['say', 'theo', 'Relax, Gus. What could possibly go wrong?', { expr: 'happy' }],
+    ['fx', 'steam', 355, 140], ['shake', 4], ['sfx', 'crash'],
+    ['expr', 'all', 'surprised'],
+    ['wait', 30],
+    ['say', 'gus', 'THAT. That could go wrong.', { expr: 'angry', anim: 'point' }],
+    ['laugh', 'big'],
+    ['say', 'priya', 'Don\'t panic. I know a guy at the health department.', { anim: 'phone' }],
+    ['say', 'gus', 'You know a guy EVERYWHERE.'],
+    ['say', 'priya', 'I know a guy who knows that.', { expr: 'smug' }],
+    ['laugh', 'laugh'],
+    ['sing', 'juno', 'Health inspector at the door, hide the pigeons, mop the floor!'],
+    ['say', 'gus', 'What pigeons?', { expr: 'scared' }],
+    ['sfx', 'flutter'], ['sfx', 'coo'],
+    ['laugh', 'ooh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'cafe'],
+    ['at', 'inspector', 300, { face: -1, expr: 'neutral' }], ['at', 'gus', 382, { face: -1, expr: 'scared' }],
+    ['at', 'dex', 100, { face: 1 }], ['at', 'mila', 130, { face: 1 }], ['at', 'theo', 160, { face: 1 }], ['at', 'priya', 190, { face: 1 }], ['at', 'juno', 70, { face: 1 }],
+    ['say', 'inspector', 'Clean floors. Working machines. No pigeons.', { expr: 'neutral' }],
+    ['say', 'inspector', 'I\'m giving The Daily Grind... an A.', { expr: 'happy' }],
+    ['say', 'gus', 'An A? I\'m gonna cry. Don\'t look at me.', { expr: 'cry', anim: 'cry' }],
+    ['laugh', 'aww'],
+    ['walk', 'inspector', 210, { wait: true }],
+    ['anim', 'inspector', 'sit'],
+    ['pop', 'benny', 222, 224, 'cheer'],
+    ['say', 'benny', 'TA-DA!', { expr: 'grin' }],
+    ['expr', 'inspector', 'shock'],
+    ['wait', 30],
+    ['say', 'inspector', '...A-minus.', { expr: 'angry' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Pigeon Relocation: JUNO (jazz)', 'Espresso Archaeology: THEO', 'Couch Placement: DEX (gently)', 'Inspector Wrangling: PRIYA (knows Brenda)'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------

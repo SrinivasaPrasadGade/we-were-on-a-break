@@ -4230,7 +4230,7 @@ class NPC extends Ent {
     this.solid = this.state === 'block';
   }
   npcVoice() { return this.p.voice || 'npc'; }
-  useBox() { return { x: this.x - 18, y: this.y - 4, w: this.w + 36, h: this.h + 8 }; }
+  useBox() { return { x: this.x - 24, y: this.y - 4, w: this.w + 48, h: this.h + 8 }; }
   // used by collision: replace box with full-height wall while blocking
   get collider() { return this.state === 'block' ? this.solidBox : null; }
   interactInfo(f) {
@@ -4258,6 +4258,19 @@ class NPC extends Ent {
   }
   draw(g, ox, oy) {
     if (this.gone) return;
+    if (this.look === 'pigeons') {
+      const fly = this.state !== 'block';
+      g.globalAlpha = this.fading ? this.fading : 1;
+      for (let i = 0; i < 5; i++) {
+        const px = this.cx - ox - 10 + i * 6 + (fly ? Math.sin(this.t / 5 + i) * 3 : 0);
+        const py = this.y + this.h - oy - (i % 2) * 9 - (fly ? (this.t % 60) * 0.3 + i * 2 : 0) - (i > 2 ? 14 : 0);
+        drawPigeon(g, px, py, (i + (this.t >> 5)) % 2 === 0, this.t + i * 7, fly);
+      }
+      g.globalAlpha = 1;
+      if (this.state === 'block' && this.level.showHints) drawNeedBadge(g, 'juno', Math.round(this.cx - ox) - 2, Math.round(this.y - oy) - 16, this.t);
+      if (this.state === 'block' && this.t % 120 === 0 && this.level.near(this, 200)) AudioSys.sfx('coo');
+      return;
+    }
     const pose = { anim: this.anim, t: this.t, expr: this.expr, blink: (this.t % 180) < 6, talk: this.level.isTalking(this) };
     blitPerson(g, 'npc:' + this.look + (this.seed !== undefined ? '~' + this.seed : ''), npcSpecFn(this.look, this.seed), pose, Math.round(this.cx - ox), Math.round(this.y + this.h - oy), { flip: this.face < 0, alpha: this.fading ? this.fading : 1 });
     if (this.state === 'block' && this.level.showHints) drawNeedBadge(g, this.solve === 'talk' ? 'priya' : 'juno', Math.round(this.cx - ox) - 2, Math.round(this.y - oy) - 10, this.t);
@@ -4642,7 +4655,7 @@ class Hazard extends Ent {
     if (!this.active()) return;
     const box = { x: this.x + 2, y: this.y + this.h - 8, w: this.w - 4, h: 8 };
     if (this.kind === 'steam' || this.kind === 'tesla' || this.kind === 'sprinkler') { box.y = this.y; box.h = this.h; }
-    if (this.kind === 'steam' && (this.t % 120) > 70) return;
+    if (this.kind === 'steam' && !this.p.always && (this.t % 120) > 70) return;
     for (const f of this.level.friends) if (f.present && !f.gone && f.mishapT <= 0 && overlap(box, f)) f.mishap(hazardReaction(this.kind));
   }
   draw(g, ox, oy) {
@@ -4651,7 +4664,7 @@ class Hazard extends Ent {
     for (let i = 0; i < this.w / T; i++) for (let j = 0; j < this.h / T; j++) {
       if (this.kind === 'steam') {
         if (!on) continue;
-        if ((this.t % 120) <= 70) { for (let k = 0; k < 4; k++) { g.fillStyle = 'rgba(255,255,255,' + (0.5 - k * 0.1) + ')'; g.fillRect(x + i * T + 4 + rnd(-2, 2), y + j * T + T - 4 - k * 4 - (this.t % 8), 8, 4); } }
+        if (this.p.always || (this.t % 120) <= 70) { for (let k = 0; k < 4; k++) { g.fillStyle = 'rgba(255,255,255,' + (0.55 - k * 0.1) + ')'; g.fillRect(x + i * T + 3 + Math.round(Math.sin((this.t + k * 9 + i * 5) / 6) * 2), y + j * T + T - 4 - k * 4 - (this.t % 8), 10, 4); } }
         continue;
       }
       const th = Object.assign({}, this.room.theme, { hazard: this.kind });
@@ -5061,7 +5074,9 @@ class Friend {
     if (this.onGround && !res.landed) this.onGround = false;
 
     // ---- hazards & pits ----
-    if (room.overlapsCode({ x: this.x + 2, y: this.y + this.h - 6, w: this.w - 4, h: 6 }, TL.HAZARD)) this.mishap(hazardReaction(room.theme.hazard));
+    // hazard tiles only bite at floor level (the trap/puddle sits in the bottom of its tile)
+    const hz = room.overlapsCode({ x: this.x + 3, y: this.y + this.h - 6, w: this.w - 6, h: 6 }, TL.HAZARD);
+    if (hz && this.y + this.h > hz.ty * T + 9) this.mishap(hazardReaction(room.theme.hazard));
     if (this.y > room.h + 24) this.mishap('fall');
 
     this.pickAnim(dir);
@@ -5939,6 +5954,7 @@ class LevelScene {
       else if (e instanceof Sensor && e.heard) hole(e.cx - ox, e.cy - oy, 90);
       else if ((e instanceof Cup && !e.got) || (e instanceof Mug && !e.got)) hole(e.cx - ox, e.cy - oy, e instanceof Mug ? 22 : 12, 0.7);
       else if (e instanceof Exit) hole(e.cx - ox, e.y - oy, 26, 0.8);
+      else if ((e instanceof NPC && !e.gone) || e instanceof Watcher || e instanceof Talker) hole(e.cx - ox, e.cy - oy, 30, 0.85);
       else if (e instanceof Broken && !e.fixed) hole(e.cx - ox, e.cy - oy, 16, 0.6);
     }
     g.globalCompositeOperation = 'source-over';
@@ -8460,6 +8476,137 @@ EPISODES.push({
   endLine: 'IGUANA SECURED!',
 });
 
+// =============================================================================
+// S1E3  The Health Inspection
+// =============================================================================
+EPISODES.push({
+  season: 1, num: 3, title: 'The Health Inspection', music: 'panic',
+  blurb: 'The inspector arrives in one hour. The café is... not ready.',
+  rooms: [
+    {
+      name: 'The Daily Grind', slug: 'INT. THE DAILY GRIND - MORNING', theme: 'cafe', shot: 'cafe_day',
+      map: [
+        // 00000000001111111111222222222233333333334444444444555555
+        // 01234567890123456789012345678901234567890123456789012345
+        '########################################################', // 0
+        '########################################################', // 1
+        '........................................................', // 2
+        '........................................................', // 3
+        '..............l...............l...............l.........', // 4
+        '........................................................', // 5
+        '........................................................', // 6
+        '........................................................', // 7
+        '........................................................', // 8
+        '......w...............................c.c...............', // 9
+        '.........................c............====..............', // 10
+        '............c.c................c...........c.c..........', // 11
+        '....c.......====....c......................===..........', // 12
+        '..@.A.c...C.....tcZ..#.E..S.cB.t..P............f.c..X...', // 13
+        '########################################################', // 14
+        '########################################################', // 15
+        '########################################################', // 16
+      ],
+      ents: {
+        C: { t: 'crate', kind: 'couch' },
+        Z: { t: 'plate', w: 3, heavy: true, mark: true, id: 'couch' },
+        E: { t: 'broken', kind: 'espresso', w: 2, h: 2, id: 'espresso', say: [['gus', 'You fixed it?! It hasn\'t worked since the Clinton administration.'], ['theo', 'Which one?'], ['gus', 'Don\'t start.']] },
+        S: { t: 'hazard', kind: 'steam', w: 2, h: 3, link: 'espresso', always: true },
+        P: { t: 'npc', look: 'pigeons', solve: 'music', id: 'pigeons', moveTo: 8, vanish: true, voice: 'npc', name: 'PIGEONS',
+          block: 'Coo. Coo-coo. (Translation: no.)', won: 'COO! (They love jazz.)' },
+        X: { t: 'exit', link: 'couch', lockedMsg: 'FIRE EXIT BLOCKED! MOVE THE COUCH' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['gus', 'Inspector\'s coming! The couch is blocking the fire exit route!'], ['dex', 'The couch? OUR couch? I\'ll be gentle with her.'], ['mila', 'It\'s a couch, Dex.'], ['dex', 'She has a NAME, Mila.']] },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['juno', 'There are PIGEONS in the café.'], ['priya', 'That\'s not a health violation. That\'s a health catastrophe.']], hintKeys: H_KEYS('Pigeons won\'t budge for anyone... except JUNO\'s music (E).', 'Pigeons won\'t budge for anyone... except JUNO\'s music (E).') },
+      },
+      extra: [
+        { t: 'trigger', x: 15, y: 13, w: 2, h: 3, lines: [['gus', 'Put it on the X! And easy on the cushions!']], hint: 'DEX: push the couch onto the X.' },
+        { t: 'trigger', x: 21, y: 13, w: 2, h: 3, lines: [['theo', 'The espresso machine is leaking steam. Like Gus.']], hintKeys: H_KEYS('THEO: hold E at the espresso machine.', 'THEO: hold E at the espresso machine.') },
+      ],
+    },
+    {
+      name: 'The Kitchen', slug: 'INT. THE DAILY GRIND KITCHEN - MORNING', theme: 'kitchen', shot: 'cafe_day',
+      map: [
+        // 000000000011111111112222222222333333333344444444445555555555
+        // 012345678901234567890123456789012345678901234567890123456789
+        '############################################################', // 0
+        '############################################################', // 1
+        '...............................................#...........#', // 2
+        '...............................................#...........#', // 3
+        '...............................................#DDDDD......#', // 4
+        '...............................................#D...D......#', // 5
+        '......o..................l...........l.......D.#D..*D......#', // 6
+        '..............................................DDD.DD.......#', // 7
+        '..............................................V....D.......#', // 8
+        '.............................................DDDDD.#########', // 9
+        '............c.......#########..............c...#...........#', // 10
+        '.........c...cc................c..c.c.....===..#...........#', // 11
+        '............====.................====......................#', // 12
+        '..@.Ac...^..^.x.c.K.F.c.B.c...c.......T.c......G..c.xL.c.X.#', // 13
+        '############################################################', // 14
+        '############################################################', // 15
+        '############################################################', // 16
+      ],
+      ents: {
+        F: { t: 'door', link: 'fridge', h: 3, kind: 'door' },
+        K: { t: 'broken', kind: 'panel', id: 'fridge', say: [['theo', 'Walk-in fridge: open. Smell: unspeakable.']] },
+        B: { t: 'crate', kind: 'box' },
+        V: { t: 'grate', id: 'vent' },
+        G: { t: 'door', link: 'pantry', h: 2, kind: 'door' },
+        L: { t: 'lever', id: 'pantry', say: 'Pantry\'s open! Nobody look at the expiration dates.' },
+        X: { t: 'exit', link: 'pantry' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Mousetraps. Everywhere.'], ['gus', 'They\'re decorative!'], ['priya', 'Gus. Nothing about this is decorative.']] },
+        T: { t: 'trigger', w: 2, h: 3, lines: [['benny', 'The pantry\'s locked from the inside. Through the vent? Classic Benny.'], ['dex', 'You can\'t reach it, little man. I\'ll get you a box.']], hintKeys: H_KEYS('DEX: push the box from the fridge to the shelf so BENNY can reach the vent.', 'DEX: push the box from the fridge to the shelf so BENNY can reach the vent.') },
+      },
+      extra: [
+        { t: 'trigger', x: 15, y: 13, w: 2, h: 3, lines: [['theo', 'Fridge door\'s jammed. My specialty! Well, after toasters. No, wait.']], hintKeys: H_KEYS('THEO: hold E at the fridge panel.', 'THEO: hold E at the fridge panel.') },
+      ],
+    },
+    {
+      name: 'The Basement Storeroom', slug: 'INT. CAFE BASEMENT - MORNING', theme: 'basement', shot: 'cafe_day', dark: true, lightLink: 'fuses',
+      map: [
+        // 0000000000111111111122222222223333333333444444444455555555
+        // 0123456789012345678901234567890123456789012345678901234567
+        '##########################################################', // 0
+        '##########################################################', // 1
+        '............................................#............#', // 2
+        '............................................#............#', // 3
+        '............................................#............#', // 4
+        '............................................#............#', // 5
+        '.......................................c....#............#', // 6
+        '........................c.c.c.........===...#............#', // 7
+        '........................=====...............#............#', // 8
+        '......................c.....................#............#', // 9
+        '.....................##...............c.....#............#', // 10
+        '..................c..##............c.####................#', // 11
+        '..................##.##............#.####................#', // 12
+        '..@.cA..x.c.N..Bc.##.##..c...x.c.x.#.####.T.U..cx..c.F.c.#', // 13
+        '##########################################################', // 14
+        '##########################################################', // 15
+        '##########################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'inspector', solve: 'talk', id: 'stalled', moveTo: -9, vanish: true, face: -1, voice: 'npc', name: 'INSPECTOR', expr: 'smug',
+          block: 'Health Department. I came in the back. I always come in the back.',
+          after: ['Five minutes.'],
+          talk: {
+            q: 'It\'s pitch dark down here. Is that a health violation I smell?',
+            opts: [
+              { t: 'That\'s not a rat! It\'s Benny\'s magic rabbit.', ok: false, r: 'A RABBIT in a café?! Writing that down.' },
+              { t: 'Look over there! A clean surface!', ok: false, r: '...It IS clean. That\'s suspicious.' },
+              { t: 'I know a guy at your office. Brenda? She says you love jazz brunch upstairs.', ok: true, r: 'Brenda said that? ...I DO love jazz brunch. Five minutes.' },
+            ],
+          } },
+        U: { t: 'shutter', h: 3, lift: 2 },
+        F: { t: 'broken', kind: 'fusebox', id: 'fuses', r: 20, say: [['gus', 'LIGHTS! It\'s a miracle!'], ['theo', 'It\'s a fuse, Gus.'], ['gus', 'It\'s a miracle fuse.']] },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['dex', 'Who turned out the lights?'], ['theo', 'The fuse box is in the storage cage. Behind a VERY heavy shutter.']] },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Leave the inspector to me. I know a guy.'], ['mila', 'You know EVERY guy.']], hintKeys: H_KEYS('PRIYA can stall the inspector (E).', 'PRIYA can stall the inspector (E).') },
+        T: { t: 'trigger', w: 2, h: 3, any: true, hintKeys: H_KEYS('DEX lifts the shutter (E). Then switch to THEO to fix the fuses.', 'DEX lifts the shutter (E). Then switch to THEO to fix the fuses.') },
+      },
+      goal: 'fuses',
+    },
+  ],
+  endLine: 'INSPECTION PASSED!',
+});
+
 
 
 // ===== 15_story.js =====
@@ -8567,6 +8714,58 @@ STORY[1] = {
     ['freeze'],
   ],
   credits: ['Iguana Wrangler: THEO (fired)', 'Hallway Choreography: MR. HOLLOWAY', 'Lettuce: Organic, airborne', 'Greenhouse Security: ROZ'],
+};
+
+// S1E3 ---------------------------------------------------------------------------
+STORY[2] = {
+  previously: [
+    ['set', 'hall'],
+    ['at', 'holloway', 300, { face: -1, expr: 'angry' }],
+    ['prop', 'sargehead', 'iguanaL', 300, 194],
+    ['at', 'theo', 200, { face: 1, expr: 'surprised' }],
+    ['say', 'holloway', 'What? What are you all looking at?'],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'cafe'],
+    ['at', 'dex', 140, { anim: 'sit', y: SIT_Y }], ['at', 'priya', 168, { anim: 'sit', y: SIT_Y }], ['at', 'theo', 230, { face: 1 }],
+    ['at', 'juno', 196, { anim: 'sit', y: SIT_Y }], ['at', 'gus', 382, { face: -1, expr: 'scared' }],
+    ['say', 'gus', 'The health inspector is coming. In ONE HOUR.', { expr: 'scared' }],
+    ['say', 'theo', 'Relax, Gus. What could possibly go wrong?', { expr: 'happy' }],
+    ['fx', 'steam', 355, 140], ['shake', 4], ['sfx', 'crash'],
+    ['expr', 'all', 'surprised'],
+    ['wait', 30],
+    ['say', 'gus', 'THAT. That could go wrong.', { expr: 'angry', anim: 'point' }],
+    ['laugh', 'big'],
+    ['say', 'priya', 'Don\'t panic. I know a guy at the health department.', { anim: 'phone' }],
+    ['say', 'gus', 'You know a guy EVERYWHERE.'],
+    ['say', 'priya', 'I know a guy who knows that.', { expr: 'smug' }],
+    ['laugh', 'laugh'],
+    ['sing', 'juno', 'Health inspector at the door, hide the pigeons, mop the floor!'],
+    ['say', 'gus', 'What pigeons?', { expr: 'scared' }],
+    ['sfx', 'flutter'], ['sfx', 'coo'],
+    ['laugh', 'ooh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'cafe'],
+    ['at', 'inspector', 300, { face: -1, expr: 'neutral' }], ['at', 'gus', 382, { face: -1, expr: 'scared' }],
+    ['at', 'dex', 100, { face: 1 }], ['at', 'mila', 130, { face: 1 }], ['at', 'theo', 160, { face: 1 }], ['at', 'priya', 190, { face: 1 }], ['at', 'juno', 70, { face: 1 }],
+    ['say', 'inspector', 'Clean floors. Working machines. No pigeons.', { expr: 'neutral' }],
+    ['say', 'inspector', 'I\'m giving The Daily Grind... an A.', { expr: 'happy' }],
+    ['say', 'gus', 'An A? I\'m gonna cry. Don\'t look at me.', { expr: 'cry', anim: 'cry' }],
+    ['laugh', 'aww'],
+    ['walk', 'inspector', 210, { wait: true }],
+    ['anim', 'inspector', 'sit'],
+    ['pop', 'benny', 222, 224, 'cheer'],
+    ['say', 'benny', 'TA-DA!', { expr: 'grin' }],
+    ['expr', 'inspector', 'shock'],
+    ['wait', 30],
+    ['say', 'inspector', '...A-minus.', { expr: 'angry' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Pigeon Relocation: JUNO (jazz)', 'Espresso Archaeology: THEO', 'Couch Placement: DEX (gently)', 'Inspector Wrangling: PRIYA (knows Brenda)'],
 };
 
 // ---------------------------------------------------------------------------

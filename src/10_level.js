@@ -533,6 +533,7 @@ class LevelScene {
       else if (e instanceof Sensor && e.heard) hole(e.cx - ox, e.cy - oy, 90);
       else if ((e instanceof Cup && !e.got) || (e instanceof Mug && !e.got)) hole(e.cx - ox, e.cy - oy, e instanceof Mug ? 22 : 12, 0.7);
       else if (e instanceof Exit) hole(e.cx - ox, e.y - oy, 26, 0.8);
+      else if ((e instanceof NPC && !e.gone) || e instanceof Watcher || e instanceof Talker) hole(e.cx - ox, e.cy - oy, 30, 0.85);
       else if (e instanceof Broken && !e.fixed) hole(e.cx - ox, e.cy - oy, 16, 0.6);
     }
     g.globalCompositeOperation = 'source-over';

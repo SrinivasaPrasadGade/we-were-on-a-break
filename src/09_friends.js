@@ -199,7 +199,9 @@ class Friend {
     if (this.onGround && !res.landed) this.onGround = false;
 
     // ---- hazards & pits ----
-    if (room.overlapsCode({ x: this.x + 2, y: this.y + this.h - 6, w: this.w - 4, h: 6 }, TL.HAZARD)) this.mishap(hazardReaction(room.theme.hazard));
+    // hazard tiles only bite at floor level (the trap/puddle sits in the bottom of its tile)
+    const hz = room.overlapsCode({ x: this.x + 3, y: this.y + this.h - 6, w: this.w - 6, h: 6 }, TL.HAZARD);
+    if (hz && this.y + this.h > hz.ty * T + 9) this.mishap(hazardReaction(room.theme.hazard));
     if (this.y > room.h + 24) this.mishap('fall');
 
     this.pickAnim(dir);
