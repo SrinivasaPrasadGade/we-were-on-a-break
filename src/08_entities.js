@@ -29,7 +29,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2], display: [1, 2], kmachine: [2, 2], bagstack: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2], display: [1, 2], kmachine: [2, 2], bagstack: [2, 2], mixer: [1, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -156,6 +156,11 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'mixer': // industrial stand mixer on casters
+      R(1, h - 4, w - 2, 4, '#7a828a'); R(3, h - 1, 2, 1, '#2a2a2a'); R(w - 5, h - 1, 2, 1, '#2a2a2a');
+      R(5, 4, 6, h - 8, '#c8ccd4'); R(2, 2, 12, 6, '#d8dce4'); R(3, 3, 3, 2, '#ff8fab');
+      R(3, h - 16, 10, 8, '#e8eef4'); R(4, h - 15, 8, 2, '#f4efe6');
       break;
     case 'bagstack': // lost-luggage pile on a trolley
       R(0, h - 3, w, 3, '#7a828a'); R(2, h - 1, 3, 1, '#2a2a2a'); R(w - 5, h - 1, 3, 1, '#2a2a2a');
@@ -539,6 +544,12 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
     case 'flame': // flames sitting on top of a grill (crate) once lit; a sad wisp of smoke before
       if (fixed) for (let i = 2; i < w - 2; i += 3) { const hh = 4 + ((t >> 2) + i * 3) % 5; R(i, h - hh, 2, hh, (i + (t >> 3)) % 2 ? '#ff6a2a' : '#ffd23f'); R(i, h - hh - 1, 1, 1, '#fff2a0'); }
       else { g.fillStyle = 'rgba(200,200,210,0.5)'; g.fillRect(x + w / 2 - 1 + Math.round(Math.sin(t / 9) * 2), y + h - 6 - (t % 24) / 4, 3, 3); }
+      break;
+    case 'oven': // the big bakery oven
+      R(0, 2, w, h - 2, '#8a8e96'); R(2, 4, w - 4, 5, '#5a5e66'); for (let i = 4; i < w - 4; i += 6) circleFill(x + i + 2, y + 6, 1.5, fixed ? '#ff6a2a' : '#3a3a3a', g);
+      R(3, 11, w - 6, h - 15, '#2a2a30'); R(5, 13, w - 10, h - 19, fixed ? '#c85a1a' : '#1a1a20');
+      if (fixed) { for (let i = 0; i < 3; i++) { R(7 + i * 8, h - 12, 6, 4, '#e8b060'); R(8 + i * 8, h - 13, 4, 1, '#f4d090'); } }
+      R(4, h - 5, w - 8, 2, '#c8ccd2');
       break;
     case 'organ': // church organ: pipes + keyboard; dead keys until fixed
       for (let i = 0; i < 6; i++) { const ph = 10 + (i % 3) * 4 + (i === 2 || i === 3 ? 6 : 0); R(3 + i * 4, 0 + (22 - ph), 3, ph, fixed ? '#e8c860' : '#a8945a'); R(3 + i * 4, 22 - ph, 3, 1, '#fff2c0'); }
