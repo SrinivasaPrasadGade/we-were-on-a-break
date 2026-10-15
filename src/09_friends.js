@@ -102,7 +102,13 @@ class Friend {
     }
     if (this.state === 'talkpose') { this.physicsIdle(); this.anim = 'talk'; return; }
     if (this.state === 'hide') {
-      if (!this.hiding || dir !== 0 || Pr.jump || Pr.act || Pr.up) { this.unhide(); Pr.act = false; Pr.jump = false; Pr.up = false; }
+      // Juno can serenade from her hiding spot
+      if (this.who === 'juno' && this.hiding && Pr.act && !this.hidePlayT) {
+        Pr.act = false; this.hidePlayT = 72;
+        Music.notes([[0, 72, 0.5], [0.5, 76, 0.5], [1, 79, 0.5], [1.5, 84, 1]], 'keytar', 150, 0.8);
+      }
+      if (this.hidePlayT > 0) { this.hidePlayT--; if (this.hidePlayT === 52) L.soundPulse(this); if (this.t % 12 === 0) Particles.notes(this.cx, this.y, 1); }
+      if (!this.hiding || dir !== 0 || Pr.jump || Pr.act || Pr.up) { this.unhide(); this.hidePlayT = 0; Pr.act = false; Pr.jump = false; Pr.up = false; }
       else { this.physicsIdle(); this.anim = 'idle'; return; }
     }
     if (L.lockInput) { dir = 0; }
@@ -402,6 +408,7 @@ class Friend {
     if (L.completing) return;
     this.release(); this.climbing = false; this.grabbing = null;
     if (this.hiding) { this.hiding.occupant = null; this.hiding = null; }
+    if (kind === 'splash' && L.room.theme.weather === 'snow') this.say(pick(['SNOWBALL!', 'In my EAR!', 'Cold! Cold! Cold!']));
     if (this.fixing) { this.fixing.fixer = null; this.fixing = null; }
     this.state = 'mishap'; this.mishapKind = kind; this.mishapT = kind === 'fall' ? 60 : 78;
     this.vx = 0; this.vy = (kind === 'fall') ? 0 : -2.5;

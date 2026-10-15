@@ -772,8 +772,9 @@ class Watcher extends Ent {
       if (overlap(vis, f)) {
         this.alertT = 50;
         this.level.say(this.p.voice || 'holloway', pick(this.lines), this);
-        AudioSys.sfx('whistle');
-        f.mishap('caught');
+        AudioSys.sfx(this.p.hit === 'splash' ? 'poof' : 'whistle');
+        if (this.p.hit === 'splash') Particles.puff(f.cx, f.y + 6, 12);
+        f.mishap(this.p.hit || 'caught');
         break;
       }
     }
@@ -809,7 +810,8 @@ class Hideout extends Ent {
   }
   interactInfo(f) {
     if (this.occupant && this.occupant !== f) return null;
-    return { ok: true, label: f.hiding === this ? 'Come out' : 'Hide', prio: 2 };
+    if (f.hiding === this) return { ok: true, label: f.who === 'juno' ? 'Play' : 'Come out', prio: 2 };
+    return { ok: true, label: 'Hide', prio: 2 };
   }
   use(f) { if (f.hiding === this) f.unhide(); else if (!this.occupant) f.startHide(this); }
   useBox() { return { x: this.x - 2, y: this.y, w: this.w + 4, h: this.h }; }
@@ -828,6 +830,12 @@ class Hideout extends Ent {
       R(3, h - 9, w - 6, 9, '#8a4a2a'); R(2, h - 10, w - 4, 2, '#a85a3a');
       for (let i = 0; i < 9; i++) { const a = -1.2 + i * 0.3; g.fillStyle = i % 2 ? '#3a8a3a' : '#2e7a34'; g.fillRect(Math.round(x + w / 2 + Math.cos(a - 1.57) * 7) - 2, Math.round(y + h - 12 - Math.abs(Math.sin(a)) * 14 - (8 - Math.abs(i - 4) * 2)), 5, 9); }
       eyes(w / 2 - 4, h - 22);
+    } else if (this.kind === 'snowman') {
+      circleFill(x + w / 2, y + h - 8, 8, '#f4f8fc', g); circleFill(x + w / 2, y + h - 21, 6, '#f4f8fc', g);
+      R(w / 2 - 6, h - 3, 12, 3, '#dde8f4'); R(w / 2 - 5, h - 30, 10, 3, '#2a2a2e'); R(w / 2 - 3, h - 34, 6, 4, '#2a2a2e');
+      R(w / 2 + 2, h - 22, 4, 1, '#ff8a2a'); R(w / 2 - 6, h - 15, 12, 2, '#c83a3a');
+      if (!occ) { R(w / 2 - 3, h - 24, 1, 1, '#1b1020'); R(w / 2 + 1, h - 24, 1, 1, '#1b1020'); }
+      eyes(w / 2 - 4, h - 25);
     } else if (this.kind === 'coatrack') {
       R(w / 2 - 1, 2, 2, h - 4, '#5a3a22'); R(w / 2 - 5, h - 2, 10, 2, '#5a3a22');
       R(0, 6, w, 12, '#6a5a8a'); R(1, 8, w - 2, 10, '#7a6a9a'); R(2, 18, w - 4, 6, '#4a5a7a');
@@ -1348,6 +1356,11 @@ class Deco extends Ent {
         R(14, wk - 14, 3, 14, '#4a4a52'); R(w - 17, wk - 14, 3, 14, '#4a4a52');
         for (const lx of [16, Math.round(w / 3), Math.round(2 * w / 3), w - 19]) R(lx, wk + 6, 3, h - wk - 6, '#4a4a52');
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
+        break;
+      }
+      case 'fort': { // a kid's snow fort: block wall with a flag
+        for (let i = 0; i < this.w; i += 8) for (let j = 0; j < this.h; j += 6) R(i + ((j / 6) % 2) * 4, j, 7, 5, j === 0 ? '#ffffff' : '#e4ecf6');
+        R(this.w - 6, -16, 1, 16, '#5a3a22'); R(this.w - 5, -16, 7, 5, '#e8504a');
         break;
       }
       case 'rails': { // the track bed in a subway pit

@@ -573,6 +573,57 @@ STORY[9] = {
   credits: ['Tidy-Bot: TIDY-BOT (playing himself)', 'Hair Restoration: TIDY-BOT', 'Tesla Coils: OFF (thanks, Mila)', 'Lullaby for a Robo-Dog: JUNO'],
 };
 
+// S2E5 (episode 11) ---------------------------------------------------------------
+STORY[10] = {
+  previously: [
+    ['set', 'expo'],
+    ['at', 'judge', 150, { face: 1, expr: 'happy' }], ['at', 'theo', 250, { face: -1, expr: 'cry' }], ['at', 'robot', 280, { face: -1 }],
+    ['say', 'judge', 'First prize goes to... TIDY-BOT!', { anim: 'point', expr: 'happy' }],
+    ['say', 'theo', 'It\'s the robot oil.', { expr: 'cry', anim: 'cry' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'apt3b'],
+    ['at', 'dex', 112, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 140, { anim: 'sit', y: SIT_Y }], ['at', 'benny', 168, { anim: 'sit', y: SIT_Y }],
+    ['at', 'priya', 230, { face: -1 }], ['at', 'theo', 270, { face: -1 }], ['at', 'juno', 310, { face: -1 }],
+    ['say', 'mila', 'SNOW DAY. No work, no deliveries, no anything. I call the couch.', { expr: 'happy' }],
+    ['say', 'dex', 'Hot cocoa. Blankets. A movie where a dog finds its way home.', { expr: 'happy' }],
+    ['say', 'juno', 'Dex, you cry at those.'],
+    ['say', 'dex', 'That\'s the POINT.', { expr: 'cry' }],
+    ['laugh', 'chuckle'],
+    ['sfx', 'ding'],
+    ['say', 'phone', 'It\'s Gus. The boiler died. If the café pipes freeze... I\'m finished.'],
+    ['expr', 'all', 'surprised'],
+    ['say', 'priya', 'Gus needs us.', { expr: 'neutral' }],
+    ['say', 'benny', 'In a BLIZZARD?', { expr: 'scared' }],
+    ['sfx', 'door'], ['shake', 3], ['fx', 'puff', 30, 190],
+    ['say', 'theo', 'I\'ll get my hair dryer.'],
+    ['say', 'mila', 'Why do you even— never mind.'],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'snowcafe'],
+    ['at', 'dex', 140, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 168, { anim: 'sit', y: SIT_Y }], ['at', 'theo', 196, { anim: 'sit', y: SIT_Y }],
+    ['at', 'priya', 92, { face: 1 }], ['at', 'benny', 250, { face: 1 }], ['at', 'juno', 280, { face: 1 }], ['at', 'gus', 382, { face: -1, expr: 'happy' }],
+    ['say', 'gus', 'It\'s warm. The pipes are fine. The café is fine. Because of you six.', { expr: 'happy' }],
+    ['laugh', 'aww'],
+    ['say', 'gus', 'Listen. I\'ve been meaning to tell you something...', { expr: 'sad' }],
+    ['faceall', 'gus'],
+    ['wait', 40],
+    ['say', 'gus', '...The marshmallows are extra.', { expr: 'neutral' }],
+    ['laugh', 'big'],
+    ['say', 'mila', 'GUS.'],
+    ['laugh', 'chuckle'],
+    ['face', 'gus', 1],
+    ['prop', 'gletter', 'letter', 398, 168],
+    ['say', 'gus', '(...I\'ll tell them tomorrow.)', { expr: 'sad' }],
+    ['laugh', 'ooh'],
+    ['freeze'],
+  ],
+  credits: ['Boiler Whisperer: THEO (and his hair dryer)', 'Fort Awesome Negotiations: PRIYA', 'Carol Rescue: JUNO & ETHEL', 'Marshmallows: EXTRA'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------

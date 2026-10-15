@@ -2095,6 +2095,7 @@ const NPC_SPECS = {
   vance: { skin: '#f0c8a8', hair: '#e8d070', hairStyle: 'slick', top: '#2a2a3a', top2: '#f0f0f0', topStyle: 'suit', bottom: '#2a2a3a', bottomStyle: 'pants', shoes: '#111', legH: 11, torsoH: 10, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { shades: '#111', tie: '#c0a020' } },
   judge: { skin: '#c89070', hair: '#c8c8d0', hairStyle: 'bun', top: '#4a3a7a', top2: '#f0e8d8', topStyle: 'suit', bottom: '#2a2a3a', bottomStyle: 'pants', shoes: '#222', legH: 10, torsoH: 10, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { glasses: '#2a2a2a', notebook: true } },
   critic: { skin: '#d8a888', hair: '#3a2a2a', hairStyle: 'short', top: '#5a2a4a', top2: '#e8d8c8', topStyle: 'suit', bottom: '#2a2a2a', bottomStyle: 'pants', shoes: '#111', legH: 9, torsoH: 10, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { beret: '#a02a2a', notebook: true, thinStache: true, mustache: '#3a2a2a' } },
+  snowkid: { skin: '#f0c8a0', hair: '#c87a2a', hairStyle: 'short', top: '#3a7ac8', top2: '#ffd23f', topStyle: 'coat', bottom: '#2a3a5a', bottomStyle: 'pants', shoes: '#5a3a2a', legH: 5, torsoH: 7, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { beanie: '#e8504a', gloves: '#ffd23f' } },
   kid: { skin: '#f0c8a0', hair: '#c87a2a', hairStyle: 'short', top: '#e85a5a', top2: '#fff', topStyle: 'tee', bottom: '#3a5aa8', bottomStyle: 'shorts', shoes: '#fff', legH: 5, torsoH: 6, torsoW: 8, headW: 10, headH: 9, armW: 2, acc: { cap: '#3a5aa8' } },
   bride: { skin: '#d9a07a', hair: '#e8e3f0', hairStyle: 'bouffant', top: '#fbf8f2', top2: '#ffd166', topStyle: 'gown', bottom: '#fbf8f2', bottomStyle: 'gown', shoes: '#fbf8f2', legH: 9, torsoH: 10, torsoW: 10, headW: 10, headH: 10, armW: 2, acc: { pearls: true, veil: true, lipstick: '#b0204a', bouquet: true } },
   groom: { skin: '#f0d0b8', hair: '#9a968e', hairStyle: 'combover', top: '#1d1d26', top2: '#f7f4ee', topStyle: 'tux', bottom: '#1d1d26', bottomStyle: 'pants', shoes: '#0d0d12', legH: 11, torsoH: 10, torsoW: 8, headW: 10, headH: 10, armW: 2, acc: { glasses: '#3a2a1e', bowtie: '#7a1f2b', mustache: '#9a968e', thinStache: true, flower: '#ff6b8a' } },
@@ -4470,8 +4471,9 @@ class Watcher extends Ent {
       if (overlap(vis, f)) {
         this.alertT = 50;
         this.level.say(this.p.voice || 'holloway', pick(this.lines), this);
-        AudioSys.sfx('whistle');
-        f.mishap('caught');
+        AudioSys.sfx(this.p.hit === 'splash' ? 'poof' : 'whistle');
+        if (this.p.hit === 'splash') Particles.puff(f.cx, f.y + 6, 12);
+        f.mishap(this.p.hit || 'caught');
         break;
       }
     }
@@ -4507,7 +4509,8 @@ class Hideout extends Ent {
   }
   interactInfo(f) {
     if (this.occupant && this.occupant !== f) return null;
-    return { ok: true, label: f.hiding === this ? 'Come out' : 'Hide', prio: 2 };
+    if (f.hiding === this) return { ok: true, label: f.who === 'juno' ? 'Play' : 'Come out', prio: 2 };
+    return { ok: true, label: 'Hide', prio: 2 };
   }
   use(f) { if (f.hiding === this) f.unhide(); else if (!this.occupant) f.startHide(this); }
   useBox() { return { x: this.x - 2, y: this.y, w: this.w + 4, h: this.h }; }
@@ -4526,6 +4529,12 @@ class Hideout extends Ent {
       R(3, h - 9, w - 6, 9, '#8a4a2a'); R(2, h - 10, w - 4, 2, '#a85a3a');
       for (let i = 0; i < 9; i++) { const a = -1.2 + i * 0.3; g.fillStyle = i % 2 ? '#3a8a3a' : '#2e7a34'; g.fillRect(Math.round(x + w / 2 + Math.cos(a - 1.57) * 7) - 2, Math.round(y + h - 12 - Math.abs(Math.sin(a)) * 14 - (8 - Math.abs(i - 4) * 2)), 5, 9); }
       eyes(w / 2 - 4, h - 22);
+    } else if (this.kind === 'snowman') {
+      circleFill(x + w / 2, y + h - 8, 8, '#f4f8fc', g); circleFill(x + w / 2, y + h - 21, 6, '#f4f8fc', g);
+      R(w / 2 - 6, h - 3, 12, 3, '#dde8f4'); R(w / 2 - 5, h - 30, 10, 3, '#2a2a2e'); R(w / 2 - 3, h - 34, 6, 4, '#2a2a2e');
+      R(w / 2 + 2, h - 22, 4, 1, '#ff8a2a'); R(w / 2 - 6, h - 15, 12, 2, '#c83a3a');
+      if (!occ) { R(w / 2 - 3, h - 24, 1, 1, '#1b1020'); R(w / 2 + 1, h - 24, 1, 1, '#1b1020'); }
+      eyes(w / 2 - 4, h - 25);
     } else if (this.kind === 'coatrack') {
       R(w / 2 - 1, 2, 2, h - 4, '#5a3a22'); R(w / 2 - 5, h - 2, 10, 2, '#5a3a22');
       R(0, 6, w, 12, '#6a5a8a'); R(1, 8, w - 2, 10, '#7a6a9a'); R(2, 18, w - 4, 6, '#4a5a7a');
@@ -5048,6 +5057,11 @@ class Deco extends Ent {
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
         break;
       }
+      case 'fort': { // a kid's snow fort: block wall with a flag
+        for (let i = 0; i < this.w; i += 8) for (let j = 0; j < this.h; j += 6) R(i + ((j / 6) % 2) * 4, j, 7, 5, j === 0 ? '#ffffff' : '#e4ecf6');
+        R(this.w - 6, -16, 1, 16, '#5a3a22'); R(this.w - 5, -16, 7, 5, '#e8504a');
+        break;
+      }
       case 'rails': { // the track bed in a subway pit
         R(0, 0, this.w, this.h, '#14121a');
         for (let i = 2; i < this.w; i += 10) R(i, 12, 6, 3, '#4a3a2a');
@@ -5232,7 +5246,13 @@ class Friend {
     }
     if (this.state === 'talkpose') { this.physicsIdle(); this.anim = 'talk'; return; }
     if (this.state === 'hide') {
-      if (!this.hiding || dir !== 0 || Pr.jump || Pr.act || Pr.up) { this.unhide(); Pr.act = false; Pr.jump = false; Pr.up = false; }
+      // Juno can serenade from her hiding spot
+      if (this.who === 'juno' && this.hiding && Pr.act && !this.hidePlayT) {
+        Pr.act = false; this.hidePlayT = 72;
+        Music.notes([[0, 72, 0.5], [0.5, 76, 0.5], [1, 79, 0.5], [1.5, 84, 1]], 'keytar', 150, 0.8);
+      }
+      if (this.hidePlayT > 0) { this.hidePlayT--; if (this.hidePlayT === 52) L.soundPulse(this); if (this.t % 12 === 0) Particles.notes(this.cx, this.y, 1); }
+      if (!this.hiding || dir !== 0 || Pr.jump || Pr.act || Pr.up) { this.unhide(); this.hidePlayT = 0; Pr.act = false; Pr.jump = false; Pr.up = false; }
       else { this.physicsIdle(); this.anim = 'idle'; return; }
     }
     if (L.lockInput) { dir = 0; }
@@ -5532,6 +5552,7 @@ class Friend {
     if (L.completing) return;
     this.release(); this.climbing = false; this.grabbing = null;
     if (this.hiding) { this.hiding.occupant = null; this.hiding = null; }
+    if (kind === 'splash' && L.room.theme.weather === 'snow') this.say(pick(['SNOWBALL!', 'In my EAR!', 'Cold! Cold! Cold!']));
     if (this.fixing) { this.fixing.fixer = null; this.fixing = null; }
     this.state = 'mishap'; this.mishapKind = kind; this.mishapT = kind === 'fall' ? 60 : 78;
     this.vx = 0; this.vy = (kind === 'fall') ? 0 : -2.5;
@@ -9943,6 +9964,143 @@ EPISODES.push({
   endLine: 'FIRST PRIZE!',
 });
 
+// =============================================================================
+// S2E5  Snow Day
+// =============================================================================
+EPISODES.push({
+  season: 2, num: 5, title: 'Snow Day', music: 'snow',
+  blurb: 'A blizzard. The café boiler is dead. Gus is acting strange.',
+  rooms: [
+    {
+      name: 'Larkspur Street', slug: 'EXT. LARKSPUR STREET - BLIZZARD', theme: 'snow', shot: 'cafe_snow', openTop: true,
+      map: [
+        // 0000000000111111111122222222223333333333444444444455555555556666
+        // 0123456789012345678901234567890123456789012345678901234567890123
+        '................................................................', // 0
+        '................................................................', // 1
+        '................................................................', // 2
+        '................................................................', // 3
+        '................................................................', // 4
+        '................................................................', // 5
+        '................................................................', // 6
+        '................................................................', // 7
+        '................................................................', // 8
+        '...............................................c*c..............', // 9
+        '..............................................####..............', // 10
+        '................c......c........c....c....c.........c...........', // 11
+        '............c...................................................', // 12
+        '..@....A..c.q.c.....N....Bc.O.Q..E.K...F..h..c.........q.jc.X...', // 13
+        '#########IIIIIII############################IIIIII##############', // 14
+        '################################################################', // 15
+        '################################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'snowkid', solve: 'talk', id: 'kid11', moveTo: -3, face: -1, voice: 'npc', name: 'KID IN A FORT', expr: 'smug',
+          block: 'HALT! This sidewalk belongs to Fort Awesome!',
+          after: ['Fort Awesome thanks you for your business.', 'Gus better have marshmallows.'],
+          talk: {
+            q: 'Nobody passes Fort Awesome without the password.',
+            opts: [
+              { t: 'Please?', ok: false, r: '"Please" is NOT the password. It\'s not even CLOSE.' },
+              { t: 'Free hot chocolate at the Daily Grind. For a week.', ok: true, r: '...With marshmallows? DEAL. Fort Awesome salutes you.' },
+              { t: 'Snowball?', ok: false, r: 'That was LAST week\'s password. Rookie.' },
+            ],
+          } },
+        O: { t: 'npc', look: 'caroler', seed: 1, solve: 'music', id: 'carol1', moveTo: 30, vanish: true, face: -1, voice: 'npc', name: 'CAROLER', expr: 'happy',
+          block: '♪ Fa la la la... la? ♪ We forgot the next part.', won: '♪ LA LA LA LA! ♪ THAT\'S the part!' },
+        Q: { t: 'npc', look: 'caroler', seed: 2, solve: 'music', id: 'carol2', moveTo: 28, vanish: true, face: -1, voice: 'npc', name: 'CAROLER', expr: 'happy',
+          block: '♪ Hmm hmm hmm... ♪ Nobody knows the words.', won: 'A harmony! Ethel, she found the HARMONY!' },
+        K: { t: 'broken', kind: 'snowplow', w: 2, h: 2, id: 'plow11', label: 'Start it (hold)', say: [['theo', 'Snowplow\'s running! Stand back!'], ['dex', 'Theo, nobody\'s driving it.'], ['theo', '...Stand BACK.']] },
+        F: { t: 'door', kind: 'snow', h: 5, link: 'plow11' },
+        X: { t: 'exit' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Gus called. The café boiler is dead. If the pipes freeze, the café\'s finished.'], ['dex', 'Then we march! Through the blizzard! ...Is that a kid in a FORT?']], hintKeys: H_KEYS('PRIYA: negotiate with the kid in the fort (E). Careful on the ice!', 'PRIYA: negotiate with the kid in the fort. Careful on the ice!') },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['juno', 'Carolers! And they forgot the words. Amateurs.'], ['mila', 'Juno, no.'], ['juno', 'Juno, YES.']], hintKeys: H_KEYS('JUNO: play (E) and join the carolers.', 'JUNO: play and join the carolers.') },
+        E: { t: 'trigger', w: 2, h: 3, any: true, lines: [['theo', 'A stalled snowplow! And a snowdrift the size of a bus.'], ['theo', 'Five minutes. Maybe four.']], hintKeys: H_KEYS('THEO: get the snowplow running (hold E).', 'THEO: get the snowplow running (hold E).') },
+      },
+      extra: [
+        { t: 'deco', kind: 'fort', x: 17, y: 13, w: 3, h: 1, back: true },
+      ],
+    },
+    {
+      name: 'The Alley', slug: 'EXT. ALLEY BEHIND THE DAILY GRIND - BLIZZARD', theme: 'alley', shot: 'alley_snow', openTop: true,
+      map: [
+        // 000000000011111111112222222222333333333344444444445555555555
+        // 012345678901234567890123456789012345678901234567890123456789
+        '............................................................', // 0
+        '............................................................', // 1
+        '............................................................', // 2
+        '............................................................', // 3
+        '................................................c.c.c.......', // 4
+        '...............................................M=====.......', // 5
+        '............w............w.............w.......M............', // 6
+        '...............................................M............', // 7
+        '...............................................M............', // 8
+        '...............................................M............', // 9
+        '...............................................M............', // 10
+        '.............c...................c.............M............', // 11
+        '...............................................M............', // 12
+        '..@.j....Ac...S..c..c..W..c..T.c.jU...c..c.V...M..B.c.K..X..', // 13
+        '######IIIIIII###############################################', // 14
+        '############################################################', // 15
+        '############################################################', // 16
+      ],
+      ents: {
+        S: { t: 'hideout', kind: 'snowman' },
+        T: { t: 'hideout', kind: 'snowman' },
+        U: { t: 'hideout', kind: 'snowman' },
+        W: { t: 'watcher', look: 'snowkid', from: -3, to: 3, range: 5, speed: 0.5, dance: 900, hit: 'splash', voice: 'npc', name: 'SNOWBALL SNIPER',
+          lines: ['SNOWBALL!', 'Bullseye!', 'Fort Awesome strikes again!', 'Gotcha! Ha!'],
+          danceLines: ['Is that a jingle? I LOVE jingles!', 'Okay, okay, truce! This song slaps.', 'My feet are dancing on their OWN!'] },
+        V: { t: 'watcher', look: 'snowkid', from: -3, to: 3, range: 5, speed: 0.5, dance: 900, hit: 'splash', voice: 'npc', name: 'SNOWBALL SNIPER',
+          lines: ['Incoming!', 'Snowball to the face!', 'You\'re OUT!'],
+          danceLines: ['A snow day DANCE BREAK!', 'I can\'t throw and dance at the same time!'] },
+        K: { t: 'broken', kind: 'panel', id: 'thaw11', label: 'Thaw (hold)', say: [['theo', 'Lock thawed! Hair dryer, extension cord, and a little prayer.']] },
+        X: { t: 'exit', link: 'thaw11', lockedMsg: 'THE CELLAR LOCK IS FROZEN SOLID' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['mila', 'Snowball snipers. Fort Awesome has an alley division.'], ['benny', 'They can\'t hit what they can\'t see.'], ['juno', 'And nobody throws snowballs during a jingle.']], hintKeys: H_KEYS('Snipers hit anyone they see (except BENNY). Hide in snowmen (E) or let JUNO play!', 'Snipers hit anyone they see (except BENNY). Hide in snowmen or let JUNO play!') },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['theo', 'Cellar door\'s lock is frozen solid. Good thing I brought a hair dryer.'], ['priya', 'Why do you HAVE a hair dryer?'], ['theo', 'For emergencies. And my hair.']], hintKeys: H_KEYS('THEO: thaw the cellar lock (hold E).', 'THEO: thaw the cellar lock (hold E).') },
+      },
+    },
+    {
+      name: 'The Boiler Room', slug: 'INT. DAILY GRIND - BOILER ROOM - NIGHT', theme: 'boiler', shot: 'cafe_snow', dark: true, lightLink: 'boiler11',
+      map: [
+        // 00000000001111111111222222222233333333334444444444555555
+        // 01234567890123456789012345678901234567890123456789012345
+        '########################################################', // 0
+        '########################################################', // 1
+        '.......................#############....................', // 2
+        '.......................#############....................', // 3
+        '....Y.........Y........#############......Y.........Y...', // 4
+        '......................c....c...c...c....................', // 5
+        '.....................==#############....................', // 6
+        '.....................c.#############....................', // 7
+        '....................===#############....................', // 8
+        '...................c...#############....................', // 9
+        '..................===..#############....................', // 10
+        '............c...c...........c...........c.........c.....', // 11
+        '................##......................................', // 12
+        '..@....A..G.....##...V.J..C....S..c...L..B..c.K...x..c..', // 13
+        '########################################################', // 14
+        '########################################################', // 15
+        '########################################################', // 16
+      ],
+      ents: {
+        G: { t: 'talker', look: 'gus', voice: 'gus', face: 1, lines: ['I can\'t feel my mustache.', 'Listen... after this, I need to tell you all something.', 'It\'s nothing. Fix the boiler. We\'ll talk later.'] },
+        V: { t: 'lever', kind: 'valve', id: 'valve11', say: 'Steam valve shut! I\'m basically a plumber now.' },
+        S: { t: 'hazard', kind: 'steam', h: 3, link: 'valve11', always: true },
+        J: { t: 'door', kind: 'door', h: 3, link: 'pilot11' },
+        C: { t: 'crate', kind: 'boxes2' },
+        L: { t: 'lever', id: 'pilot11', say: 'Pilot light\'s lit! And the door latch was right here. Magic!' },
+        K: { t: 'broken', kind: 'boiler', w: 2, h: 3, id: 'boiler11', say: [['theo', 'Boiler\'s ALIVE! Heat in three, two, one...'], ['gus', 'I can feel my mustache again!']] },
+        Y: { t: 'light', kind: 'hang', r: 5 },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['gus', 'You came. In a BLIZZARD. You idiots. Thank you.'], ['benny', 'The boiler room door is latched from the inside. But there\'s a duct up top...']], hintKeys: H_KEYS('BENNY: climb the shelves and crawl through the duct.', 'BENNY: climb the shelves and crawl through the duct.') },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['theo', 'There she is. The old girl. Built in 1952. Fixed by me in... let\'s say now.']], hintKeys: H_KEYS('Shut the steam VALVE, DEX clears the water heater, THEO fixes the boiler.', 'Shut the steam valve, DEX clears the water heater, THEO fixes the boiler.') },
+      },
+      goal: 'boiler11',
+    },
+  ],
+  endLine: 'HEAT IS ON!',
+});
+
 
 
 // ===== 15_story.js =====
@@ -10519,6 +10677,57 @@ STORY[9] = {
     ['freeze'],
   ],
   credits: ['Tidy-Bot: TIDY-BOT (playing himself)', 'Hair Restoration: TIDY-BOT', 'Tesla Coils: OFF (thanks, Mila)', 'Lullaby for a Robo-Dog: JUNO'],
+};
+
+// S2E5 (episode 11) ---------------------------------------------------------------
+STORY[10] = {
+  previously: [
+    ['set', 'expo'],
+    ['at', 'judge', 150, { face: 1, expr: 'happy' }], ['at', 'theo', 250, { face: -1, expr: 'cry' }], ['at', 'robot', 280, { face: -1 }],
+    ['say', 'judge', 'First prize goes to... TIDY-BOT!', { anim: 'point', expr: 'happy' }],
+    ['say', 'theo', 'It\'s the robot oil.', { expr: 'cry', anim: 'cry' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'apt3b'],
+    ['at', 'dex', 112, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 140, { anim: 'sit', y: SIT_Y }], ['at', 'benny', 168, { anim: 'sit', y: SIT_Y }],
+    ['at', 'priya', 230, { face: -1 }], ['at', 'theo', 270, { face: -1 }], ['at', 'juno', 310, { face: -1 }],
+    ['say', 'mila', 'SNOW DAY. No work, no deliveries, no anything. I call the couch.', { expr: 'happy' }],
+    ['say', 'dex', 'Hot cocoa. Blankets. A movie where a dog finds its way home.', { expr: 'happy' }],
+    ['say', 'juno', 'Dex, you cry at those.'],
+    ['say', 'dex', 'That\'s the POINT.', { expr: 'cry' }],
+    ['laugh', 'chuckle'],
+    ['sfx', 'ding'],
+    ['say', 'phone', 'It\'s Gus. The boiler died. If the café pipes freeze... I\'m finished.'],
+    ['expr', 'all', 'surprised'],
+    ['say', 'priya', 'Gus needs us.', { expr: 'neutral' }],
+    ['say', 'benny', 'In a BLIZZARD?', { expr: 'scared' }],
+    ['sfx', 'door'], ['shake', 3], ['fx', 'puff', 30, 190],
+    ['say', 'theo', 'I\'ll get my hair dryer.'],
+    ['say', 'mila', 'Why do you even— never mind.'],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'snowcafe'],
+    ['at', 'dex', 140, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 168, { anim: 'sit', y: SIT_Y }], ['at', 'theo', 196, { anim: 'sit', y: SIT_Y }],
+    ['at', 'priya', 92, { face: 1 }], ['at', 'benny', 250, { face: 1 }], ['at', 'juno', 280, { face: 1 }], ['at', 'gus', 382, { face: -1, expr: 'happy' }],
+    ['say', 'gus', 'It\'s warm. The pipes are fine. The café is fine. Because of you six.', { expr: 'happy' }],
+    ['laugh', 'aww'],
+    ['say', 'gus', 'Listen. I\'ve been meaning to tell you something...', { expr: 'sad' }],
+    ['faceall', 'gus'],
+    ['wait', 40],
+    ['say', 'gus', '...The marshmallows are extra.', { expr: 'neutral' }],
+    ['laugh', 'big'],
+    ['say', 'mila', 'GUS.'],
+    ['laugh', 'chuckle'],
+    ['face', 'gus', 1],
+    ['prop', 'gletter', 'letter', 398, 168],
+    ['say', 'gus', '(...I\'ll tell them tomorrow.)', { expr: 'sad' }],
+    ['laugh', 'ooh'],
+    ['freeze'],
+  ],
+  credits: ['Boiler Whisperer: THEO (and his hair dryer)', 'Fort Awesome Negotiations: PRIYA', 'Carol Rescue: JUNO & ETHEL', 'Marshmallows: EXTRA'],
 };
 
 // ---------------------------------------------------------------------------
