@@ -314,7 +314,7 @@ class Friend {
     this.quip();
   }
   musicWanted() {
-    const R = 7 * T;
+    const R = this.level.soundRadius();
     for (const e of this.level.room.ents) {
       if (!e.onSound) continue;
       const d = Math.hypot(e.cx - this.cx, e.cy - (this.y + this.h / 2));

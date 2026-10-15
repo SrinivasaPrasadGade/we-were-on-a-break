@@ -191,10 +191,12 @@ class LevelScene {
     for (const e of this.room.ents) if (e instanceof Exit && f.cx > e.x && f.cx < e.x + e.w && f.y + f.h > e.y + 8 && f.y < e.y + e.h) return e;
     return null;
   }
+  // Juno's music reach; stage speakers (room.def.amp flag) amplify it
+  soundRadius() { return (this.room.def.amp && this.check(this.room.def.amp) ? 13 : 7) * T; }
   soundPulse(f) {
-    const R = 7 * T;
+    const R = this.soundRadius();
     this.pulses = this.pulses || [];
-    this.pulses.push({ x: f.cx, y: f.y + 8, t: 0 });
+    this.pulses.push({ x: f.cx, y: f.y + 8, t: 0, big: R > 7 * T });
     for (const e of this.room.ents) {
       if (!e.onSound) continue;
       const d = Math.hypot(e.cx - f.cx, e.cy - (f.y + f.h / 2));
@@ -477,8 +479,8 @@ class LevelScene {
     }
     // sound pulses
     if (this.pulses) for (const p of this.pulses) {
-      const rr = p.t * 3 + 6;
-      ctx.strokeStyle = 'rgba(76,201,240,' + (1 - p.t / 40) * 0.7 + ')'; ctx.lineWidth = 1;
+      const rr = p.t * (p.big ? 5.4 : 3) + 6;
+      ctx.strokeStyle = (p.big ? 'rgba(255,210,63,' : 'rgba(76,201,240,') + (1 - p.t / 40) * 0.7 + ')'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(Math.round(p.x - ox), Math.round(p.y - oy), rr, 0, TAU); ctx.stroke();
       ctx.beginPath(); ctx.arc(Math.round(p.x - ox), Math.round(p.y - oy), rr * 0.6, 0, TAU); ctx.stroke();
     }

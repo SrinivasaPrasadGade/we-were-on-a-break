@@ -29,7 +29,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2], display: [1, 2], kmachine: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -156,6 +156,16 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'display': // Robo-Butler display mannequin on a plinth
+      R(1, h - 6, w - 2, 6, '#3a465a'); R(2, h - 5, w - 4, 1, '#5a6a8a');
+      R(4, 8, 8, 13, '#9aa6b8'); R(5, 9, 6, 2, '#4cc9f0'); R(3, 2, 10, 7, '#c8d0dc'); R(5, 4, 2, 2, '#ff4a3a'); R(9, 4, 2, 2, '#ff4a3a');
+      R(1, 10, 3, 8, '#9aa6b8'); R(12, 10, 3, 8, '#9aa6b8'); R(6, 0, 4, 2, '#7a8698');
+      break;
+    case 'kmachine': // the Kessler-Matic 9000: chrome, tubes, and ego
+      R(0, 4, w, h - 4, '#b8c0cc'); R(2, 6, w - 4, h - 10, '#8a94a4'); R(4, 8, 10, 8, '#2a3448'); R(5, 9, 8, 2, (t >> 3) % 2 ? '#7cf29a' : '#2a8a4a');
+      R(w - 12, 8, 8, 12, '#c83a3a'); R(w - 10, 2, 4, 6, '#d8dce4'); circleFill(x + w - 8, y + 2, 3, '#ffd23f', g);
+      drawText('K-9000', x + w / 2, y + h - 11, '#1b1020', { g, align: 'center' });
       break;
     case 'botcrate': // Theo's invention, crated
       R(0, 0, w, h, '#a87a4a'); R(1, 1, w - 2, h - 2, '#b88a5a');

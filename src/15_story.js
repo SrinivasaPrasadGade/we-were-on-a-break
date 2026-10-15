@@ -519,6 +519,60 @@ STORY[8] = {
   credits: ['Tokens: MARGE (since 1998)', 'Commuter Choir: JUNO & CAR 3', 'Freight: DEX (four hundred pounds)', 'Archive: THEO (one very full crate)'],
 };
 
+// S2E4 (episode 10) ---------------------------------------------------------------
+STORY[9] = {
+  previously: [
+    ['set', 'cafe'],
+    ['at', 'gus', 382, { face: -1, expr: 'angry' }], ['at', 'robot', 352, { face: 1 }], ['at', 'theo', 250, { face: 1 }],
+    ['say', 'robot', 'MESS DETECTED. MUSTACHE: UNTIDY.'],
+    ['say', 'gus', 'Don\'t you DARE.', { expr: 'angry' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'expo'],
+    ['at', 'theo', 260, { face: 1, expr: 'happy' }], ['at', 'robot', 290, { face: -1 }],
+    ['at', 'dex', 90, { face: 1 }], ['at', 'mila', 120, { face: 1 }], ['at', 'priya', 60, { face: 1 }], ['at', 'juno', 150, { face: 1 }], ['at', 'benny', 180, { face: 1 }],
+    ['say', 'theo', 'The City Invention Expo. Tidy-Bot\'s big day.', { expr: 'happy' }],
+    ['enter', 'inventor', 'R', 360, { wait: true, expr: 'smug' }],
+    ['say', 'inventor', 'Theodore. Still building toasters?', { expr: 'smug' }],
+    ['say', 'theo', 'My toaster has NEVER worked.', { expr: 'angry' }],
+    ['say', 'inventor', 'I know.', { expr: 'smug' }],
+    ['laugh', 'laugh'],
+    ['say', 'inventor', 'Behold the future: the Kessler-Matic 9000. It does EVERYTHING.'],
+    ['sfx', 'robot'],
+    ['say', 'robot', 'MESS DETECTED. HAIR: NOT REAL.'],
+    ['walk', 'robot', 340, { wait: true }],
+    ['fx', 'puff', 360, 186], ['sfx', 'poof'],
+    ['expr', 'inventor', 'shock'],
+    ['say', 'inventor', 'MY HAIR!', { expr: 'shock' }],
+    ['laugh', 'big'],
+    ['exit', 'robot', 'R'],
+    ['say', 'theo', '...Tidy-Bot? TIDY-BOT! Come back with his hair!', { expr: 'scared' }],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'expo'],
+    ['at', 'judge', 150, { face: 1, expr: 'happy' }],
+    ['at', 'theo', 250, { face: -1 }], ['at', 'robot', 280, { face: -1 }],
+    ['at', 'dex', 320, { face: -1 }], ['at', 'mila', 350, { face: -1 }], ['at', 'priya', 380, { face: -1 }], ['at', 'juno', 410, { face: -1 }], ['at', 'benny', 440, { face: -1 }],
+    ['say', 'judge', 'And first prize at the City Invention Expo goes to... TIDY-BOT!', { anim: 'point', expr: 'happy' }],
+    ['laugh', 'applause'],
+    ['say', 'theo', 'I\'m not crying. It\'s the robot oil.', { expr: 'cry', anim: 'cry' }],
+    ['say', 'dex', 'Welcome to the club, buddy.', { expr: 'cry' }],
+    ['laugh', 'aww'],
+    ['enter', 'inventor', 'L', 90, { wait: true, expr: 'angry' }],
+    ['say', 'inventor', 'This isn\'t over, Theodore!', { expr: 'angry', anim: 'point' }],
+    ['sfx', 'robot'],
+    ['say', 'robot', 'LOST AND FOUND: ONE HAIR. RETURNING.'],
+    ['fx', 'puff', 96, 186],
+    ['say', 'inventor', '...Thank you.', { expr: 'sad' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Tidy-Bot: TIDY-BOT (playing himself)', 'Hair Restoration: TIDY-BOT', 'Tesla Coils: OFF (thanks, Mila)', 'Lullaby for a Robo-Dog: JUNO'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------

@@ -2093,6 +2093,7 @@ const NPC_SPECS = {
   gateagent: { skin: '#e8b898', hair: '#a85a2a', hairStyle: 'bun', top: '#1e4a7a', top2: '#f0f0f0', topStyle: 'uniform', bottom: '#1e4a7a', bottomStyle: 'skirt', shoes: '#111', legH: 9, torsoH: 9, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { scarf: '#e0a020' } },
   pigeonlady: { skin: '#d8b090', hair: '#c8c8c8', hairStyle: 'bun', top: '#8a6a9a', top2: '#d8c8a8', topStyle: 'coat', bottom: '#5a4a5a', bottomStyle: 'skirt', shoes: '#3a2a2a', legH: 9, torsoH: 10, torsoW: 10, headW: 10, headH: 10, armW: 2, acc: { shawl: '#a88ab8', pigeonHat: true } },
   vance: { skin: '#f0c8a8', hair: '#e8d070', hairStyle: 'slick', top: '#2a2a3a', top2: '#f0f0f0', topStyle: 'suit', bottom: '#2a2a3a', bottomStyle: 'pants', shoes: '#111', legH: 11, torsoH: 10, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { shades: '#111', tie: '#c0a020' } },
+  judge: { skin: '#c89070', hair: '#c8c8d0', hairStyle: 'bun', top: '#4a3a7a', top2: '#f0e8d8', topStyle: 'suit', bottom: '#2a2a3a', bottomStyle: 'pants', shoes: '#222', legH: 10, torsoH: 10, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { glasses: '#2a2a2a', notebook: true } },
   critic: { skin: '#d8a888', hair: '#3a2a2a', hairStyle: 'short', top: '#5a2a4a', top2: '#e8d8c8', topStyle: 'suit', bottom: '#2a2a2a', bottomStyle: 'pants', shoes: '#111', legH: 9, torsoH: 10, torsoW: 9, headW: 10, headH: 10, armW: 2, acc: { beret: '#a02a2a', notebook: true, thinStache: true, mustache: '#3a2a2a' } },
   kid: { skin: '#f0c8a0', hair: '#c87a2a', hairStyle: 'short', top: '#e85a5a', top2: '#fff', topStyle: 'tee', bottom: '#3a5aa8', bottomStyle: 'shorts', shoes: '#fff', legH: 5, torsoH: 6, torsoW: 8, headW: 10, headH: 9, armW: 2, acc: { cap: '#3a5aa8' } },
   bride: { skin: '#d9a07a', hair: '#e8e3f0', hairStyle: 'bouffant', top: '#fbf8f2', top2: '#ffd166', topStyle: 'gown', bottom: '#fbf8f2', bottomStyle: 'gown', shoes: '#fbf8f2', legH: 9, torsoH: 10, torsoW: 10, headW: 10, headH: 10, armW: 2, acc: { pearls: true, veil: true, lipstick: '#b0204a', bouquet: true } },
@@ -3726,7 +3727,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2], display: [1, 2], kmachine: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -3853,6 +3854,16 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'display': // Robo-Butler display mannequin on a plinth
+      R(1, h - 6, w - 2, 6, '#3a465a'); R(2, h - 5, w - 4, 1, '#5a6a8a');
+      R(4, 8, 8, 13, '#9aa6b8'); R(5, 9, 6, 2, '#4cc9f0'); R(3, 2, 10, 7, '#c8d0dc'); R(5, 4, 2, 2, '#ff4a3a'); R(9, 4, 2, 2, '#ff4a3a');
+      R(1, 10, 3, 8, '#9aa6b8'); R(12, 10, 3, 8, '#9aa6b8'); R(6, 0, 4, 2, '#7a8698');
+      break;
+    case 'kmachine': // the Kessler-Matic 9000: chrome, tubes, and ego
+      R(0, 4, w, h - 4, '#b8c0cc'); R(2, 6, w - 4, h - 10, '#8a94a4'); R(4, 8, 10, 8, '#2a3448'); R(5, 9, 8, 2, (t >> 3) % 2 ? '#7cf29a' : '#2a8a4a');
+      R(w - 12, 8, 8, 12, '#c83a3a'); R(w - 10, 2, 4, 6, '#d8dce4'); circleFill(x + w - 8, y + 2, 3, '#ffd23f', g);
+      drawText('K-9000', x + w / 2, y + h - 11, '#1b1020', { g, align: 'center' });
       break;
     case 'botcrate': // Theo's invention, crated
       R(0, 0, w, h, '#a87a4a'); R(1, 1, w - 2, h - 2, '#b88a5a');
@@ -5433,7 +5444,7 @@ class Friend {
     this.quip();
   }
   musicWanted() {
-    const R = 7 * T;
+    const R = this.level.soundRadius();
     for (const e of this.level.room.ents) {
       if (!e.onSound) continue;
       const d = Math.hypot(e.cx - this.cx, e.cy - (this.y + this.h / 2));
@@ -5898,10 +5909,12 @@ class LevelScene {
     for (const e of this.room.ents) if (e instanceof Exit && f.cx > e.x && f.cx < e.x + e.w && f.y + f.h > e.y + 8 && f.y < e.y + e.h) return e;
     return null;
   }
+  // Juno's music reach; stage speakers (room.def.amp flag) amplify it
+  soundRadius() { return (this.room.def.amp && this.check(this.room.def.amp) ? 13 : 7) * T; }
   soundPulse(f) {
-    const R = 7 * T;
+    const R = this.soundRadius();
     this.pulses = this.pulses || [];
-    this.pulses.push({ x: f.cx, y: f.y + 8, t: 0 });
+    this.pulses.push({ x: f.cx, y: f.y + 8, t: 0, big: R > 7 * T });
     for (const e of this.room.ents) {
       if (!e.onSound) continue;
       const d = Math.hypot(e.cx - f.cx, e.cy - (f.y + f.h / 2));
@@ -6184,8 +6197,8 @@ class LevelScene {
     }
     // sound pulses
     if (this.pulses) for (const p of this.pulses) {
-      const rr = p.t * 3 + 6;
-      ctx.strokeStyle = 'rgba(76,201,240,' + (1 - p.t / 40) * 0.7 + ')'; ctx.lineWidth = 1;
+      const rr = p.t * (p.big ? 5.4 : 3) + 6;
+      ctx.strokeStyle = (p.big ? 'rgba(255,210,63,' : 'rgba(76,201,240,') + (1 - p.t / 40) * 0.7 + ')'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(Math.round(p.x - ox), Math.round(p.y - oy), rr, 0, TAU); ctx.stroke();
       ctx.beginPath(); ctx.arc(Math.round(p.x - ox), Math.round(p.y - oy), rr * 0.6, 0, TAU); ctx.stroke();
     }
@@ -6903,6 +6916,7 @@ const ACTOR_INFO = {
   gateagent: { name: 'GATE AGENT', color: '#7aa8e0', voice: 'npc' },
   vance: { name: 'MR. VANCE', color: '#e8d070', voice: 'npc' },
   critic: { name: 'THE CRITIC', color: '#c86a9a', voice: 'npc' },
+  judge: { name: 'THE JUDGE', color: '#b8a8e8', voice: 'npc' },
   agent: { name: 'AGENT', color: '#c86a6a', voice: 'npc' },
   security: { name: 'SECURITY', color: '#9a9aaa', voice: 'npc' },
   officer: { name: 'OFFICER', color: '#6a9ad8', voice: 'npc' },
@@ -9777,6 +9791,158 @@ EPISODES.push({
   endLine: 'BOT RETRIEVED!',
 });
 
+// =============================================================================
+// S2E4  The Invention Expo
+// =============================================================================
+EPISODES.push({
+  season: 2, num: 4, title: 'The Invention Expo', music: 'expo',
+  blurb: 'Tidy-Bot vs. the Kessler-Matic 9000. Tidy-Bot has left the booth.',
+  rooms: [
+    {
+      name: 'The Expo Floor', slug: 'INT. CITY INVENTION EXPO - DAY', theme: 'expo', shot: 'expo_day',
+      map: [
+        // 0000000000111111111122222222223333333333444444444455555555556666
+        // 0123456789012345678901234567890123456789012345678901234567890123
+        '################################################################', // 0
+        '################################################################', // 1
+        '...................................#.....########...............', // 2
+        '...................................#.....########.....c.*c......', // 3
+        '...................................#.....########....M====......', // 4
+        '...................................#.....########....M..........', // 5
+        '...................................#.....########....M..........', // 6
+        '...................................#.....########....M..........', // 7
+        '...................................#.....########....M..........', // 8
+        '......................n........n...#.....########.n..M..........', // 9
+        '...................................#.....########....M..........', // 10
+        '..........c..............c......c....c............c..M.....c....', // 11
+        '.....................................................M..........', // 12
+        '..@.....A.....R..c..c..cB..N..c....S..E.c.C..c.......M.......X..', // 13
+        '################}}}}}}}}########################################', // 14
+        '################################################################', // 15
+        '################################################################', // 16
+      ],
+      ents: {
+        R: { t: 'runner', kind: 'robot', voice: 'robot', path: [[14, 13], [22, 13], [30, 13], [38, 13], [47, 13], [63, 13]], near: 5, speed: 2.6, vanish: true,
+          taunts: ['BEEP. CLEANING.', 'MESS DETECTED: EVERYTHING.', 'BOOP. BOOP. BOOP.', 'TIDY-BOT IS FREE.'] },
+        N: { t: 'npc', look: 'security', solve: 'talk', id: 'guard10', moveTo: 10, vanish: true, face: -1, voice: 'npc', name: 'EXPO SECURITY', expr: 'neutral',
+          block: 'Exhibitors only past this point.',
+          talk: {
+            q: 'Badge? Lanyard? Anything with a barcode on it?',
+            opts: [
+              { t: 'Our badge was in the robot. The robot left.', ok: false, r: 'That\'s the saddest thing I\'ve heard today. Still no.' },
+              { t: 'We ARE the invention.', ok: false, r: 'Then you need a badge AND a patent.' },
+              { t: 'Dr. Kessler sent us. He wants his lab coat steamed. AGAIN.', ok: true, r: 'Ugh. Kessler. Go, before he yells at me again.' },
+            ],
+          } },
+        S: { t: 'sounddoor', id: 'vdoor10', h: 3 },
+        C: { t: 'crate', kind: 'display' },
+        X: { t: 'exit' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'TIDY-BOT! Come back! You\'re supposed to be WINNING!'], ['mila', 'He\'s fast. I respect him.'], ['dex', 'He\'s got the right idea. Expos are exhausting.']] },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Security. Let me handle it.']], hintKeys: H_KEYS('PRIYA: talk your way past security (E).', 'PRIYA: talk your way past security (E).') },
+        E: { t: 'trigger', w: 2, h: 3, any: true, lines: [['juno', '"Kessler\'s Voice-Activated Door." It opens for a perfect high C.'], ['juno', 'Stand back. I was BORN for this.'], ['dex', 'And there\'s a robot butler stuck in that aisle.']], hintKeys: H_KEYS('JUNO: sing to the door (E). DEX: push the Robo-Butler out of the aisle.', 'JUNO: sing to the door (E). DEX: push the Robo-Butler out of the aisle.') },
+      },
+    },
+    {
+      name: 'Kessler\'s Booth', slug: 'INT. EXPO - KESSLER LABS BOOTH - DAY', theme: 'expo', shot: 'expo_day',
+      map: [
+        // 00000000001111111111222222222233333333334444444444555555
+        // 01234567890123456789012345678901234567890123456789012345
+        '########################################################', // 0
+        '########################################################', // 1
+        '......................#......................#..........', // 2
+        '......................#......................#..........', // 3
+        '.................ccL..#......................#..........', // 4
+        '................M===..#......................#..........', // 5
+        '................M.....#......................#..........', // 6
+        '................M.....#......................#..........', // 7
+        '....n...........M.....#..........n...........#...n......', // 8
+        '................M.....#......................#..........', // 9
+        '................M.....#.................................', // 10
+        '.........c.....cM...c......c........c......c.......c....', // 11
+        '................M.......................................', // 12
+        '..@....A...N.c..M.....T.c.B.x.K..c...E.c.Q...G..c....X..', // 13
+        '########################################################', // 14
+        '########################################################', // 15
+        '########################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'inventor', solve: 'talk', id: 'kessler', moveTo: -10, vanish: true, face: -1, voice: 'npc', name: 'DR. KESSLER', expr: 'smug',
+          block: 'Ah. Theodore. Here to lose AGAIN?',
+          talk: {
+            q: 'My Kessler-Matic 9000 will win. Your little vacuum doesn\'t stand a chance.',
+            opts: [
+              { t: 'Tidy-Bot is NOT a vacuum!', ok: false, r: 'It vacuumed my SHOES, Theodore.' },
+              { t: 'Dr. Kessler! The judges want an interview. They said you\'re a GENIUS.', ok: true, r: 'FINALLY, someone noticed! Out of my way!' },
+              { t: 'Can we borrow your tesla coils?', ok: false, r: 'BORROW? Those coils cost more than your apartment!' },
+            ],
+          } },
+        L: { t: 'lever', id: 'coils10', say: 'Tesla coils: OFF! Scoreboard: Mila 1, Electricity 0.' },
+        T: { t: 'hazard', kind: 'tesla', h: 3, link: 'coils10' },
+        K: { t: 'broken', kind: 'safe', id: 'remote10', label: 'Pick the lock (hold)', say: [['theo', 'Got it! Tidy-Bot\'s remote! Kessler STOLE it!'], ['priya', 'Rivalry. In a lab coat. Classic.']] },
+        Q: { t: 'sensor', kind: 'dog', id: 'dog10', sayWho: 'juno', say: '♪ Hush little robo-dog ♪ ...It\'s asleep. Aww.' },
+        G: { t: 'door', kind: 'gate', h: 4, link: 'dog10' },
+        X: { t: 'exit', link: 'remote10', lockedMsg: 'GET TIDY-BOT\'S REMOTE FIRST!' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'Kessler\'s booth. He took Tidy-Bot\'s remote. I KNOW he did.'], ['juno', 'Is that a tesla fence? At an EXPO?'], ['theo', 'That\'s Kessler. Safety third.']], hintKeys: H_KEYS('PRIYA: distract Dr. Kessler (E).', 'PRIYA: distract Dr. Kessler (E).') },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['mila', 'Fence is off! The remote must be in that display case.']], hintKeys: H_KEYS('THEO: pick the display case lock (hold E).', 'THEO: pick the display case lock (hold E).') },
+        E: { t: 'trigger', w: 2, h: 3, any: true, lines: [['benny', 'A robot dog. Guarding the exit. It looks... grumpy.'], ['juno', 'Every dog loves a lullaby.']], hintKeys: H_KEYS('JUNO: play a lullaby (E) for the robo-dog.', 'JUNO: play a lullaby (E) for the robo-dog.') },
+      },
+      extra: [
+        { t: 'trigger', x: 13, y: 13, w: 2, h: 3, cond: 'kessler', lines: [['mila', 'Tesla fence. Power switch is up on that truss.'], ['mila', 'Up is my favorite direction.']], hintKeys: H_KEYS('MILA: climb the truss (hold W) and flip the switch.', 'MILA: climb the truss (hold UP) and flip the switch.') },
+      ],
+    },
+    {
+      name: 'The Main Stage', slug: 'INT. EXPO - MAIN STAGE - DAY', theme: 'expo', shot: 'expo_day', amp: 'speaker10',
+      map: [
+        // 000000000011111111112222222222333333333344444444445555555555
+        // 012345678901234567890123456789012345678901234567890123456789
+        '############################################################', // 0
+        '############################################################', // 1
+        '............................................................', // 2
+        '.....................................cRc....................', // 3
+        '....................................====M...................', // 4
+        '........................................M...................', // 5
+        '........................................M...................', // 6
+        '........................................M...................', // 7
+        '.....n..................................M.....n.............', // 8
+        '........................................M...................', // 9
+        '........................................M...................', // 10
+        '..........c.....c.........c.......c.....M....c.......c......', // 11
+        '........................................M...................', // 12
+        '..@.....A...N..c...C....Bc..K.c.E.......M.c......c..x...c...', // 13
+        '############################################################', // 14
+        '############################################################', // 15
+        '############################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'judge', solve: 'talk', id: 'judge10', moveTo: -9, vanish: true, face: -1, voice: 'npc', name: 'THE JUDGE', expr: 'neutral',
+          block: 'Judging begins in five minutes.',
+          talk: {
+            q: 'Where is your invention? I can\'t judge an empty booth. I\'ve tried.',
+            opts: [
+              { t: 'It\'s an invisible invention. Very cutting-edge.', ok: false, r: 'Kessler tried that one in 2019.' },
+              { t: 'It\'s on the lighting truss. It\'s doing a... live demo.', ok: true, r: 'A LIVE demo? How bold! Get it down here. Carefully!' },
+              { t: 'It\'s in the bathroom.', ok: false, r: 'Robots don\'t... you know what, I don\'t want to know.' },
+            ],
+          } },
+        C: { t: 'crate', kind: 'kmachine' },
+        K: { t: 'broken', kind: 'speaker', h: 2, id: 'speaker10', say: [['theo', 'Stage speakers are ON. Juno, you\'re amplified!'], ['juno', 'Every musician\'s dream. And nightmare.']] },
+        R: { t: 'runner', kind: 'robot', voice: 'robot', path: [[38, 3], [42, 13]], near: 0, lovesMusic: true, catchable: true, goal: true, id: 'bot10', gate: 'speaker10&!cable10', speed: 2.2,
+          lureSay: [['robot', 'MUSIC DETECTED. MUST... DANCE.'], ['theo', 'He\'s coming down! He LOVES jazz! I programmed that by accident!']],
+          say: [['theo', 'Gotcha! Tidy-Bot, you\'re grounded. Well. You\'re ALWAYS grounded. You\'re a robot.'], ['robot', 'BEEP. SORRY. BOOP.']] },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'There he is! On top of the lighting truss!'], ['juno', 'He loves music. If the stage speakers worked, I could sing him down.']], hintKeys: H_KEYS('PRIYA: talk to the judge (E).', 'PRIYA: talk to the judge (E).') },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['dex', 'Kessler parked his machine right on the stage power cable.'], ['theo', 'Of course he did.']], hintKeys: H_KEYS('DEX: push the Kessler-Matic off the power cable. THEO: fix the speakers.', 'DEX: push the Kessler-Matic off the power cable. THEO: fix the speakers.') },
+        E: { t: 'trigger', w: 2, h: 3, any: true, cond: 'speaker10', lines: [['juno', 'Speakers are live. Tidy-Bot, this one\'s for you.']], hintKeys: H_KEYS('JUNO: play (E) to bring Tidy-Bot down, then catch him!', 'JUNO: play to bring Tidy-Bot down, then catch him!') },
+      },
+      extra: [
+        { t: 'plate', x: 19, y: 13, w: 2, heavy: true, id: 'cable10' },
+        { t: 'deco', kind: 'podium', x: 47, y: 13, w: 3, h: 3, dy: 8, back: true },
+      ],
+      goal: 'bot10',
+    },
+  ],
+  endLine: 'FIRST PRIZE!',
+});
+
 
 
 // ===== 15_story.js =====
@@ -10299,6 +10465,60 @@ STORY[8] = {
     ['freeze'],
   ],
   credits: ['Tokens: MARGE (since 1998)', 'Commuter Choir: JUNO & CAR 3', 'Freight: DEX (four hundred pounds)', 'Archive: THEO (one very full crate)'],
+};
+
+// S2E4 (episode 10) ---------------------------------------------------------------
+STORY[9] = {
+  previously: [
+    ['set', 'cafe'],
+    ['at', 'gus', 382, { face: -1, expr: 'angry' }], ['at', 'robot', 352, { face: 1 }], ['at', 'theo', 250, { face: 1 }],
+    ['say', 'robot', 'MESS DETECTED. MUSTACHE: UNTIDY.'],
+    ['say', 'gus', 'Don\'t you DARE.', { expr: 'angry' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'expo'],
+    ['at', 'theo', 260, { face: 1, expr: 'happy' }], ['at', 'robot', 290, { face: -1 }],
+    ['at', 'dex', 90, { face: 1 }], ['at', 'mila', 120, { face: 1 }], ['at', 'priya', 60, { face: 1 }], ['at', 'juno', 150, { face: 1 }], ['at', 'benny', 180, { face: 1 }],
+    ['say', 'theo', 'The City Invention Expo. Tidy-Bot\'s big day.', { expr: 'happy' }],
+    ['enter', 'inventor', 'R', 360, { wait: true, expr: 'smug' }],
+    ['say', 'inventor', 'Theodore. Still building toasters?', { expr: 'smug' }],
+    ['say', 'theo', 'My toaster has NEVER worked.', { expr: 'angry' }],
+    ['say', 'inventor', 'I know.', { expr: 'smug' }],
+    ['laugh', 'laugh'],
+    ['say', 'inventor', 'Behold the future: the Kessler-Matic 9000. It does EVERYTHING.'],
+    ['sfx', 'robot'],
+    ['say', 'robot', 'MESS DETECTED. HAIR: NOT REAL.'],
+    ['walk', 'robot', 340, { wait: true }],
+    ['fx', 'puff', 360, 186], ['sfx', 'poof'],
+    ['expr', 'inventor', 'shock'],
+    ['say', 'inventor', 'MY HAIR!', { expr: 'shock' }],
+    ['laugh', 'big'],
+    ['exit', 'robot', 'R'],
+    ['say', 'theo', '...Tidy-Bot? TIDY-BOT! Come back with his hair!', { expr: 'scared' }],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'expo'],
+    ['at', 'judge', 150, { face: 1, expr: 'happy' }],
+    ['at', 'theo', 250, { face: -1 }], ['at', 'robot', 280, { face: -1 }],
+    ['at', 'dex', 320, { face: -1 }], ['at', 'mila', 350, { face: -1 }], ['at', 'priya', 380, { face: -1 }], ['at', 'juno', 410, { face: -1 }], ['at', 'benny', 440, { face: -1 }],
+    ['say', 'judge', 'And first prize at the City Invention Expo goes to... TIDY-BOT!', { anim: 'point', expr: 'happy' }],
+    ['laugh', 'applause'],
+    ['say', 'theo', 'I\'m not crying. It\'s the robot oil.', { expr: 'cry', anim: 'cry' }],
+    ['say', 'dex', 'Welcome to the club, buddy.', { expr: 'cry' }],
+    ['laugh', 'aww'],
+    ['enter', 'inventor', 'L', 90, { wait: true, expr: 'angry' }],
+    ['say', 'inventor', 'This isn\'t over, Theodore!', { expr: 'angry', anim: 'point' }],
+    ['sfx', 'robot'],
+    ['say', 'robot', 'LOST AND FOUND: ONE HAIR. RETURNING.'],
+    ['fx', 'puff', 96, 186],
+    ['say', 'inventor', '...Thank you.', { expr: 'sad' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Tidy-Bot: TIDY-BOT (playing himself)', 'Hair Restoration: TIDY-BOT', 'Tesla Coils: OFF (thanks, Mila)', 'Lullaby for a Robo-Dog: JUNO'],
 };
 
 // ---------------------------------------------------------------------------

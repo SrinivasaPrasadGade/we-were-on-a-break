@@ -456,6 +456,7 @@ const ACTOR_INFO = {
   gateagent: { name: 'GATE AGENT', color: '#7aa8e0', voice: 'npc' },
   vance: { name: 'MR. VANCE', color: '#e8d070', voice: 'npc' },
   critic: { name: 'THE CRITIC', color: '#c86a9a', voice: 'npc' },
+  judge: { name: 'THE JUDGE', color: '#b8a8e8', voice: 'npc' },
   agent: { name: 'AGENT', color: '#c86a6a', voice: 'npc' },
   security: { name: 'SECURITY', color: '#9a9aaa', voice: 'npc' },
   officer: { name: 'OFFICER', color: '#6a9ad8', voice: 'npc' },
