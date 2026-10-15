@@ -29,7 +29,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2], display: [1, 2], kmachine: [2, 2],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2], botcrate: [2, 2], display: [1, 2], kmachine: [2, 2], bagstack: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -156,6 +156,12 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'bagstack': // lost-luggage pile on a trolley
+      R(0, h - 3, w, 3, '#7a828a'); R(2, h - 1, 3, 1, '#2a2a2a'); R(w - 5, h - 1, 3, 1, '#2a2a2a');
+      R(1, h - 14, w - 2, 11, '#4a6aa8'); R(1, h - 14, w - 2, 2, '#6a8ac8'); R(w / 2 - 3, h - 17, 6, 3, '#2a2a2a');
+      R(4, 2, w - 10, h - 17, '#c83a3a'); R(4, 2, w - 10, 2, '#e85a5a'); R(8, 0, 6, 2, '#2a2a2a');
+      R(w - 7, 6, 6, h - 21, '#e8c020'); R(3, h - 9, 5, 2, '#f4efe6');
       break;
     case 'display': // Robo-Butler display mannequin on a plinth
       R(1, h - 6, w - 2, 6, '#3a465a'); R(2, h - 5, w - 4, 1, '#5a6a8a');
@@ -1356,6 +1362,23 @@ class Deco extends Ent {
         R(14, wk - 14, 3, 14, '#4a4a52'); R(w - 17, wk - 14, 3, 14, '#4a4a52');
         for (const lx of [16, Math.round(w / 3), Math.round(2 * w / 3), w - 19]) R(lx, wk + 6, 3, h - wk - 6, '#4a4a52');
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
+        break;
+      }
+      case 'detector': { // airport metal detector arch
+        R(0, 0, 4, this.h, '#9aa4b0'); R(this.w - 4, 0, 4, this.h, '#9aa4b0'); R(0, 0, this.w, 5, '#9aa4b0');
+        R(1, 6, 2, this.h - 8, '#c8d0dc'); R(this.w / 2 - 2, 1, 4, 3, (t >> 4) % 2 ? '#7cf29a' : '#2a6a3a');
+        break;
+      }
+      case 'board': { // departures board
+        R(0, 0, this.w, this.h, '#1a1a22'); R(2, 2, this.w - 4, 9, '#2a2a36');
+        drawText('DEPARTURES', x + this.w / 2, y + 3, '#ffd23f', { g, align: 'center' });
+        const rows = this.p.rows || [['88', 'GATE 47', '3:00', 'BOARDING'], ['12', 'GATE 12', '3:10', 'ON TIME'], ['301', 'GATE 9', '3:25', 'DELAYED']];
+        rows.forEach((r, i) => {
+          const yy = y + 14 + i * 9;
+          drawText(r[0], x + 5, yy, '#f4efe6', { g }); drawText(r[1], x + 24, yy, '#f4efe6', { g });
+          drawText(r[2], x + this.w - 72, yy, '#f4efe6', { g });
+          drawText(r[3], x + this.w - 45, yy, r[3] === 'BOARDING' ? ((t >> 4) % 2 ? '#7cf29a' : '#2a8a4a') : r[3] === 'DELAYED' ? '#ff8a7a' : '#4cc9f0', { g });
+        });
         break;
       }
       case 'fort': { // a kid's snow fort: block wall with a flag

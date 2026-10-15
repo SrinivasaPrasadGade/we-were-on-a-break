@@ -624,6 +624,61 @@ STORY[10] = {
   credits: ['Boiler Whisperer: THEO (and his hair dryer)', 'Fort Awesome Negotiations: PRIYA', 'Carol Rescue: JUNO & ETHEL', 'Marshmallows: EXTRA'],
 };
 
+// S2E6 (episode 12) ---------------------------------------------------------------
+STORY[11] = {
+  previously: [
+    ['set', 'snowcafe'],
+    ['at', 'gus', 382, { face: 1, expr: 'sad' }],
+    ['prop', 'gletter', 'letter', 398, 168],
+    ['say', 'gus', '(...I\'ll tell them tomorrow.)', { expr: 'sad' }],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'closedcafe'],
+    ['enter', 'dex', 'D1', 150, { expr: 'happy' }], ['enter', 'mila', 'D1', 182, {}], ['enter', 'theo', 'D1', 214, {}],
+    ['enter', 'priya', 'D1', 246, {}], ['enter', 'juno', 'D1', 278, {}], ['enter', 'benny', 'D1', 310, { wait: true }],
+    ['say', 'dex', 'Gus? Coffee time! ...Why are the chairs on the tables?', { expr: 'surprised' }],
+    ['prop', 'gletter', 'letter', 360, 168],
+    ['say', 'priya', 'There\'s a letter. "Dear couch people."', { anim: 'phone' }],
+    ['say', 'priya', '"I sold the café. My flight leaves at 3:00 from Gate 47. Don\'t make it weird. Gus."'],
+    ['expr', 'all', 'shock'],
+    ['laugh', 'ooh'],
+    ['say', 'priya', '"P.S. The marshmallows were never extra."', { expr: 'sad' }],
+    ['laugh', 'aww'],
+    ['say', 'dex', 'I\'m not crying. It\'s... no, I\'m crying.', { expr: 'cry', anim: 'cry' }],
+    ['say', 'mila', 'What time is it?'],
+    ['say', 'theo', 'Two... fifteen.', { expr: 'scared' }],
+    ['faceall', 'theo'], ['wait', 20],
+    ['say', 'mila', 'EVERYBODY MOVE!', { anim: 'point', expr: 'angry' }],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'gate'],
+    ['at', 'gus', 120, { face: 1, expr: 'sad' }],
+    ['at', 'dex', 200, { face: -1 }], ['at', 'mila', 230, { face: -1 }], ['at', 'theo', 260, { face: -1 }], ['at', 'priya', 290, { face: -1 }], ['at', 'juno', 320, { face: -1 }], ['at', 'benny', 350, { face: -1 }],
+    ['say', 'gus', '...You came to the AIRPORT. You played a SONG. On the PA.', { expr: 'sad' }],
+    ['say', 'juno', 'It was a bop.'],
+    ['say', 'gus', 'It was a bop.', { expr: 'cry' }],
+    ['laugh', 'aww'],
+    ['say', 'announcer', 'Attention: Flight 88 is delayed. There is... an iguana in the cockpit.'],
+    ['expr', 'all', 'surprised'],
+    ['wait', 20],
+    ['say', 'theo', 'He didn\'t want you to leave either.', { expr: 'happy' }],
+    ['laugh', 'big'],
+    ['say', 'gus', 'Kids. I sold the café to a developer. Mr. Vance. It closes Friday.', { expr: 'sad' }],
+    ['laugh', 'ooh'],
+    ['wait', 30],
+    ['say', 'mila', 'Friday? Then we\'ve got four days.', { expr: 'smug' }],
+    ['say', 'priya', 'And I know a guy.', { expr: 'smug' }],
+    ['faceall', 'priya'],
+    ['say', 'priya', '...It\'s Mr. Vance.', { expr: 'grin' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Airport Security Diplomacy: PRIYA', 'Accidental Tour Guide: JUNO', 'Cockpit Intrusion: SARGE (unlicensed)', 'Goodbye Song: JUNO & THE COUCH'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------
