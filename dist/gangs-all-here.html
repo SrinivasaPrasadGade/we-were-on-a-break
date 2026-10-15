@@ -3673,6 +3673,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
+  cakecart: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -3799,6 +3800,14 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'cakecart': // five-tier wedding cake on a rolling cart
+      R(0, h - 6, w, 3, '#9aa0a8'); R(2, h - 3, 3, 3, '#3a3a40'); R(w - 5, h - 3, 3, 3, '#3a3a40');
+      R(3, h - 13, w - 6, 7, '#f6eef4'); R(3, h - 13, w - 6, 1, '#ff8fab');
+      R(7, h - 19, w - 14, 6, '#f6eef4'); R(7, h - 19, w - 14, 1, '#ff8fab');
+      R(10, h - 24, w - 20, 5, '#f6eef4'); R(10, h - 24, w - 20, 1, '#ff8fab');
+      R(w / 2 - 3, h - 29, 2, 5, '#3a3a40'); R(w / 2 + 1, h - 29, 2, 5, '#f4efe6'); R(w / 2 - 3, h - 31, 2, 2, '#e0b090'); R(w / 2 + 1, h - 31, 2, 2, '#e0b090');
+      for (let i = 5; i < w - 5; i += 5) R(i, h - 10, 2, 2, '#ffd23f');
       break;
     case 'cart':
       R(0, h - 6, w, 3, '#9aa2aa'); R(0, 2, 2, h - 4, '#9aa2aa'); R(2, h - 3, 3, 3, '#2a2a2a'); R(w - 5, h - 3, 3, 3, '#2a2a2a');
@@ -4124,6 +4133,11 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
     case 'flame': // flames sitting on top of a grill (crate) once lit; a sad wisp of smoke before
       if (fixed) for (let i = 2; i < w - 2; i += 3) { const hh = 4 + ((t >> 2) + i * 3) % 5; R(i, h - hh, 2, hh, (i + (t >> 3)) % 2 ? '#ff6a2a' : '#ffd23f'); R(i, h - hh - 1, 1, 1, '#fff2a0'); }
       else { g.fillStyle = 'rgba(200,200,210,0.5)'; g.fillRect(x + w / 2 - 1 + Math.round(Math.sin(t / 9) * 2), y + h - 6 - (t % 24) / 4, 3, 3); }
+      break;
+    case 'organ': // church organ: pipes + keyboard; dead keys until fixed
+      for (let i = 0; i < 6; i++) { const ph = 10 + (i % 3) * 4 + (i === 2 || i === 3 ? 6 : 0); R(3 + i * 4, 0 + (22 - ph), 3, ph, fixed ? '#e8c860' : '#a8945a'); R(3 + i * 4, 22 - ph, 3, 1, '#fff2c0'); }
+      R(0, 18, w, h - 18, '#5a3020'); R(2, 20, w - 4, 3, '#f4efe6'); for (let i = 3; i < w - 3; i += 3) R(i, 20, 1, 2, '#2a1a10');
+      if (!fixed) { R(w - 8, 12, 4, 1, '#3a3a3a'); R(w - 6, 13, 1, 4, '#3a3a3a'); }
       break;
     case 'junction':
       R(2, 1, 12, 14, '#5a606a'); R(3, 2, 10, 12, '#3a3e46'); R(5, 4, 6, 2, fixed ? '#7cf29a' : (blink ? '#ffd23f' : '#5a4a1a'));
@@ -4675,7 +4689,7 @@ class Runner extends Ent {
 
 // ---- Hazards ----------------------------------------------------------------------------
 class Hazard extends Ent {
-  constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, p.h || 1); this.kind = p.kind || room.theme.hazard; }
+  constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, p.h || 1); this.kind = p.kind || room.theme.hazard; if (p.phase !== undefined) this.t = p.phase; }
   active() { return !this.link || !this.level.check(this.link); }
   update() {
     super.update();
@@ -4748,17 +4762,20 @@ class Light extends Ent {
 // ---- Sound sensors (Juno) ----------------------------------------------------------------
 class Sensor extends Ent {
   constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, p.h || 1); this.kind = p.kind || 'speaker'; this.heard = false; this.sound = true; }
+  ready() { return !this.p.cond || this.level.check(this.p.cond); }
   onSound() {
+    if (!this.ready()) { if (this.p.notReady) this.level.queueLines(this.p.notReady, 0); return; }
     if (this.heard && !this.p.repeat) return;
     this.heard = true; this.setFlag(true);
     AudioSys.sfx('fixed'); Particles.notes(this.cx, this.y, 5);
     if (this.p.say) this.level.say(this.p.sayWho || 'juno', this.p.say);
   }
-  interactInfo(f) { return this.heard ? null : (f.who === 'juno' ? { ok: true, label: 'Play', prio: 3, play: true } : { ok: false, need: 'juno', label: 'Sound-activated', prio: 1 }); }
+  interactInfo(f) { return this.heard || !this.ready() ? null : (f.who === 'juno' ? { ok: true, label: 'Play', prio: 3, play: true } : { ok: false, need: 'juno', label: 'Sound-activated', prio: 1 }); }
   update() { super.update(); if (this.p.link && this.level.check(this.p.link) && !this.heard) { /* externally triggered */ } }
   draw(g, ox, oy) {
     const x = Math.round(this.x - ox), y = Math.round(this.y - oy);
     const R = (a, b, w, h, c) => { g.fillStyle = c; g.fillRect(x + a, y + b, w, h); };
+    if (this.p.invisible) { if (!this.heard && this.ready() && this.level.showHints) drawNeedBadge(g, 'juno', x + this.w - 4, y - 10, this.t); return; }
     switch (this.kind) {
       case 'dog':
         drawRoboDog(g, x + 8, y + this.h, true, this.t, this.heard); break;
@@ -4865,8 +4882,16 @@ class Deco extends Ent {
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
         break;
       }
+      case 'chandelier': { // sits on a '=' platform row; chain to the ceiling
+        const w = this.w;
+        R(Math.floor(w / 2) - 1, -this.p.chain || -40, 2, this.p.chain || 40, '#8a7a4a');
+        R(0, 0, w, 3, '#d8b040'); R(2, 3, w - 4, 2, '#a8802a'); R(Math.floor(w / 2) - 4, 5, 8, 4, '#d8b040');
+        for (let i = 3; i < w - 2; i += 6) { R(i, -5, 2, 5, '#f4efe6'); R(i, -7 - ((t >> 3) + i) % 2, 2, 2, '#ffd23f'); }
+        for (let i = 4; i < w - 2; i += 8) R(i, 6, 1, 3 + (i % 3), '#e8f4ff');
+        break;
+      }
       case 'plane': R(0, 6, this.w, 6, '#f4f4f8'); R(this.w - 8, 0, 6, 8, '#3a6ac8'); R(this.w / 2 - 6, 10, 12, 4, '#d8d8e0'); for (let i = 6; i < this.w - 10; i += 5) R(i, 7, 2, 2, '#4a6a8a'); break;
-      default: break;
+      default: if (typeof drawSetProp === 'function') drawSetProp(g, this.kind, x, y, t, this.p.text); break;
     }
   }
 }
@@ -8965,6 +8990,162 @@ EPISODES.push({
   endLine: 'LET\'S EAT!',
 });
 
+// =============================================================================
+// S1E6  The Wedding Gig (season finale)
+// =============================================================================
+EPISODES.push({
+  season: 1, num: 6, title: 'The Wedding Gig', music: 'wedding',
+  blurb: 'Roz and Holloway tie the knot. Juno\'s "band" plays. Sarge carries the rings.',
+  rooms: [
+    {
+      name: 'The Grand Ballroom', slug: 'INT. THE PARAMOUNT HOTEL BALLROOM - DAY', theme: 'ballroom', shot: 'hotel_day',
+      map: [
+        // 000000000011111111112222222222333333333344444444445555555555
+        // 012345678901234567890123456789012345678901234567890123456789
+        '############################################################', // 0
+        '############################################################', // 1
+        '........................................#...................', // 2
+        '........................................#...................', // 3
+        '........................................#...................', // 4
+        '.................*......................#...................', // 5
+        '................===.....................#...................', // 6
+        '.....w...........................w......#.......w...........', // 7
+        '.....................c..................#...................', // 8
+        '....................===.................#...................', // 9
+        '........................................#...................', // 10
+        '..........c.....c......c.........c............c.....c.......', // 11
+        '............................................................', // 12
+        '..@......A.P...c..N.cB..Z..c.KcQ...cf.c.G..cx....c..t..c.X..', // 13
+        '############################################################', // 14
+        '############################################################', // 15
+        '############################################################', // 16
+      ],
+      ents: {
+        P: { t: 'crate', kind: 'pianobig' },
+        N: { t: 'npc', look: 'planner', solve: 'talk', id: 'planner', moveTo: 16, vanish: true, face: -1, voice: 'npc', name: 'GWENDOLYN', expr: 'angry',
+          block: 'The band is LATE. And who are YOU people?',
+          talk: {
+            q: 'I have a ceremony in one hour, no band, and a groom who keeps quoting bylaws. Talk fast.',
+            opts: [
+              { t: 'Relax. Have you tried yoga?', ok: false, r: 'I do yoga FOUR times a day. This IS me relaxed.' },
+              { t: 'We ARE the band! "Juno and the Couch."', ok: true, r: '...Worst band name I\'ve ever heard. You\'re hired. GO.' },
+              { t: 'I know a guy who plans weddings.', ok: false, r: 'Is it Gerald? I HATE Gerald.' },
+            ],
+          } },
+        Z: { t: 'plate', w: 3, heavy: true, mark: true, id: 'piano' },
+        K: { t: 'broken', kind: 'speaker', h: 2, id: 'speaker6', say: [['theo', 'Speaker\'s working! I replaced a fuse with a paperclip. Tell no one.'], ['juno', 'Paperclip rock. I love it.']] },
+        Q: { t: 'sensor', kind: 'mic', id: 'soundcheck', cond: 'speaker6', notReady: [['juno', 'Testing? Hello? ...The speaker\'s dead. THEO!']], sayWho: 'juno', say: '♪ Check one, two! ♪ We are LIVE, people!' },
+        G: { t: 'door', kind: 'curtain', h: 3, link: 'piano&soundcheck' },
+        X: { t: 'exit' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['juno', 'Roz and Holloway\'s wedding. MY band. My big break.'], ['dex', 'We\'re not a band, Juno.'], ['juno', 'Tonight we are. Dex, you\'re on piano. Moving it, not playing it.']], hintKeys: H_KEYS('PRIYA: talk to the wedding planner (E).', 'PRIYA: talk to the wedding planner (E).') },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['dex', 'The piano goes on the bandstand. Of course it does.'], ['theo', 'And the speaker\'s dead. Of course it is.']], hintKeys: H_KEYS('DEX: piano onto the X. THEO: fix the speaker. JUNO: sound check at the mic.', 'DEX: piano onto the X. THEO: fix the speaker. JUNO: sound check at the mic.') },
+      },
+      extra: [
+        { t: 'deco', kind: 'chandelier', x: 20, y: 9, w: 3, chain: 112 },
+        { t: 'deco', kind: 'chandelier', x: 16, y: 6, w: 3, chain: 64 },
+        { t: 'deco', kind: 'banner', x: 23, y: 5, w: 14, h: 2, text: 'ROZ & BERTRAM', back: true },
+      ],
+    },
+    {
+      name: 'The Hotel Kitchen', slug: 'INT. PARAMOUNT HOTEL KITCHEN - DAY', theme: 'kitchen', shot: 'hotel_day',
+      map: [
+        // 0000000000111111111122222222223333333333444444444455555555556666
+        // 0123456789012345678901234567890123456789012345678901234567890123
+        '################################################################', // 0
+        '################################################################', // 1
+        '...............................##########...........#...........', // 2
+        '...............................##########...........#...........', // 3
+        '...............................##########...........#...........', // 4
+        '...............................##########...........#...........', // 5
+        '...............................##########...........#...........', // 6
+        '...............................##########...........#........###', // 7
+        '................cc.............##########...........#........###', // 8
+        '......y.........==......y......##########....y......#...y....###', // 9
+        '...............................##########...........#........###', // 10
+        '..........c....c...c......................c...........c....c.###', // 11
+        '..............=======...............................G........###', // 12
+        '..@.....A...Sc.......c..c..c.C...B.c..c....E..Vc.W.cU.L.X.c..###', // 13
+        '######################{{{{{{{{##################################', // 14
+        '################################################################', // 15
+        '################################################################', // 16
+      ],
+      ents: {
+        S: { t: 'runner', kind: 'sarge', path: [[12, 13], [16, 11], [27, 13], [37, 13], [45, 13], [55, 13], [62, 6], [59, 13]], near: 4, speed: 2.4,
+          lovesMusic: true, catchable: true, id: 'rings', taunts: ['*jingle jingle*', '*smug ring-bearer hiss*', '*iguana noises, but fancy*'],
+          lureSay: [['juno', '♪ Sarge, Sarge, bring the rings, I\'ll give you lettuce and other things ♪']],
+          say: [['theo', 'GOT HIM! And the rings! Sarge, you are the WORST ring bearer.'], ['benny', 'Technically, he bore them. Far away. But he bore them.']] },
+        B: { t: 'crate', kind: 'boxes2' },
+        V: { t: 'hazard', kind: 'steam', h: 3, phase: 0 },
+        W: { t: 'hazard', kind: 'steam', h: 3, phase: 60 },
+        G: { t: 'door', link: 'pantry6', h: 2, kind: 'door' },
+        U: { t: 'grate', id: 'vent6' },
+        L: { t: 'lever', id: 'pantry6', say: 'Pantry\'s open! Sarge, you\'re surrounded. By soup.' },
+        X: { t: 'exit', link: 'rings', lockedMsg: 'FIND THE RINGS FIRST!' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'Sarge was the ring bearer. WAS. He has the rings and he is GONE.'], ['priya', 'Who made the IGUANA the ring bearer?'], ['theo', 'Roz! She said he has "presence."']] },
+        C: { t: 'trigger', w: 2, h: 3, lines: [['dex', 'A stack of boxes. In a corridor. Classic hotel.'], ['benny', 'Sarge went under them. Everything goes under.']], hintKeys: H_KEYS('DEX: push the boxes out of the corridor.', 'DEX: push the boxes out of the corridor.') },
+        E: { t: 'trigger', w: 2, h: 3, lines: [['mila', 'Dishwasher steam! Time it right.'], ['juno', '♪ Hot, hot, HOT ♪']], hintKeys: H_KEYS('Steam vents puff on and off. Wait for a gap!', 'Steam vents puff on and off. Wait for a gap!') },
+      },
+      extra: [
+        { t: 'trigger', x: 50, y: 13, w: 2, h: 3, lines: [['benny', 'Pantry door\'s locked. But there\'s a vent...'], ['juno', 'Of course there is.']], hintKeys: H_KEYS('BENNY: open the vent (E) and crawl under the door.', 'BENNY: open the vent (E) and crawl under the door.') },
+        { t: 'trigger', x: 55, y: 13, w: 2, h: 3, cond: 'pantry6', lines: [['juno', 'He\'s on top of the fridge! Good thing he loves my music.']], hintKeys: H_KEYS('JUNO: play (E) to lure Sarge down, then grab him.', 'JUNO: play (E) to lure Sarge down, then grab him.') },
+      ],
+    },
+    {
+      name: 'The Ceremony', slug: 'INT. PARAMOUNT HOTEL CHAPEL - DAY', theme: 'ballroom', shot: 'hotel_day',
+      map: [
+        // 00000000001111111111222222222233333333334444444444555555
+        // 01234567890123456789012345678901234567890123456789012345
+        '########################################################', // 0
+        '########################################################', // 1
+        '.................................#......................', // 2
+        '.................................#......................', // 3
+        '.................................#......................', // 4
+        '.................................#......................', // 5
+        '.................................#......................', // 6
+        '.....w............w..............#..................w...', // 7
+        '.................................#......................', // 8
+        '.......................c.........#......................', // 9
+        '......................===........#......................', // 10
+        '..........c.....c...........c.......c........c......c...', // 11
+        '.................................G......................', // 12
+        '..@.....A...cN...C...c...cB..Z.fcV.L.Ec....Y...K..c..fc.', // 13
+        '########################################################', // 14
+        '########################################################', // 15
+        '########################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'commuter', solve: 'talk', id: 'photog', moveTo: -9, vanish: true, face: -1, voice: 'npc', name: 'PHOTOGRAPHER', expr: 'smug',
+          block: 'Nobody crosses my shot!',
+          talk: {
+            q: 'I\'ve got the PERFECT angle on the... wall. Nobody moves.',
+            opts: [
+              { t: 'Can you take OUR picture?', ok: false, r: 'I only shoot weddings. And sunsets. And once, a ferret.' },
+              { t: 'Move or I sneeze on your lens.', ok: false, r: '...Rude. Effective, but rude. Still no.' },
+              { t: 'The bride wants photos by the cake. The light there is GORGEOUS.', ok: true, r: 'Gorgeous light?! Say no more. Light waits for no one!' },
+            ],
+          } },
+        C: { t: 'crate', kind: 'cakecart' },
+        Z: { t: 'plate', w: 2, heavy: true, mark: true, id: 'cake6' },
+        G: { t: 'door', link: 'vestry6', h: 2, kind: 'door' },
+        V: { t: 'grate', id: 'vent6b' },
+        L: { t: 'lever', id: 'vestry6', say: 'Vestry\'s open! Ta-da! ...Please clap.' },
+        Y: { t: 'talker', look: 'groom', voice: 'holloway', lines: ['I\'m not nervous. I\'m sweating BY THE RULES.', 'Rule 1 of marriage: always agree with Roz. I wrote it myself.', 'Do I look all right? Don\'t answer. Rule 77.'] },
+        K: { t: 'broken', kind: 'organ', w: 2, h: 2, id: 'organ6', say: [['theo', 'Organ\'s fixed! A mouse was living in the low C.'], ['benny', 'Can I keep him?'], ['theo', 'No.']] },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Places, people! Ceremony in five!'], ['mila', 'The photographer is hogging the aisle.'], ['priya', 'Leave him to me.']], hintKeys: H_KEYS('PRIYA: talk the photographer out of the way (E).', 'PRIYA: talk the photographer out of the way (E).') },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['dex', 'The cake goes on the X. Five tiers. No pressure.'], ['benny', 'I could make it disappear.'], ['dex', 'NO.']], hintKeys: H_KEYS('DEX: push the cake onto the X. BENNY: the vestry has a vent.', 'DEX: push the cake onto the X. BENNY: the vestry has a vent.') },
+        E: { t: 'trigger', w: 2, h: 3, any: true, lines: [['theo', 'The organ\'s dead. Leave it to me.'], ['juno', 'Then I play them down the aisle. This is my moment!']], hintKeys: H_KEYS('THEO fixes the organ. Then JUNO plays it (E)!', 'THEO fixes the organ. Then JUNO plays it (E)!') },
+      },
+      extra: [
+        { t: 'sensor', x: 47, y: 13, w: 2, h: 2, kind: 'organkeys', invisible: true, id: 'march', cond: 'organ6&cake6', notReady: [['juno', 'Not yet! Organ fixed? Cake on the X? THEN we play.']], sayWho: 'juno', say: '♪ Here comes the bride! ♪' },
+        { t: 'deco', kind: 'chandelier', x: 22, y: 10, w: 3, chain: 128 },
+        { t: 'deco', kind: 'arch', x: 41, y: 13, w: 4, h: 7, back: true },
+      ],
+      goal: 'march',
+    },
+  ],
+  endLine: 'JUST MARRIED!',
+});
+
 
 
 // ===== 15_story.js =====
@@ -9258,6 +9439,70 @@ STORY[4] = {
     ['freeze'],
   ],
   credits: ['Grill Master: DEX (apron-certified)', 'Fire Escape Speedrun: MILA (new record)', 'Sunbather Relations: PRIYA', 'Rule 112: SUSPENDED (medium-rare)'],
+};
+
+// S1E6 ---------------------------------------------------------------------------
+STORY[5] = {
+  previously: [
+    ['set', 'roof'],
+    ['at', 'holloway', 392, { face: 1, expr: 'neutral' }], ['at', 'roz', 432, { face: -1, expr: 'happy' }], ['at', 'dex', 316, { face: 1 }],
+    ['say', 'roz', 'Bertram, darling. Medium-rare.', { expr: 'happy' }],
+    ['say', 'holloway', '...Rule 112 is suspended. Pass the ketchup.', { expr: 'happy' }],
+    ['emote', 'roz', '♥'],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'cafe'],
+    ['at', 'dex', 140, { anim: 'sit', y: SIT_Y }], ['at', 'mila', 168, { anim: 'sit', y: SIT_Y }], ['at', 'theo', 196, { anim: 'sit', y: SIT_Y }],
+    ['at', 'juno', 290, { face: -1 }], ['at', 'priya', 92, { face: 1 }], ['at', 'benny', 320, { face: -1 }], ['at', 'gus', 382, { face: -1 }],
+    ['enter', 'roz', 'D1', 240, { wait: true, expr: 'happy' }],
+    ['say', 'roz', 'Darlings! Bertram proposed! On the roof! With a ring made from a ketchup lid!', { anim: 'cheer', expr: 'happy' }],
+    ['laugh', 'aww'],
+    ['say', 'mila', 'That\'s... actually really sweet.'],
+    ['say', 'roz', 'The wedding is SATURDAY. And Juno, darling: YOUR band will play!', { anim: 'point' }],
+    ['say', 'juno', 'My band?!', { expr: 'surprised' }],
+    ['say', 'dex', 'You have a band?'],
+    ['say', 'juno', 'I have a keyboard and a dream.', { expr: 'smug' }],
+    ['say', 'mila', 'Who\'s in it?'],
+    ['faceall', 'juno'], ['wait', 30],
+    ['say', 'juno', '...All of you.', { expr: 'grin' }],
+    ['expr', 'all', 'shock'],
+    ['laugh', 'big'],
+    ['say', 'theo', 'I don\'t play anything.'],
+    ['say', 'juno', 'You\'re on triangle.'],
+    ['say', 'theo', '...I\'ve always wanted to be on triangle.', { expr: 'happy' }],
+    ['laugh', 'laugh'],
+    ['say', 'gus', 'A landlord marrying a tenant. What\'s next, I sell the café?', { expr: 'smug' }],
+    ['laugh', 'chuckle'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'ballroom'],
+    ['at', 'bride', 246, { face: 1, expr: 'happy' }], ['at', 'groom', 268, { face: -1, expr: 'happy' }],
+    ['at', 'benny', 70, { face: 1 }], ['at', 'dex', 104, { face: 1 }], ['at', 'mila', 134, { face: 1 }], ['at', 'theo', 164, { face: 1 }],
+    ['at', 'priya', 194, { face: 1 }], ['at', 'juno', 400, { face: -1, anim: 'play' }],
+    ['say', 'groom', 'I\'d like to say a few words. To the tenants of 3A and 3B.', { anim: 'point' }],
+    ['say', 'groom', 'You are loud. You are reckless. You broke FOUR rules today.'],
+    ['say', 'mila', 'Five.', { expr: 'smug' }],
+    ['laugh', 'chuckle'],
+    ['say', 'groom', '...And I have never been happier. Thank you.', { expr: 'happy' }],
+    ['laugh', 'aww'],
+    ['say', 'bride', 'Bouquet time! Catch, darlings!', { anim: 'cheer', expr: 'happy' }],
+    ['prop', 'bouquet', 'flowers', 250, 180], ['moveprop', 'bouquet', 100, 176, 4],
+    ['wait', 45],
+    ['unprop', 'bouquet'], ['anim', 'dex', 'cheer'], ['emote', 'dex', '♥'],
+    ['faceall', 'dex'], ['expr', 'all', 'surprised'],
+    ['wait', 30],
+    ['say', 'dex', '...I\'m not crying. It\'s pollen.', { expr: 'cry', anim: 'cry' }],
+    ['laugh', 'big'],
+    ['enter', 'gus', 'L', 40, { wait: true, expr: 'sad' }],
+    ['say', 'gus', 'Nice wedding. Big changes, huh? ...Real big changes.', { expr: 'sad' }],
+    ['exit', 'gus', 'L', { wait: true }],
+    ['say', 'priya', 'Was it just me, or was Gus being weird?'],
+    ['laugh', 'ooh'],
+    ['freeze'],
+  ],
+  credits: ['Wedding Band: JUNO & THE COUCH (one night only)', 'Triangle: THEO (classically trained since Tuesday)', 'Ring Bearer: SARGE (briefly)', 'Bouquet Catch: DEX (pollen-related)'],
 };
 
 // ---------------------------------------------------------------------------

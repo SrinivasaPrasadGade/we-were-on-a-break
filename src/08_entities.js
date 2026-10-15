@@ -29,6 +29,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
+  cakecart: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -155,6 +156,14 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'cakecart': // five-tier wedding cake on a rolling cart
+      R(0, h - 6, w, 3, '#9aa0a8'); R(2, h - 3, 3, 3, '#3a3a40'); R(w - 5, h - 3, 3, 3, '#3a3a40');
+      R(3, h - 13, w - 6, 7, '#f6eef4'); R(3, h - 13, w - 6, 1, '#ff8fab');
+      R(7, h - 19, w - 14, 6, '#f6eef4'); R(7, h - 19, w - 14, 1, '#ff8fab');
+      R(10, h - 24, w - 20, 5, '#f6eef4'); R(10, h - 24, w - 20, 1, '#ff8fab');
+      R(w / 2 - 3, h - 29, 2, 5, '#3a3a40'); R(w / 2 + 1, h - 29, 2, 5, '#f4efe6'); R(w / 2 - 3, h - 31, 2, 2, '#e0b090'); R(w / 2 + 1, h - 31, 2, 2, '#e0b090');
+      for (let i = 5; i < w - 5; i += 5) R(i, h - 10, 2, 2, '#ffd23f');
       break;
     case 'cart':
       R(0, h - 6, w, 3, '#9aa2aa'); R(0, 2, 2, h - 4, '#9aa2aa'); R(2, h - 3, 3, 3, '#2a2a2a'); R(w - 5, h - 3, 3, 3, '#2a2a2a');
@@ -480,6 +489,11 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
     case 'flame': // flames sitting on top of a grill (crate) once lit; a sad wisp of smoke before
       if (fixed) for (let i = 2; i < w - 2; i += 3) { const hh = 4 + ((t >> 2) + i * 3) % 5; R(i, h - hh, 2, hh, (i + (t >> 3)) % 2 ? '#ff6a2a' : '#ffd23f'); R(i, h - hh - 1, 1, 1, '#fff2a0'); }
       else { g.fillStyle = 'rgba(200,200,210,0.5)'; g.fillRect(x + w / 2 - 1 + Math.round(Math.sin(t / 9) * 2), y + h - 6 - (t % 24) / 4, 3, 3); }
+      break;
+    case 'organ': // church organ: pipes + keyboard; dead keys until fixed
+      for (let i = 0; i < 6; i++) { const ph = 10 + (i % 3) * 4 + (i === 2 || i === 3 ? 6 : 0); R(3 + i * 4, 0 + (22 - ph), 3, ph, fixed ? '#e8c860' : '#a8945a'); R(3 + i * 4, 22 - ph, 3, 1, '#fff2c0'); }
+      R(0, 18, w, h - 18, '#5a3020'); R(2, 20, w - 4, 3, '#f4efe6'); for (let i = 3; i < w - 3; i += 3) R(i, 20, 1, 2, '#2a1a10');
+      if (!fixed) { R(w - 8, 12, 4, 1, '#3a3a3a'); R(w - 6, 13, 1, 4, '#3a3a3a'); }
       break;
     case 'junction':
       R(2, 1, 12, 14, '#5a606a'); R(3, 2, 10, 12, '#3a3e46'); R(5, 4, 6, 2, fixed ? '#7cf29a' : (blink ? '#ffd23f' : '#5a4a1a'));
@@ -1031,7 +1045,7 @@ class Runner extends Ent {
 
 // ---- Hazards ----------------------------------------------------------------------------
 class Hazard extends Ent {
-  constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, p.h || 1); this.kind = p.kind || room.theme.hazard; }
+  constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, p.h || 1); this.kind = p.kind || room.theme.hazard; if (p.phase !== undefined) this.t = p.phase; }
   active() { return !this.link || !this.level.check(this.link); }
   update() {
     super.update();
@@ -1104,17 +1118,20 @@ class Light extends Ent {
 // ---- Sound sensors (Juno) ----------------------------------------------------------------
 class Sensor extends Ent {
   constructor(room, tx, ty, p) { super(room, tx, ty, p, p.w || 1, p.h || 1); this.kind = p.kind || 'speaker'; this.heard = false; this.sound = true; }
+  ready() { return !this.p.cond || this.level.check(this.p.cond); }
   onSound() {
+    if (!this.ready()) { if (this.p.notReady) this.level.queueLines(this.p.notReady, 0); return; }
     if (this.heard && !this.p.repeat) return;
     this.heard = true; this.setFlag(true);
     AudioSys.sfx('fixed'); Particles.notes(this.cx, this.y, 5);
     if (this.p.say) this.level.say(this.p.sayWho || 'juno', this.p.say);
   }
-  interactInfo(f) { return this.heard ? null : (f.who === 'juno' ? { ok: true, label: 'Play', prio: 3, play: true } : { ok: false, need: 'juno', label: 'Sound-activated', prio: 1 }); }
+  interactInfo(f) { return this.heard || !this.ready() ? null : (f.who === 'juno' ? { ok: true, label: 'Play', prio: 3, play: true } : { ok: false, need: 'juno', label: 'Sound-activated', prio: 1 }); }
   update() { super.update(); if (this.p.link && this.level.check(this.p.link) && !this.heard) { /* externally triggered */ } }
   draw(g, ox, oy) {
     const x = Math.round(this.x - ox), y = Math.round(this.y - oy);
     const R = (a, b, w, h, c) => { g.fillStyle = c; g.fillRect(x + a, y + b, w, h); };
+    if (this.p.invisible) { if (!this.heard && this.ready() && this.level.showHints) drawNeedBadge(g, 'juno', x + this.w - 4, y - 10, this.t); return; }
     switch (this.kind) {
       case 'dog':
         drawRoboDog(g, x + 8, y + this.h, true, this.t, this.heard); break;
@@ -1221,8 +1238,16 @@ class Deco extends Ent {
         for (let yy = wk + 20; yy < h - 10; yy += 36) { for (let k = 0; k < w - 34; k += 2) { R(16 + k, yy + Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); R(16 + k, yy + 24 - Math.round(k * 24 / (w - 34)), 2, 1, '#5a5a62'); } }
         break;
       }
+      case 'chandelier': { // sits on a '=' platform row; chain to the ceiling
+        const w = this.w;
+        R(Math.floor(w / 2) - 1, -this.p.chain || -40, 2, this.p.chain || 40, '#8a7a4a');
+        R(0, 0, w, 3, '#d8b040'); R(2, 3, w - 4, 2, '#a8802a'); R(Math.floor(w / 2) - 4, 5, 8, 4, '#d8b040');
+        for (let i = 3; i < w - 2; i += 6) { R(i, -5, 2, 5, '#f4efe6'); R(i, -7 - ((t >> 3) + i) % 2, 2, 2, '#ffd23f'); }
+        for (let i = 4; i < w - 2; i += 8) R(i, 6, 1, 3 + (i % 3), '#e8f4ff');
+        break;
+      }
       case 'plane': R(0, 6, this.w, 6, '#f4f4f8'); R(this.w - 8, 0, 6, 8, '#3a6ac8'); R(this.w / 2 - 6, 10, 12, 4, '#d8d8e0'); for (let i = 6; i < this.w - 10; i += 5) R(i, 7, 2, 2, '#4a6a8a'); break;
-      default: break;
+      default: if (typeof drawSetProp === 'function') drawSetProp(g, this.kind, x, y, t, this.p.text); break;
     }
   }
 }
