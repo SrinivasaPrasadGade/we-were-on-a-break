@@ -3726,7 +3726,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -3853,6 +3853,12 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'magicbox': // the Great Bennini's vanishing cabinet
+      R(0, 2, w, h - 4, '#5a189a'); R(2, 4, w - 4, h - 8, '#7a38ba'); R(0, h - 2, w, 2, '#2a1a3a');
+      R(w / 2 - 1, 4, 2, h - 8, '#3a0a6a'); R(w / 2 - 4, h / 2, 2, 3, '#ffd23f'); R(w / 2 + 2, h / 2, 2, 3, '#ffd23f');
+      for (let i = 0; i < 4; i++) R(5 + (i % 2) * (w - 13), 7 + Math.floor(i / 2) * 12, 3, 3, (t >> 4) % 2 === i % 2 ? '#ffd166' : '#ffef9a');
+      R(-1, 0, w + 2, 3, '#ffd166');
       break;
     case 'terrarium': // Sarge's glass house on a little wheeled stand
       R(0, h - 3, w, 3, '#5a3a22'); R(2, h - 1, 2, 1, '#2a2a2a'); R(w - 4, h - 1, 2, 1, '#2a2a2a');
@@ -4212,6 +4218,11 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
       for (let i = 0; i < 6; i++) { const ph = 10 + (i % 3) * 4 + (i === 2 || i === 3 ? 6 : 0); R(3 + i * 4, 0 + (22 - ph), 3, ph, fixed ? '#e8c860' : '#a8945a'); R(3 + i * 4, 22 - ph, 3, 1, '#fff2c0'); }
       R(0, 18, w, h - 18, '#5a3020'); R(2, 20, w - 4, 3, '#f4efe6'); for (let i = 3; i < w - 3; i += 3) R(i, 20, 1, 2, '#2a1a10');
       if (!fixed) { R(w - 8, 12, 4, 1, '#3a3a3a'); R(w - 6, 13, 1, 4, '#3a3a3a'); }
+      break;
+    case 'spot': // theater spotlight on a stand
+      R(5, h - 4, 6, 4, '#2a2a2e'); R(7, 6, 2, h - 9, '#3a3a40');
+      R(2, 1, 12, 7, '#4a4a52'); R(12, 2, 3, 5, fixed ? '#fff2a0' : '#5a5a4a');
+      if (fixed) { g.fillStyle = 'rgba(255,240,160,0.18)'; g.beginPath(); g.moveTo(x + 15, y + 2); g.lineTo(x + 70, y + 60); g.lineTo(x + 40, y + 70); g.closePath(); g.fill(); }
       break;
     case 'safe':
       R(1, 2, w - 2, h - 2, '#4a4e56'); R(2, 3, w - 4, h - 4, '#5a606a'); circleFill(x + w / 2, y + h / 2 + 1, 4, fixed ? '#7cf29a' : '#2a2e36', g);
@@ -4909,6 +4920,14 @@ class Sensor extends Ent {
         R(0, 4, this.w, this.h - 4, '#3a2a5a'); R(2, 6, this.w - 4, 8, this.heard ? '#ff4f9a' : '#1a1a2a'); drawText('♪', x + this.w / 2, y + 6, this.heard ? '#fff' : '#4cc9f0', { align: 'center' }); break;
       case 'mic':
         R(7, 4, 2, 12, '#888'); R(5, 0, 6, 5, '#333'); R(4, 14, 8, 2, '#555'); break;
+      case 'drums': { // a drum kit: bass drum, snare, cymbal
+        const hb = this.heard && (this.t % 20) < 10 ? 1 : 0;
+        circleFill(x + this.w / 2, y + this.h - 9, 9, '#c83a3a', g); circleFill(x + this.w / 2, y + this.h - 9, 7, '#f4efe6', g);
+        drawText('B', x + this.w / 2, y + this.h - 13, '#5a189a', { g, align: 'center' });
+        R(2, this.h - 18, 8, 5, '#c8c8d0'); R(4, this.h - 13, 2, 11, '#7a7a82');
+        R(this.w - 10, 6 - hb, 10, 2, '#e8c860'); R(this.w - 6, 8, 1, this.h - 10, '#7a7a82');
+        break;
+      }
       default:
         R(1, 2, 14, 14, '#2a2a2e'); circleFill(x + 8, y + 10, 4, '#4a4a52', g); circleFill(x + 8, y + 10, 2, '#6a6a72', g); R(3, 3, 10, 2, this.heard ? '#7cf29a' : '#4cc9f0');
     }
@@ -9458,6 +9477,145 @@ EPISODES.push({
   endLine: 'INSPECTION SURVIVED!',
 });
 
+// =============================================================================
+// S2E2  The Magic Show Disaster
+// =============================================================================
+EPISODES.push({
+  season: 2, num: 2, title: 'The Magic Show Disaster', music: 'magic',
+  blurb: 'The Great Bennini\'s first real show. The rabbit has other plans.',
+  rooms: [
+    {
+      name: 'Backstage', slug: 'INT. THE RIALTO - BACKSTAGE - NIGHT', theme: 'backstage', shot: 'theater_night',
+      map: [
+        // 000000000011111111112222222222333333333344444444445555555555
+        // 012345678901234567890123456789012345678901234567890123456789
+        '############################################################', // 0
+        '############################################################', // 1
+        '............................................................', // 2
+        '.........................................cc.*...............', // 3
+        '.......................................M======..............', // 4
+        '.......................................M....................', // 5
+        '....................c..c..K..c.........M....................', // 6
+        '...................============........M....................', // 7
+        '.......................................M....................', // 8
+        '..................c....................M............n.......', // 9
+        '.......................................M....................', // 10
+        '..........c....c................c.....cM..........c.....c...', // 11
+        '.......................................M....................', // 12
+        '..@..x..A...N..B.S....j.......E..C..c..M....Z..cx....c...X..', // 13
+        '############################################################', // 14
+        '############################################################', // 15
+        '############################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'stagehand', solve: 'talk', id: 'stagemgr', moveTo: 12, vanish: true, face: -1, voice: 'npc', name: 'STAGE MANAGER', expr: 'angry',
+          block: 'No laminate, no backstage!',
+          talk: {
+            q: 'Laminates. Lanyards. Credentials. You have NONE of these things.',
+            opts: [
+              { t: 'I left my laminate in my other jacket.', ok: false, r: 'Classic. Heard it four hundred times. No.' },
+              { t: 'Benny says you\'re the only one who can make this show work.', ok: true, r: '...He said that? Nobody EVER says that. Go! Break a leg!' },
+              { t: 'Do you know who I am?', ok: false, r: 'No. And judging by that face, neither do you.' },
+            ],
+          } },
+        S: { t: 'spring', w: 2, kind: 'trampoline' },
+        K: { t: 'broken', kind: 'spot', id: 'spot8', say: [['theo', 'Spotlight\'s working! It was a loose bulb. I tightened it. With FEELING.'], ['benny', 'My spotlight! I have a SPOTLIGHT!']] },
+        C: { t: 'crate', kind: 'tophat' },
+        Z: { t: 'plate', w: 2, heavy: true, mark: true, id: 'hat8' },
+        X: { t: 'exit', link: 'spot8&hat8', lockedMsg: 'SPOTLIGHT AND TOP HAT FIRST!' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['benny', 'My first REAL show. At the Rialto. With an AUDIENCE.'], ['mila', 'How many tickets did you sell?'], ['benny', 'Eleven. Six are you guys.']], hintKeys: H_KEYS('PRIYA: get past the stage manager (E).', 'PRIYA: get past the stage manager (E).') },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['theo', 'A trampoline! For the acrobat act.'], ['dex', 'There\'s an acrobat act?'], ['benny', 'There is now.']], hintKeys: H_KEYS('Jump on the TRAMPOLINE to reach the catwalk. THEO: fix the spotlight.', 'Jump on the TRAMPOLINE to reach the catwalk. THEO: fix the spotlight.') },
+        E: { t: 'trigger', w: 2, h: 3, lines: [['dex', 'A giant top hat. Of course I\'m moving a giant top hat.'], ['benny', 'It goes on the stage lift. Gently! It has feelings. And a rabbit.']], hintKeys: H_KEYS('DEX: push the top hat onto the stage lift (X).', 'DEX: push the top hat onto the stage lift (X).') },
+      },
+    },
+    {
+      name: 'Under the Stage', slug: 'INT. THE RIALTO - UNDER THE STAGE - NIGHT', theme: 'backstage', shot: 'theater_night', dark: true,
+      map: [
+        // 00000000001111111111222222222233333333334444444444555555
+        // 01234567890123456789012345678901234567890123456789012345
+        '########################################################', // 0
+        '########################################################', // 1
+        '......................................#.................', // 2
+        '......Y.................Y.............#.....Y...........', // 3
+        '................................cc....#.................', // 4
+        '...............................===....#.................', // 5
+        '......................................#.................', // 6
+        '......................c..c..c.........#.................', // 7
+        '....................###########.......#.................', // 8
+        '..................c.###########.......#.................', // 9
+        '....................###########.......#.................', // 10
+        '..........c...c.....###########....c......c.......c.....', // 11
+        '....................###########.......G.................', // 12
+        '..@.....A..R..x..S.....c...c......B..cV.L....K.c.x...X..', // 13
+        '########################################################', // 14
+        '########################################################', // 15
+        '########################################################', // 16
+      ],
+      ents: {
+        R: { t: 'runner', kind: 'rabbit', path: [[11, 13], [19, 13], [26, 13], [34, 13], [41, 13], [50, 13]], near: 4, speed: 2.2, catchable: true, id: 'rabbit8',
+          taunts: ['*judgmental nose wiggle*', '*thump thump*', '*rabbit noises*'],
+          say: [['benny', 'Professor Fluffington! You\'re safe! You\'re... chewing my cape.'], ['juno', 'He\'s a critic.']] },
+        S: { t: 'spring', w: 2, kind: 'trampoline' },
+        G: { t: 'door', link: 'motordoor8', h: 2, kind: 'door' },
+        V: { t: 'grate', id: 'vent8' },
+        L: { t: 'lever', id: 'motordoor8', say: 'Door\'s open! The Great Bennini walks through walls! ...Through vents. Same thing.' },
+        K: { t: 'broken', kind: 'motor', id: 'lift8', say: [['theo', 'Lift motor\'s purring. Like the rabbit. Do rabbits purr?'], ['benny', 'Professor Fluffington does.']] },
+        X: { t: 'exit', link: 'rabbit8&lift8', lockedMsg: 'CATCH THE RABBIT AND FIX THE LIFT!' },
+        Y: { t: 'light', kind: 'hang', r: 6 },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['benny', 'Professor Fluffington escaped through the trapdoor!'], ['dex', 'Your rabbit is named PROFESSOR?'], ['benny', 'He has a doctorate in being adorable.']] },
+        B: { t: 'trigger', w: 2, h: 3, any: true, lines: [['theo', 'The motor room is locked. And the lift won\'t run without the motor.'], ['benny', 'Locked doors are just doors that haven\'t met me.']], hintKeys: H_KEYS('BENNY: open the vent and the motor room. THEO: fix the lift motor. Then catch the rabbit!', 'BENNY: open the vent and the motor room. THEO: fix the lift motor. Then catch the rabbit!') },
+      },
+    },
+    {
+      name: 'The Stage', slug: 'INT. THE RIALTO - ON STAGE - NIGHT', theme: 'theater', shot: 'theater_night',
+      map: [
+        // 000000000011111111112222222222333333333344444444445555555555
+        // 012345678901234567890123456789012345678901234567890123456789
+        '############################################################', // 0
+        '############################################################', // 1
+        '............................................................', // 2
+        '............................................................', // 3
+        '.......................c..cL.c..............................', // 4
+        '......................=========.............................', // 5
+        '............................................................', // 6
+        '............................................................', // 7
+        '............................................................', // 8
+        '....n................c.................................n....', // 9
+        '............................................................', // 10
+        '..........c.......................c.......c..........c......', // 11
+        '............................................................', // 12
+        '..@.....A....N..cB..S...........C...Ec..Z...K.c...Q.....c...', // 13
+        '############################################################', // 14
+        '############################################################', // 15
+        '############################################################', // 16
+      ],
+      ents: {
+        N: { t: 'npc', look: 'critic', solve: 'talk', id: 'heckler', moveTo: -9, vanish: true, face: -1, voice: 'npc', name: 'HECKLER', expr: 'smug',
+          block: 'BOOO! Bring back the juggler!',
+          talk: {
+            q: 'I paid good money for this show! ...Well. Someone did. BOOO!',
+            opts: [
+              { t: 'Sir, you got in free.', ok: false, r: 'Then I want my free back! BOOO!' },
+              { t: 'Volunteer! The Great Bennini needs a brave volunteer for the SAW trick!', ok: true, r: 'The... saw trick? I\'ll just... sit down now. Quietly.' },
+              { t: 'Please be nice. It\'s his first show.', ok: false, r: 'Nice? I\'m a CRITIC. Nice is for amateurs.' },
+            ],
+          } },
+        S: { t: 'spring', w: 2, kind: 'trampoline' },
+        L: { t: 'lever', id: 'spot8b', say: 'Spotlight aimed! Scoreboard: Mila 1, Gravity 0.' },
+        C: { t: 'crate', kind: 'magicbox' },
+        Z: { t: 'plate', w: 2, heavy: true, mark: true, id: 'box8' },
+        K: { t: 'broken', kind: 'panel', id: 'trap8', label: 'Fix trapdoor (hold)', say: [['theo', 'Trapdoor\'s fixed! It drops you gently onto a mattress. I tested it. On Dex.'], ['dex', 'I volunteered!']] },
+        Q: { t: 'sensor', kind: 'drums', w: 2, h: 2, id: 'trick', cond: 'box8&trap8&spot8b', notReady: [['juno', 'Not yet! Box on the X, trapdoor fixed, spotlight aimed. THEN the drumroll.']], sayWho: 'benny', say: 'And now... the Great Bennini... DISAPPEARS!' },
+        A: { t: 'trigger', w: 2, h: 3, lines: [['priya', 'Full house! Eleven people!'], ['mila', 'And one heckler.']], hintKeys: H_KEYS('PRIYA: deal with the heckler (E).', 'PRIYA: deal with the heckler (E).') },
+        B: { t: 'trigger', w: 2, h: 3, lines: [['benny', 'The spotlight up on the fly rail needs aiming. It\'s really high.'], ['mila', 'Really high is my favorite height.']], hintKeys: H_KEYS('MILA: bounce on the trampoline and double-jump (E) at the top to reach the fly rail.', 'MILA: bounce on the trampoline and double-jump at the top to reach the fly rail.') },
+        E: { t: 'trigger', w: 2, h: 3, any: true, lines: [['benny', 'The box goes on the trapdoor. Theo fixes the trapdoor. Juno gives me a drumroll. And I... vanish.'], ['dex', 'And this has worked before?'], ['benny', 'Define "worked."']], hintKeys: H_KEYS('DEX: box on the X. THEO: fix the trapdoor. JUNO: drumroll at the drums!', 'DEX: box on the X. THEO: fix the trapdoor. JUNO: drumroll at the drums!') },
+      },
+      goal: 'trick',
+    },
+  ],
+  endLine: 'TA-DA!',
+});
+
 
 
 // ===== 15_story.js =====
@@ -9868,6 +10026,62 @@ STORY[6] = {
     ['freeze'],
   ],
   credits: ['Door Hiding: EVERYONE (badly)', 'Rule 9½: B. HOLLOWAY (allegedly)', 'Evidence Removal: THEO, DEX & MILA', 'The Fern: ITSELF'],
+};
+
+// S2E2 (episode 8) ----------------------------------------------------------------
+STORY[7] = {
+  previously: [
+    ['set', 'hall'],
+    ['at', 'holloway', 300, { face: -1, expr: 'neutral' }], ['at', 'roz', 344, { face: -1, expr: 'smug' }],
+    ['prop', 'sargehead', 'iguanaL', 300, 194],
+    ['say', 'roz', 'You wrote it on our honeymoon, darling.', { expr: 'smug' }],
+    ['say', 'holloway', 'Hello, Sarge.'],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'stage'],
+    ['at', 'priya', 60, { face: 1 }], ['at', 'dex', 92, { face: 1 }], ['at', 'mila', 122, { face: 1 }], ['at', 'theo', 152, { face: 1 }], ['at', 'juno', 182, { face: 1 }],
+    ['at', 'benny', 270, { face: -1, expr: 'grin' }],
+    ['say', 'benny', 'Ladies and gentlemen! The Great Bennini has a REAL GIG!', { anim: 'magic' }],
+    ['say', 'mila', 'A real one? With strangers?'],
+    ['say', 'benny', 'The Rialto! Saturday! Eleven tickets sold!', { anim: 'cheer' }],
+    ['say', 'priya', 'Six of those were us.'],
+    ['laugh', 'chuckle'],
+    ['say', 'dex', 'Can I be your assistant? I\'ve always wanted to be sawed in half.', { expr: 'happy' }],
+    ['say', 'benny', '...That\'s not the dream you think it is, Dex.'],
+    ['laugh', 'laugh'],
+    ['say', 'benny', 'And now, the star of the show... PROFESSOR FLUFFINGTON!', { anim: 'magic' }],
+    ['fx', 'puff', 280, 196],
+    ['wait', 40],
+    ['say', 'benny', '...Professor?', { expr: 'surprised' }],
+    ['prop', 'fluff', 'rabbit', 230, 224], ['moveprop', 'fluff', -30, 224, 2.2],
+    ['laugh', 'big'],
+    ['say', 'juno', 'Your rabbit just left. Out the stage door.', { expr: 'surprised' }],
+    ['say', 'benny', 'He does that. He\'s a method actor.'],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'stage'],
+    ['at', 'priya', 60, { face: 1 }], ['at', 'dex', 92, { face: 1 }], ['at', 'mila', 122, { face: 1 }], ['at', 'theo', 152, { face: 1 }], ['at', 'juno', 190, { face: 1, anim: 'play' }],
+    ['at', 'benny', 360, { face: -1, expr: 'grin' }],
+    ['say', 'benny', 'For my final trick... the Great Bennini will... DISAPPEAR!', { anim: 'magic' }],
+    ['sing', 'juno', 'Drumroll, drumroll, rat-a-tat-tat!'],
+    ['flash'], ['vanish', 'benny'],
+    ['laugh', 'ooh'],
+    ['wait', 40],
+    ['say', 'mila', 'He actually vanished. Point for Benny. Holy cow.', { expr: 'surprised' }],
+    ['laugh', 'applause'],
+    ['pop', 'benny', 440, 224, 'cheer'],
+    ['say', 'benny', 'IT WORKED! I\'m a REAL magician!', { expr: 'grin', anim: 'cheer' }],
+    ['laugh', 'cheer'],
+    ['say', 'theo', 'Wait. If Benny\'s over there... who\'s in the trapdoor?'],
+    ['pop', 'holloway', 360, 224, 'point'],
+    ['say', 'holloway', 'Rule 52. No unlicensed magic.', { expr: 'angry', anim: 'point' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Magic: THE GREAT BENNINI (for real this time)', 'Trapdoor: THEO (tested on Dex)', 'Rabbit: PROFESSOR FLUFFINGTON (uncredited)', 'Drumroll: JUNO (four minutes long)'],
 };
 
 // ---------------------------------------------------------------------------

@@ -157,6 +157,26 @@
       B.up('KeyW'); B.step(4);
       return B.f();
     },
+    // jump onto a spring at springPx, then steer the bounce toward landPx (opts.double: Mila's air jump at the top)
+    bounce(springPx, landPx, opts) {
+      opts = opts || {};
+      B.down('Space');
+      let bounced = false, dbl = false;
+      for (let i = 0; i < 500; i++) {
+        const f = B.f();
+        const target = bounced ? landPx : springPx;
+        B.up('KeyA'); B.up('KeyD');
+        if (Math.abs(target - f.cx) > 2) B.down(target > f.cx ? 'KeyD' : 'KeyA');
+        if (opts.double && bounced && !dbl && f.vy > -1) { B.up('Space'); B.step(1); B.down('Space'); dbl = true; }
+        B.step(1);
+        const g = B.f();
+        if (g.vy < -6.5) bounced = true;
+        if (bounced && g.onGround && !g.groundEnt?.bounce) { B.releaseAll(); B.step(2); return g; }
+        if (g.mishapT > 0) { B.releaseAll(); B.fail('mishap during bounce'); }
+      }
+      B.releaseAll();
+      B.fail('bounce did not land');
+    },
     use() { B.tap('KeyE', 1); B.step(2); },
     holdUse(n) { B.down('KeyE'); B.step(n || 70); B.up('KeyE'); B.step(2); },
     enter() { B.tap('KeyW', 1); B.step(4); },

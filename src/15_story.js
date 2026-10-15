@@ -407,6 +407,62 @@ STORY[6] = {
   credits: ['Door Hiding: EVERYONE (badly)', 'Rule 9½: B. HOLLOWAY (allegedly)', 'Evidence Removal: THEO, DEX & MILA', 'The Fern: ITSELF'],
 };
 
+// S2E2 (episode 8) ----------------------------------------------------------------
+STORY[7] = {
+  previously: [
+    ['set', 'hall'],
+    ['at', 'holloway', 300, { face: -1, expr: 'neutral' }], ['at', 'roz', 344, { face: -1, expr: 'smug' }],
+    ['prop', 'sargehead', 'iguanaL', 300, 194],
+    ['say', 'roz', 'You wrote it on our honeymoon, darling.', { expr: 'smug' }],
+    ['say', 'holloway', 'Hello, Sarge.'],
+    ['wait', 20],
+  ],
+  coldOpen: [
+    ['set', 'stage'],
+    ['at', 'priya', 60, { face: 1 }], ['at', 'dex', 92, { face: 1 }], ['at', 'mila', 122, { face: 1 }], ['at', 'theo', 152, { face: 1 }], ['at', 'juno', 182, { face: 1 }],
+    ['at', 'benny', 270, { face: -1, expr: 'grin' }],
+    ['say', 'benny', 'Ladies and gentlemen! The Great Bennini has a REAL GIG!', { anim: 'magic' }],
+    ['say', 'mila', 'A real one? With strangers?'],
+    ['say', 'benny', 'The Rialto! Saturday! Eleven tickets sold!', { anim: 'cheer' }],
+    ['say', 'priya', 'Six of those were us.'],
+    ['laugh', 'chuckle'],
+    ['say', 'dex', 'Can I be your assistant? I\'ve always wanted to be sawed in half.', { expr: 'happy' }],
+    ['say', 'benny', '...That\'s not the dream you think it is, Dex.'],
+    ['laugh', 'laugh'],
+    ['say', 'benny', 'And now, the star of the show... PROFESSOR FLUFFINGTON!', { anim: 'magic' }],
+    ['fx', 'puff', 280, 196],
+    ['wait', 40],
+    ['say', 'benny', '...Professor?', { expr: 'surprised' }],
+    ['prop', 'fluff', 'rabbit', 230, 224], ['moveprop', 'fluff', -30, 224, 2.2],
+    ['laugh', 'big'],
+    ['say', 'juno', 'Your rabbit just left. Out the stage door.', { expr: 'surprised' }],
+    ['say', 'benny', 'He does that. He\'s a method actor.'],
+    ['laugh', 'laugh'],
+    ['freeze'],
+  ],
+  tag: [
+    ['set', 'stage'],
+    ['at', 'priya', 60, { face: 1 }], ['at', 'dex', 92, { face: 1 }], ['at', 'mila', 122, { face: 1 }], ['at', 'theo', 152, { face: 1 }], ['at', 'juno', 190, { face: 1, anim: 'play' }],
+    ['at', 'benny', 360, { face: -1, expr: 'grin' }],
+    ['say', 'benny', 'For my final trick... the Great Bennini will... DISAPPEAR!', { anim: 'magic' }],
+    ['sing', 'juno', 'Drumroll, drumroll, rat-a-tat-tat!'],
+    ['flash'], ['vanish', 'benny'],
+    ['laugh', 'ooh'],
+    ['wait', 40],
+    ['say', 'mila', 'He actually vanished. Point for Benny. Holy cow.', { expr: 'surprised' }],
+    ['laugh', 'applause'],
+    ['pop', 'benny', 440, 224, 'cheer'],
+    ['say', 'benny', 'IT WORKED! I\'m a REAL magician!', { expr: 'grin', anim: 'cheer' }],
+    ['laugh', 'cheer'],
+    ['say', 'theo', 'Wait. If Benny\'s over there... who\'s in the trapdoor?'],
+    ['pop', 'holloway', 360, 224, 'point'],
+    ['say', 'holloway', 'Rule 52. No unlicensed magic.', { expr: 'angry', anim: 'point' }],
+    ['laugh', 'big'],
+    ['freeze'],
+  ],
+  credits: ['Magic: THE GREAT BENNINI (for real this time)', 'Trapdoor: THEO (tested on Dex)', 'Rabbit: PROFESSOR FLUFFINGTON (uncredited)', 'Drumroll: JUNO (four minutes long)'],
+};
+
 // ---------------------------------------------------------------------------
 // Hub flavour
 // ---------------------------------------------------------------------------

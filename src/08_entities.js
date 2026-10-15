@@ -29,7 +29,7 @@ const CRATE_KINDS = {
   box: [1, 1], couch: [3, 1], vending: [1, 2], piano: [2, 2], fridge: [1, 2], amp: [1, 1], dresser: [2, 2], washer: [1, 1],
   snowball: [1, 1], cart: [2, 1], trunk: [2, 1], sandbag: [1, 1], bike: [2, 1], gym: [2, 1], grill: [2, 1], cooler: [1, 1],
   case: [2, 1], tophat: [2, 2], magnet: [1, 1], dumpster: [2, 2], suitcase: [1, 1], pianobig: [3, 2], speaker: [1, 2], boxes2: [1, 2],
-  cakecart: [2, 2], terrarium: [2, 1],
+  cakecart: [2, 2], terrarium: [2, 1], magicbox: [2, 2],
 };
 class Crate extends Ent {
   constructor(room, tx, ty, p) {
@@ -156,6 +156,12 @@ function drawCrateArt(g, kind, x, y, w, h, t) {
       break;
     case 'snowball':
       circleFill(x + 8, y + 8, 8, '#f4f8fc', g); R(3, 4, 4, 2, '#ffffff'); R(5, 12, 7, 2, '#c8d8ea'); R(10, 6, 2, 2, '#dde8f4');
+      break;
+    case 'magicbox': // the Great Bennini's vanishing cabinet
+      R(0, 2, w, h - 4, '#5a189a'); R(2, 4, w - 4, h - 8, '#7a38ba'); R(0, h - 2, w, 2, '#2a1a3a');
+      R(w / 2 - 1, 4, 2, h - 8, '#3a0a6a'); R(w / 2 - 4, h / 2, 2, 3, '#ffd23f'); R(w / 2 + 2, h / 2, 2, 3, '#ffd23f');
+      for (let i = 0; i < 4; i++) R(5 + (i % 2) * (w - 13), 7 + Math.floor(i / 2) * 12, 3, 3, (t >> 4) % 2 === i % 2 ? '#ffd166' : '#ffef9a');
+      R(-1, 0, w + 2, 3, '#ffd166');
       break;
     case 'terrarium': // Sarge's glass house on a little wheeled stand
       R(0, h - 3, w, 3, '#5a3a22'); R(2, h - 1, 2, 1, '#2a2a2a'); R(w - 4, h - 1, 2, 1, '#2a2a2a');
@@ -515,6 +521,11 @@ function drawBrokenArt(g, kind, x, y, w, h, fixed, t) {
       for (let i = 0; i < 6; i++) { const ph = 10 + (i % 3) * 4 + (i === 2 || i === 3 ? 6 : 0); R(3 + i * 4, 0 + (22 - ph), 3, ph, fixed ? '#e8c860' : '#a8945a'); R(3 + i * 4, 22 - ph, 3, 1, '#fff2c0'); }
       R(0, 18, w, h - 18, '#5a3020'); R(2, 20, w - 4, 3, '#f4efe6'); for (let i = 3; i < w - 3; i += 3) R(i, 20, 1, 2, '#2a1a10');
       if (!fixed) { R(w - 8, 12, 4, 1, '#3a3a3a'); R(w - 6, 13, 1, 4, '#3a3a3a'); }
+      break;
+    case 'spot': // theater spotlight on a stand
+      R(5, h - 4, 6, 4, '#2a2a2e'); R(7, 6, 2, h - 9, '#3a3a40');
+      R(2, 1, 12, 7, '#4a4a52'); R(12, 2, 3, 5, fixed ? '#fff2a0' : '#5a5a4a');
+      if (fixed) { g.fillStyle = 'rgba(255,240,160,0.18)'; g.beginPath(); g.moveTo(x + 15, y + 2); g.lineTo(x + 70, y + 60); g.lineTo(x + 40, y + 70); g.closePath(); g.fill(); }
       break;
     case 'safe':
       R(1, 2, w - 2, h - 2, '#4a4e56'); R(2, 3, w - 4, h - 4, '#5a606a'); circleFill(x + w / 2, y + h / 2 + 1, 4, fixed ? '#7cf29a' : '#2a2e36', g);
@@ -1212,6 +1223,14 @@ class Sensor extends Ent {
         R(0, 4, this.w, this.h - 4, '#3a2a5a'); R(2, 6, this.w - 4, 8, this.heard ? '#ff4f9a' : '#1a1a2a'); drawText('♪', x + this.w / 2, y + 6, this.heard ? '#fff' : '#4cc9f0', { align: 'center' }); break;
       case 'mic':
         R(7, 4, 2, 12, '#888'); R(5, 0, 6, 5, '#333'); R(4, 14, 8, 2, '#555'); break;
+      case 'drums': { // a drum kit: bass drum, snare, cymbal
+        const hb = this.heard && (this.t % 20) < 10 ? 1 : 0;
+        circleFill(x + this.w / 2, y + this.h - 9, 9, '#c83a3a', g); circleFill(x + this.w / 2, y + this.h - 9, 7, '#f4efe6', g);
+        drawText('B', x + this.w / 2, y + this.h - 13, '#5a189a', { g, align: 'center' });
+        R(2, this.h - 18, 8, 5, '#c8c8d0'); R(4, this.h - 13, 2, 11, '#7a7a82');
+        R(this.w - 10, 6 - hb, 10, 2, '#e8c860'); R(this.w - 6, 8, 1, this.h - 10, '#7a7a82');
+        break;
+      }
       default:
         R(1, 2, 14, 14, '#2a2a2e'); circleFill(x + 8, y + 10, 4, '#4a4a52', g); circleFill(x + 8, y + 10, 2, '#6a6a72', g); R(3, 3, 10, 2, this.heard ? '#7cf29a' : '#4cc9f0');
     }
