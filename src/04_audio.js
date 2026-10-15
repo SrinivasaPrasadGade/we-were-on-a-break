@@ -12,7 +12,7 @@ const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 
 const AudioSys = {
   ctx: null, ok: false, master: null, musicBus: null, sfxBus: null, crowdBus: null,
-  noiseBuf: null, ksCache: new Map(), crowd: {}, crowdReady: false,
+  noiseBuf: null, ksCache: new Map(), crowd: {}, crowdReady: false, lastCrowd: -9, lastCrowdBuf: null,
   vol: { music: 0.7, sfx: 0.8 }, laughOn: true, duckUntil: 0,
 
   unlock() {
@@ -37,8 +37,8 @@ const AudioSys = {
     this.crowdBus = c.createGain(); this.crowdBus.connect(this.master);
     // a small "studio" room for the audience
     const verb = c.createConvolver();
-    verb.buffer = this.makeIR(1.4, 0.4);
-    const wet = c.createGain(); wet.gain.value = 0.35;
+    verb.buffer = this.makeIR(1.5, 0.38, true);
+    const wet = c.createGain(); wet.gain.value = 0.3;
     this.crowdBus.connect(verb); verb.connect(wet); wet.connect(this.master);
     // a little room on the music too
     const mverb = c.createConvolver(); mverb.buffer = this.makeIR(1.1, 0.25);
@@ -69,14 +69,19 @@ const AudioSys = {
     this.crowdBus.gain.setTargetAtTime(this.vol.sfx * 0.9, t, 0.05);
   },
 
-  makeIR(dur, decay) {
+  makeIR(dur, decay, dark) {
     const c = this.ctx, sr = c.sampleRate, len = Math.floor(sr * dur);
     const b = c.createBuffer(2, len, sr);
     for (let ch = 0; ch < 2; ch++) {
       const d = b.getChannelData(ch);
+      let lp = 0;
       for (let i = 0; i < len; i++) {
         const t = i / sr;
-        d[i] = (Math.random() * 2 - 1) * Math.exp(-t / decay) * (t < 0.01 ? t / 0.01 : 1);
+        const x = (Math.random() * 2 - 1) * Math.exp(-t / decay) * (t < 0.01 ? t / 0.01 : 1);
+        // seats and bodies soak up the highs first, so the tail darkens as it fades
+        const k = dark ? Math.max(0.05, Math.exp(-t / (decay * 0.8))) : 1;
+        lp += k * (x - lp);
+        d[i] = lp;
       }
     }
     return b;
@@ -567,23 +572,57 @@ const AudioSys = {
   },
 
   // ---- studio audience ---------------------------------------------------------------
+  // CrowdSynth (04_crowd.js) renders the reactions in a Worker when the page allows one,
+  // otherwise here in small slices between frames. The most-used reactions come first.
   buildCrowd() {
-    const jobs = [
-      ['chuckle', 1], ['chuckle', 2], ['laugh', 3], ['laugh', 4], ['big', 5], ['big', 6],
-      ['ooh', 7], ['aww', 8], ['applause', 9], ['cheer', 10], ['applause', 11],
-    ];
-    const run = () => {
-      const j = jobs.shift();
-      if (!j) { this.crowdReady = true; return; }
+    const jobs = [['chuckle', 1], ['laugh', 2], ['applause', 3], ['chuckle', 4], ['laugh', 5], ['big', 6], ['aww', 7],
+      ['cheer', 8], ['ooh', 9], ['chuckle', 10], ['laugh', 11], ['big', 12], ['aww', 13], ['applause', 14]];
+    const done = new Set();
+    const add = (kind, seed, L, R, sr) => {
+      if (done.has(seed)) return;
+      done.add(seed);
       try {
-        const data = synthCrowd(j[0], j[1]);
-        const b = this.ctx.createBuffer(2, data.L.length, data.sr);
-        b.getChannelData(0).set(data.L); b.getChannelData(1).set(data.R);
-        (this.crowd[j[0]] = this.crowd[j[0]] || []).push(b);
+        const b = this.ctx.createBuffer(2, L.length, sr);
+        b.getChannelData(0).set(L); b.getChannelData(1).set(R);
+        (this.crowd[kind] = this.crowd[kind] || []).push(b);
       } catch (e) { /* audience is a nicety */ }
-      setTimeout(run, 16);
+      if (done.size === jobs.length) this.crowdReady = true;
     };
-    run();
+    const local = () => this.buildCrowdLocal(jobs.filter(j => !done.has(j[1])), add);
+    let w = null;
+    try {
+      const code = 'const CS=(' + CrowdSynth.toString() + ')();onmessage=function(e){var d=e.data,r=CS.render(d.kind,d.seed);' +
+        'postMessage({kind:d.kind,seed:d.seed,L:r.L,R:r.R,sr:r.sr},[r.L.buffer,r.R.buffer]);};';
+      w = new Worker(URL.createObjectURL(new Blob([code], { type: 'text/javascript' })));
+    } catch (e) { w = null; }
+    if (!w) { local(); return; }
+    let fellBack = false;
+    const fallback = () => { if (fellBack) return; fellBack = true; try { w.terminate(); } catch (e) { /* ignore */ } local(); };
+    w.onmessage = e => {
+      const d = e.data;
+      add(d.kind, d.seed, d.L, d.R, d.sr);
+      if (done.size === jobs.length) { try { w.terminate(); } catch (err) { /* ignore */ } }
+    };
+    w.onerror = fallback;
+    w.onmessageerror = fallback;
+    for (const j of jobs) w.postMessage({ kind: j[0], seed: j[1] });
+    // a worker that is silently blocked never answers: render here instead
+    setTimeout(() => { if (!done.size) fallback(); }, 6000);
+  },
+
+  buildCrowdLocal(jobs, add) {
+    const CS = CrowdSynth();
+    let job = null, p = null, k = 0;
+    const step = () => {
+      const t0 = performance.now();
+      while (performance.now() - t0 < 6) {
+        if (!p) { job = jobs.shift(); if (!job) return; p = CS.plan(job[0], job[1]); k = 0; }
+        if (k < p.tasks.length) p.tasks[k++]();
+        else { const r = p.result(); add(job[0], job[1], r.L, r.R, r.sr); p = null; }
+      }
+      setTimeout(step, 0);
+    };
+    step();
   },
 
   // kind: chuckle | laugh | big | ooh | aww | applause | cheer
@@ -592,15 +631,21 @@ const AudioSys = {
     const list = this.crowd[kind];
     if (!list || !list.length) return;
     const c = this.ctx, t = c.currentTime;
+    // a chuckle stacked on another reaction sounds like a stutter, not a crowd
+    if (kind === 'chuckle' && t - this.lastCrowd < 0.9) return;
+    this.lastCrowd = t;
+    let b = pick(list);
+    if (list.length > 1 && b === this.lastCrowdBuf) b = list[(list.indexOf(b) + 1) % list.length];
+    this.lastCrowdBuf = b;
     const src = c.createBufferSource();
-    src.buffer = pick(list);
-    src.playbackRate.value = rnd(0.94, 1.06);
+    src.buffer = b;
+    src.playbackRate.value = rnd(0.96, 1.04);
     const g = this.gain(vol === undefined ? 0.85 : vol, this.crowdBus);
     src.connect(g); src.start(t);
     // duck music under the audience
-    const dur = src.buffer.duration;
+    const dur = b.duration;
     const dg = this.musicDuck.gain;
-    dg.cancelScheduledValues(t); dg.setTargetAtTime(0.45, t, 0.08); dg.setTargetAtTime(1, t + dur * 0.7, 0.4);
+    dg.cancelScheduledValues(t); dg.setTargetAtTime(0.45, t, 0.08); dg.setTargetAtTime(1, t + dur * 0.6, 0.4);
   },
 };
 
@@ -618,204 +663,3 @@ const VOICES = {
   sarge: { f: 900, var: 0.2, type: 'sine', dur: 0.04, vol: 0.06, slide: 1.3 },
   robot: { f: 600, var: 0.4, type: 'square', dur: 0.04, vol: 0.04, slide: 1 },
 };
-
-// ---------------------------------------------------------------------------
-// Crowd synthesis (pure JS -> Float32Arrays). Formant-filtered voices.
-// ---------------------------------------------------------------------------
-const VOWELS = {
-  a: [[800, 80], [1200, 90], [2500, 120]],
-  e: [[520, 70], [1750, 100], [2550, 130]],
-  o: [[520, 70], [900, 80], [2400, 120]],
-  u: [[340, 50], [870, 80], [2300, 110]],
-  i: [[300, 50], [2250, 120], [2950, 150]],
-  aw: [[640, 70], [980, 80], [2500, 120]],
-};
-function makeBP(f, bw, sr) {
-  const s = { x1: 0, x2: 0, y1: 0, y2: 0 };
-  setBP(s, f, bw, sr);
-  return s;
-}
-function setBP(s, f, bw, sr) {
-  const q = Math.max(0.5, f / bw);
-  const w = 2 * Math.PI * Math.min(f, sr * 0.45) / sr, al = Math.sin(w) / (2 * q), a0 = 1 + al;
-  s.b0 = al / a0; s.b2 = -al / a0; s.a1 = -2 * Math.cos(w) / a0; s.a2 = (1 - al) / a0;
-}
-function runBP(s, x) {
-  const y = s.b0 * x + s.b2 * s.x2 - s.a1 * s.y1 - s.a2 * s.y2;
-  s.x2 = s.x1; s.x1 = x; s.y2 = s.y1; s.y1 = y;
-  return y;
-}
-
-function synthCrowd(kind, seed) {
-  const sr = 22050;
-  const R = mulberry32(seed * 7919 + 13);
-  const rr = (a, b) => a + R() * (b - a);
-  const durs = { chuckle: 2.0, laugh: 3.2, big: 4.4, ooh: 2.3, aww: 2.5, applause: 4.6, cheer: 4.0 };
-  const dur = durs[kind] || 3;
-  const n = Math.floor(sr * dur);
-  const L = new Float32Array(n), Rr = new Float32Array(n);
-
-  // one voiced stream with an amplitude/pitch/vowel contour
-  function voice(o) {
-    // o: {t0, len, f0fn(k), ampfn(k), vowelfn(k)->[[f,bw]..], breath, pan}
-    const filters = [0, 1, 2].map(() => ({ x1: 0, x2: 0, y1: 0, y2: 0 }));
-    const fg = [1, 0.55, 0.22];
-    const i0 = Math.floor(o.t0 * sr), len = Math.floor(o.len * sr);
-    let ph = rr(0, 1), lp = 0, jit = 0;
-    const pl = Math.cos(o.pan * Math.PI / 2), pr = Math.sin(o.pan * Math.PI / 2);
-    for (let i = 0; i < len; i++) {
-      const idx = i0 + i;
-      if (idx >= n) break;
-      const k = i / len;
-      if ((i & 63) === 0) {
-        const V = o.vowelfn(k);
-        for (let j = 0; j < 3; j++) setBP(filters[j], V[j][0] * o.fscale, V[j][1], sr);
-        jit = (R() - 0.5) * 0.02;
-      }
-      const amp = o.ampfn(k, i / sr);
-      if (amp < 0.0005) { continue; }
-      const f0 = o.f0fn(k, i / sr) * (1 + jit);
-      ph += f0 / sr; if (ph >= 1) ph -= 1;
-      const saw = 2 * ph - 1;
-      lp += 0.35 * (saw - lp);
-      const nz = (R() * 2 - 1) * o.breath(k, i / sr);
-      const x = (lp * 0.9 + nz) * amp;
-      let y = 0;
-      for (let j = 0; j < 3; j++) y += runBP(filters[j], x) * fg[j];
-      L[idx] += y * pl; Rr[idx] += y * pr;
-    }
-  }
-
-  // "ha ha ha" laughter
-  function laugher(t0, nSyl, intensity) {
-    const female = R() < 0.5;
-    const f0 = female ? rr(190, 290) : rr(100, 160);
-    const rate = rr(4.2, 6.6);
-    const vowel = pick2(['a', 'a', 'a', 'e', 'o', 'aw']);
-    const sylLen = [];
-    let tot = 0;
-    for (let s = 0; s < nSyl; s++) { const d = (1 / rate) * rr(0.8, 1.25); sylLen.push(d); tot += d; }
-    const starts = []; let acc = 0; for (const d of sylLen) { starts.push(acc); acc += d; }
-    const len = tot + 0.15;
-    const decline = rr(0.015, 0.035);
-    const ampBase = intensity * rr(0.5, 1.0);
-    const sylAt = tt => { let s = 0; while (s + 1 < starts.length && starts[s + 1] <= tt) s++; return s; };
-    voice({
-      t0, len, pan: rr(0.1, 0.9), fscale: female ? 1.12 : 1,
-      vowelfn: () => VOWELS[vowel],
-      f0fn: (k, tt) => { const s = sylAt(tt); const p = (tt - starts[s]) / sylLen[s]; return f0 * (1.18 - s * decline - p * 0.22); },
-      ampfn: (k, tt) => {
-        const s = sylAt(tt); const p = (tt - starts[s]) / sylLen[s];
-        const on = 0.55;
-        if (p > on) return 0;
-        const e = p < 0.1 ? p / 0.1 : Math.pow(1 - (p - 0.1) / (on - 0.1), 1.6);
-        return e * ampBase * Math.pow(0.93, s);
-      },
-      breath: (k, tt) => { const s = sylAt(tt); const p = (tt - starts[s]) / sylLen[s]; return p < 0.12 ? 0.9 : 0.18; },
-    });
-  }
-  function pick2(a) { return a[Math.floor(R() * a.length)]; }
-
-  function sustained(t0, len, vowelA, vowelB, f0, contour, amp, female) {
-    const vib = rr(4.5, 6), vibA = rr(0.008, 0.018), ph0 = rr(0, 6);
-    voice({
-      t0, len, pan: rr(0.05, 0.95), fscale: female ? 1.1 : 1,
-      vowelfn: k => {
-        if (!vowelB) return VOWELS[vowelA];
-        const m = Math.min(1, k / 0.12);
-        const A = VOWELS[vowelA], B = VOWELS[vowelB];
-        return A.map((p, j) => [lerp(p[0], B[j][0], m), lerp(p[1], B[j][1], m)]);
-      },
-      f0fn: (k, tt) => f0 * contour(k) * (1 + Math.sin(tt * vib * TAU + ph0) * vibA),
-      ampfn: k => amp * (k < 0.12 ? k / 0.12 : k > 0.6 ? Math.max(0, (1 - k) / 0.4) : 1),
-      breath: () => 0.22,
-    });
-  }
-
-  function claps(count, t0, t1, density, vol) {
-    for (let c = 0; c < count; c++) {
-      const period = rr(0.17, 0.3) / density;
-      let t = t0 + rr(0, 0.35);
-      const end = t1 - rr(0, 1.2);
-      const f = rr(800, 2600), bw = f / rr(0.8, 1.6), pan = rr(0.05, 0.95);
-      const pl = Math.cos(pan * Math.PI / 2), pr = Math.sin(pan * Math.PI / 2);
-      const s = makeBP(f, bw, sr);
-      const v = vol * rr(0.4, 1);
-      while (t < end) {
-        const i0 = Math.floor(t * sr), cl = Math.floor(sr * 0.03), tau = rr(0.005, 0.012) * sr;
-        const g = v * envAt(t);
-        for (let i = 0; i < cl && i0 + i < n; i++) {
-          const x = (R() * 2 - 1) * Math.exp(-i / tau) * g;
-          const y = runBP(s, x) * 2.2;
-          L[i0 + i] += y * pl; Rr[i0 + i] += y * pr;
-        }
-        t += period * rr(0.85, 1.15);
-      }
-    }
-    function envAt(t) { const a = Math.min(1, (t - t0) / 0.3); const r = Math.min(1, Math.max(0, (t1 - t) / 1.3)); return a * r; }
-  }
-  function woo(t0, f0, amp) {
-    sustained(t0, rr(0.6, 0.9), 'u', 'o', f0, k => (k < 0.35 ? 1 + k * 1.6 : 1.56 - (k - 0.35) * 0.9), amp, true);
-  }
-  function whistle(t0, amp) {
-    const i0 = Math.floor(t0 * sr), len = Math.floor(sr * rr(0.35, 0.6));
-    let ph = 0; const f0 = rr(1800, 2600); const pan = rr(0.2, 0.8);
-    for (let i = 0; i < len && i0 + i < n; i++) {
-      const k = i / len;
-      const f = f0 * (k < 0.3 ? 1 + k : 1.3 - (k - 0.3) * 0.25);
-      ph += f / sr;
-      const e = amp * (k < 0.05 ? k / 0.05 : 1 - k);
-      const y = Math.sin(ph * TAU) * e;
-      L[i0 + i] += y * (1 - pan); Rr[i0 + i] += y * pan;
-    }
-  }
-
-  if (kind === 'chuckle') {
-    for (let v = 0; v < 9; v++) laugher(rr(0, 0.35), Math.floor(rr(3, 6)), 0.55);
-  } else if (kind === 'laugh') {
-    for (let v = 0; v < 20; v++) laugher(rr(0, 0.5), Math.floor(rr(5, 10)), 0.75);
-    for (let v = 0; v < 4; v++) laugher(rr(0.7, 1.3), Math.floor(rr(3, 6)), 0.45);
-  } else if (kind === 'big') {
-    for (let v = 0; v < 28; v++) laugher(rr(0, 0.45), Math.floor(rr(8, 16)), 0.85);
-    for (let v = 0; v < 8; v++) laugher(rr(0.9, 2.0), Math.floor(rr(4, 8)), 0.5);
-    claps(10, 0.6, 3.2, 1.2, 0.35);
-    woo(rr(0.5, 1.0), rr(280, 380), 0.6);
-  } else if (kind === 'ooh') {
-    for (let v = 0; v < 24; v++) {
-      const female = R() < 0.5;
-      sustained(rr(0, 0.15), rr(1.5, 1.9), 'u', 'o', female ? rr(200, 290) : rr(110, 160),
-        k => (k < 0.3 ? 1 + k * 0.4 : 1.12 - (k - 0.3) * 0.45), 0.5, female);
-    }
-  } else if (kind === 'aww') {
-    for (let v = 0; v < 22; v++) {
-      const female = R() < 0.55;
-      sustained(rr(0, 0.15), rr(1.6, 2.1), 'u', 'aw', female ? rr(210, 300) : rr(115, 165),
-        k => 1.28 - k * 0.5, 0.45, female);
-    }
-  } else if (kind === 'applause') {
-    claps(46, 0, dur, 1, 0.55);
-    for (let i = 0; i < 4; i++) woo(rr(0.3, 1.6), rr(260, 420), 0.45);
-    for (let i = 0; i < 2; i++) whistle(rr(0.4, 1.8), 0.05);
-  } else if (kind === 'cheer') {
-    for (let v = 0; v < 14; v++) {
-      const female = R() < 0.5;
-      sustained(rr(0, 0.3), rr(0.8, 1.2), 'e', 'a', female ? rr(240, 330) : rr(140, 200), k => (k < 0.3 ? 1 + k * 0.8 : 1.24 - (k - 0.3) * 0.5), 0.5, female);
-    }
-    claps(40, 0.1, dur, 1.1, 0.5);
-    for (let i = 0; i < 5; i++) woo(rr(0.2, 1.8), rr(280, 420), 0.5);
-    for (let i = 0; i < 3; i++) whistle(rr(0.3, 2.0), 0.05);
-  }
-
-  // normalise with a gentle soft clip
-  let pk = 0;
-  for (let i = 0; i < n; i++) pk = Math.max(pk, Math.abs(L[i]), Math.abs(Rr[i]));
-  const g = pk > 0 ? 0.85 / pk : 1;
-  for (let i = 0; i < n; i++) {
-    L[i] = Math.tanh(L[i] * g * 1.2) / 1.1;
-    Rr[i] = Math.tanh(Rr[i] * g * 1.2) / 1.1;
-  }
-  // fade tail
-  const ft = Math.floor(sr * 0.2);
-  for (let i = 0; i < ft; i++) { const m = i / ft; L[n - 1 - i] *= m; Rr[n - 1 - i] *= m; }
-  return { L, R: Rr, sr };
-}
